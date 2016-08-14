@@ -20,7 +20,6 @@
         </activity>
 
         <!-- Download binaries activity -->
-        <activity android:name=".DownloadBinActivity" />
     </application>
 
 </manifest>

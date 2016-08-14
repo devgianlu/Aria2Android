@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 
+import com.gianlu.aria2android.BinUtils;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
 
@@ -45,7 +46,7 @@ public class DownloadFile extends AsyncTask<URL, Integer, Object> {
             ByteArrayOutputStream out = (ByteArrayOutputStream) result;
 
             try {
-                Utils.unzipBin(new ByteArrayInputStream(out.toByteArray()), context);
+                BinUtils.unzipBin(new ByteArrayInputStream(out.toByteArray()), context);
             } catch (IOException ex) {
                 Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, ex);
             }
