@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 
 import com.gianlu.aria2android.NetIO.AsyncRequest;
-import com.gianlu.aria2android.NetIO.DownloadFile;
+import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
 
 import org.json.JSONArray;
@@ -22,21 +22,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (!BinUtils.binAvailable(this))
-            downloadBinDialog();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         if (!BinUtils.binAvailable(this)) {
-            Utils.UIToast(this, Utils.TOAST_MESSAGES.BIN_NOT_FOUND);
-            System.exit(1);
+            downloadBinDialog();
             return;
         }
     }
@@ -103,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                                     try {
                                         downloadURL = new JSONObject(response).getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
 
-                                        new DownloadFile(MainActivity.this).execute(new URL(downloadURL));
+                                        new DownloadBinFile(MainActivity.this).execute(new URL(downloadURL));
                                     } catch (Exception ex) {
                                         Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, ex);
                                     }

@@ -15,11 +15,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DownloadFile extends AsyncTask<URL, Integer, Object> {
+public class DownloadBinFile extends AsyncTask<URL, Integer, Object> {
     private Activity context;
     private ProgressDialog progressDialog;
 
-    public DownloadFile(Activity context) {
+    public DownloadBinFile(Activity context) {
         this.context = context;
     }
 
@@ -50,6 +50,8 @@ public class DownloadFile extends AsyncTask<URL, Integer, Object> {
             } catch (IOException ex) {
                 Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, ex);
             }
+
+            context.recreate();
         } else if (result instanceof String) {
             Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, (String) result);
         } else if (result instanceof Exception) {

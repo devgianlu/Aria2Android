@@ -20,8 +20,10 @@ public class BinUtils {
                 if (ze.isDirectory()) continue;
 
                 if (ze.getName().endsWith("/aria2c")) {
-                    File file = new File(context.getFilesDir().getPath() + "/bin", "aria2c");
+                    File binParent = new File(context.getFilesDir().getPath() + "/bin");
+                    if (!binParent.mkdirs()) continue;
 
+                    File file = new File(binParent, "/aria2c");
                     try (FileOutputStream out = new FileOutputStream(file)) {
                         while ((count = zis.read(buffer)) != -1)
                             out.write(buffer, 0, count);
@@ -33,6 +35,7 @@ public class BinUtils {
     }
 
     public static boolean binAvailable(Context context) {
-        return new File(context.getFilesDir().getPath() + "/bin/aria2c").exists();
+        File file = new File(context.getFilesDir().getPath() + "/bin/aria2c");
+        return file.exists() && !file.isDirectory();
     }
 }
