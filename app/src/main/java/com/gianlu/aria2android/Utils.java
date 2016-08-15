@@ -12,6 +12,10 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class Utils {
+    public static final String PREF_OUTPUT_DIRECTORY = "outputPath";
+    public static final String PREF_RPC_PORT = "rpcPort";
+    public static final String PREF_RPC_TOKEN = "rpcToken";
+
     public static void UIToast(final Activity context, final String text) {
         UIToast(context, text, Toast.LENGTH_SHORT);
     }
@@ -134,7 +138,10 @@ public class Utils {
     public enum TOAST_MESSAGES {
         FAILED_RETRIEVING_RELEASES("Failed retrieving releases!", true),
         FAILED_DOWNLOADING_BIN("Failed downloading bin files!", true),
-        BIN_NOT_FOUND("Bin file not found!", true);
+        OUTPUT_PATH_NOT_FOUND("Selected output path cannot be find!", false),
+        OUTPUT_PATH_CANNOT_WRITE("Cannot write selected output path!", false),
+        INVALID_RPC_PORT("Invalid RPC port!", false),
+        INVALID_RPC_TOKEN("Invalid RPC token!", false);
 
         private final String text;
         private final boolean isError;

@@ -4,6 +4,15 @@
     <string name="loading_releases">Retrieving releases. Please wait…</string>
     <string name="downloading_bin">Downloading bin files…</string>
     <string name="whichRelease">Select which release…</string>
+    <string name="outputDir">Output directory:</string>
+    <string name="rpc">RPC</string>
+    <string name="rpcDisclaimer">To control the server you need to setup some other options</string>
+    <string name="rpcPort">Port:</string>
+    <string name="rpcPortInt">6800</string>
+    <string name="rpcToken">Token:</string>
+    <string name="rpcTokenHint">aria2</string>
+    <string name="options">Options</string>
+    <string name="restore">Restore</string>
 
     <string name="URL_releases">https://api.github.com/repos/aria2/aria2/releases</string>
 </resources>

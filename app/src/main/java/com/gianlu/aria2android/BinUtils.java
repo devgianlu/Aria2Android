@@ -3,10 +3,12 @@ package com.gianlu.aria2android;
 import android.content.Context;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -37,5 +39,17 @@ public class BinUtils {
     public static boolean binAvailable(Context context) {
         File file = new File(context.getFilesDir().getPath() + "/bin/aria2c");
         return file.exists() && !file.isDirectory();
+    }
+
+    public static String binVersion(Context context) {
+        try {
+            return new BufferedReader(
+                    new InputStreamReader(
+                            Runtime.getRuntime().exec(context.getFilesDir().getPath() + "/bin/aria2c -v")
+                                    .getInputStream()))
+                    .readLine();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
