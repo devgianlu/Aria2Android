@@ -1,15 +1,22 @@
 package com.gianlu.aria2android;
 
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,17 +25,24 @@ import android.widget.ToggleButton;
 import com.gianlu.aria2android.NetIO.AsyncRequest;
 import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
+import com.gianlu.aria2android.aria2.IAria2;
+import com.gianlu.aria2android.aria2.aria2StartConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private StreamListener streamListener;
+    private boolean isRunning;
+
+    // TODO: Save session
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +55,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        aria2Service.setContext(this);
+        aria2Service.handler = new IAria2() {
+            @Override
+            public void onServerStarted(InputStream in, InputStream err) {
+                streamListener = new StreamListener(in, err);
+                new Thread(streamListener).start();
+            }
+
+            @Override
+            public void onException(Exception ex, boolean fatal) {
+                StreamListener.stop();
+                ex.printStackTrace();
+            }
+
+            @Override
+            public void onServerStopped() {
+                StreamListener.stop();
+            }
+        };
+
         TextView version = ((TextView) findViewById(R.id.main_binVersion));
         assert version != null;
 
@@ -48,13 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
         ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
         assert toggleServer != null;
-
-        toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });
 
         final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
         assert outputPath != null;
@@ -124,9 +151,104 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, null) == null ? Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() : preferences.getString("outputPath", "/"));
+        outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
         rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
         rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
+
+        toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isRunning = isChecked;
+
+                if (isChecked)
+                    startService(new Intent(MainActivity.this, aria2Service.class)
+                            .putExtra(aria2Service.CONFIG, new aria2StartConfig(
+                                    outputPath.getText().toString(),
+                                    null,
+                                    false,
+                                    getPort(outputPath),
+                                    rpcToken.getText().toString())
+                            ));
+                else
+                    stopService(new Intent(MainActivity.this, aria2Service.class));
+
+
+                outputPath.setEnabled(!isChecked);
+                rpcToken.setEnabled(!isChecked);
+                rpcPort.setEnabled(!isChecked);
+            }
+        });
+
+        for (ActivityManager.RunningServiceInfo service : ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE))
+            if (aria2Service.class.getName().equals(service.service.getClassName()))
+                toggleServer.setChecked(true);
+
+        Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
+        assert openAria2App != null;
+
+        openAria2App.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
+                } catch (PackageManager.NameNotFoundException ex) {
+                    new AlertDialog.Builder(MainActivity.this).setTitle(R.string.aria2App_not_installed)
+                            .setMessage(R.string.aria2App_not_installed_message)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    try {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
+                                    } catch (android.content.ActivityNotFoundException ex) {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
+                                    }
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .create().show();
+
+                    return;
+                }
+
+                startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
+                        .putExtra("external", true)
+                        .putExtra("port", getPort(rpcPort))
+                        .putExtra("token", rpcToken.getText().toString()));
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mainMenu_options:
+                if (isRunning) {
+                    Utils.UIToast(this, Utils.TOAST_MESSAGES.SERVER_RUNNING);
+                    break;
+                }
+
+
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private int getPort(EditText port) {
+        try {
+            return Integer.parseInt(port.getText().toString());
+        } catch (Exception ex) {
+            return 6800;
+        }
     }
 
     private void downloadBinDialog() {

@@ -11,6 +11,14 @@
     <string name="rpcPortInt">6800</string>
     <string name="rpcToken">Token:</string>
     <string name="rpcTokenHint">aria2</string>
+    <string name="equals">=</string>
+    <string name="doubleScore">--</string>
+    <string name="aria2app_disclaimer">Now, to manage aria2 you can use any UI interface, such as Aria2App.</string>
+    <string name="openAria2App">Open Aria2App</string>
+    <string name="aria2App_not_installed">Aria2App is not installed</string>
+    <string name="aria2App_not_installed_message">Aria2App is not installed. Would you like to install it now?</string>
+    <string name="add">Add</string>
+    <string name="apply">Apply</string>
     <string name="options">Options</string>
     <string name="restore">Restore</string>
 

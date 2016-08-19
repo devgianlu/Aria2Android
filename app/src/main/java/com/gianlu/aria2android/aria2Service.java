@@ -5,44 +5,68 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 
-import com.gianlu.aria2android.aria2.IIncoming;
-import com.gianlu.aria2android.aria2.IOutgoing;
+import com.gianlu.aria2android.aria2.IAria2;
+import com.gianlu.aria2android.aria2.aria2StartConfig;
 
 import java.io.IOException;
 import java.util.Random;
 
-public class aria2Service extends IntentService implements IIncoming {
-    private static IOutgoing handler;
-    private Process process;
-    private Context context;
+public class aria2Service extends IntentService {
+    public static final String CONFIG = "config";
+    public static IAria2 handler;
+    private static Process process;
+    private static Context context;
 
     public aria2Service() {
         super("aria2 service");
+    }
 
-        context = getApplicationContext();
+    public static void setContext(Context context) {
+        aria2Service.context = context;
+    }
+
+    public static void killService() {
+        handler.onServerStopped();
+        if (process != null)
+            process.destroy();
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Notification.Builder builder = new Notification.Builder(context);
-        builder.setContentTitle("aria2 service")
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        startForeground(new Random().nextInt(100), new Notification.Builder(context).setContentTitle("aria2 service")
                 .setShowWhen(false)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("aria2 is currently running");
+                .setContentText("aria2 is currently running").build());
 
-        startForeground(new Random().nextInt(1000), builder.build());
-
-        try {
-            process = Runtime.getRuntime().exec(context.getFilesDir().getPath() + "/bin/aria2c --daemon" + (intent.getBooleanExtra("useConfig", false) ? " --conf-path=./aria2.conf" : "--no-conf=true"));
-        } catch (IOException ex) {
-            handler.onException(ex, true);
-        }
+        onHandleIntent(intent);
+        return START_STICKY;
     }
 
     @Override
-    public void killService() {
-        process.destroy();
+    protected void onHandleIntent(Intent intent) {
+        aria2StartConfig config = intent.getParcelableExtra(CONFIG);
+
+        try {
+            process = Runtime.getRuntime().exec(context.getFilesDir().getPath()
+                    + "/bin/aria2c --daemon "
+                    + (config.useConfig() ? "--conf-path=./aria2.conf" : "--no-conf=true")
+                    + " --dir=" + config.getOutputDirectory()
+                    + " --enable-rpc --rpc-listen-all=true --rpc-listen-port=" + config.getRpcPort()
+                    + " --rpc-secret=" + config.getRpcToken()
+                    + Utils.optionProcessor(config.getOptions()));
+        } catch (IOException ex) {
+            handler.onException(ex, true);
+            stopSelf();
+            return;
+        }
+
+        handler.onServerStarted(process.getInputStream(), process.getErrorStream());
+    }
+
+    @Override
+    public void onDestroy() {
+        killService();
     }
 }

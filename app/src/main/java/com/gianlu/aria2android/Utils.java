@@ -2,19 +2,50 @@ package com.gianlu.aria2android;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.ArrayMap;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 
 public class Utils {
     public static final String PREF_OUTPUT_DIRECTORY = "outputPath";
     public static final String PREF_RPC_PORT = "rpcPort";
     public static final String PREF_RPC_TOKEN = "rpcToken";
+
+    public static String optionProcessor(Map<String, String> options) {
+        String extended = "";
+        if (options == null || options.isEmpty()) return "";
+
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            if (entry.getKey().isEmpty() || entry.getValue().isEmpty()) continue;
+
+            extended += " --" + entry.getKey() + "=" + entry.getValue();
+        }
+
+        return extended;
+    }
+
+    public static Map<String, String> optionProcessor(InputStream in) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        Map<String, String> map = new ArrayMap<>();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] _option = line.split("=");
+            map.put(_option[0], _option[1]);
+        }
+
+        return map;
+    }
 
     public static void UIToast(final Activity context, final String text) {
         UIToast(context, text, Toast.LENGTH_SHORT);
@@ -138,10 +169,12 @@ public class Utils {
     public enum TOAST_MESSAGES {
         FAILED_RETRIEVING_RELEASES("Failed retrieving releases!", true),
         FAILED_DOWNLOADING_BIN("Failed downloading bin files!", true),
+        FAILED_SAVING_OPTIONS("Failed saving options file!", true),
         OUTPUT_PATH_NOT_FOUND("Selected output path cannot be find!", false),
         OUTPUT_PATH_CANNOT_WRITE("Cannot write selected output path!", false),
         INVALID_RPC_PORT("Invalid RPC port!", false),
-        INVALID_RPC_TOKEN("Invalid RPC token!", false);
+        INVALID_RPC_TOKEN("Invalid RPC token!", false),
+        SERVER_RUNNING("Server is running!", false);
 
         private final String text;
         private final boolean isError;
