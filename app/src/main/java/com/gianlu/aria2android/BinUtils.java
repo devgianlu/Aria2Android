@@ -30,7 +30,10 @@ public class BinUtils {
                         while ((count = zis.read(buffer)) != -1)
                             out.write(buffer, 0, count);
                         out.close();
+
+                        Runtime.getRuntime().exec("chmod 777 " + file.getPath());
                     }
+
                 }
             }
         }

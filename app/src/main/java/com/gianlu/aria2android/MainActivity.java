@@ -236,8 +236,6 @@ public class MainActivity extends AppCompatActivity {
                     Utils.UIToast(this, Utils.TOAST_MESSAGES.SERVER_RUNNING);
                     break;
                 }
-
-
                 break;
         }
         return super.onOptionsItemSelected(item);
