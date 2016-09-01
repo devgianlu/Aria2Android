@@ -2,15 +2,11 @@ package com.gianlu.aria2android;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.ArrayMap;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -36,28 +32,11 @@ public class Utils {
         return extended;
     }
 
-    public static Map<String, String> optionProcessor(InputStream in) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        Map<String, String> map = new ArrayMap<>();
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            String[] _option = line.split("=");
-            map.put(_option[0], _option[1]);
-        }
-
-        return map;
-    }
-
     public static TextView fastTextView(Context context, String text) {
         TextView textView = new TextView(context);
         textView.setText(text);
 
         return textView;
-    }
-
-    public static void UIToast(final Activity context, final String text) {
-        UIToast(context, text, Toast.LENGTH_SHORT);
     }
 
     public static void UIToast(final Activity context, final String text, final int duration) {
@@ -67,16 +46,6 @@ public class Utils {
                 Toast.makeText(context, text, duration).show();
             }
         });
-    }
-
-    public static void UIToast(final Activity context, final String text, final int duration, Runnable extra) {
-        context.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, text, duration).show();
-            }
-        });
-        context.runOnUiThread(extra);
     }
 
     public static void UIToast(final Activity context, final TOAST_MESSAGES message) {
@@ -110,41 +79,6 @@ public class Utils {
 
         LogMe(context, message + " Details: " + exception.getMessage(), message.isError());
         SecretLog(context, exception);
-    }
-
-    public static void UIToast(final Activity context, final TOAST_MESSAGES message, final String message_extras, Runnable extra) {
-        context.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        context.runOnUiThread(extra);
-        LogMe(context, message + " Details: " + message_extras, message.isError());
-    }
-
-    public static void UIToast(final Activity context, final TOAST_MESSAGES message, final Throwable exception, Runnable extra) {
-        context.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        context.runOnUiThread(extra);
-
-        LogMe(context, message + " Details: " + exception.getMessage(), message.isError());
-        SecretLog(context, exception);
-    }
-
-    public static void UIToast(final Activity context, final TOAST_MESSAGES message, Runnable extra) {
-        context.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        context.runOnUiThread(extra);
-        LogMe(context, message.toString(), message.isError());
     }
 
     public static void SecretLog(Activity context, Throwable exx) {
