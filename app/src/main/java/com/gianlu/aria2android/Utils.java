@@ -20,6 +20,7 @@ public class Utils {
     public static final String PREF_OUTPUT_DIRECTORY = "outputPath";
     public static final String PREF_RPC_PORT = "rpcPort";
     public static final String PREF_RPC_TOKEN = "rpcToken";
+    public static final String PREF_SAVE_SESSION = "saveSession";
 
     public static String optionProcessor(Map<String, String> options) {
         String extended = "";
@@ -169,7 +170,7 @@ public class Utils {
     public enum TOAST_MESSAGES {
         FAILED_RETRIEVING_RELEASES("Failed retrieving releases!", true),
         FAILED_DOWNLOADING_BIN("Failed downloading bin files!", true),
-        FAILED_SAVING_OPTIONS("Failed saving options file!", true),
+        FAILED_CREATING_SESSION_FILE("Failed creating an empty session file!", true),
         OUTPUT_PATH_NOT_FOUND("Selected output path cannot be find!", false),
         OUTPUT_PATH_CANNOT_WRITE("Cannot write selected output path!", false),
         INVALID_RPC_PORT("Invalid RPC port!", false),

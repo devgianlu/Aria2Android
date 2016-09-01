@@ -8,6 +8,7 @@ import android.content.Intent;
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -48,10 +49,14 @@ public class aria2Service extends IntentService {
     protected void onHandleIntent(Intent intent) {
         aria2StartConfig config = intent.getParcelableExtra(CONFIG);
 
+        boolean loadConfig = config.isSavingSession() && new File(getFilesDir().getPath() + "/bin/session").exists();
+
         try {
             process = Runtime.getRuntime().exec(context.getFilesDir().getPath()
-                    + "/bin/aria2c --daemon "
-                    + (config.useConfig() ? "--conf-path=./aria2.conf" : "--no-conf=true")
+                    + "/bin/aria2c --daemon --check-certificate=false"
+                    + (config.useConfig() ? " --conf-path=./aria2.conf" : " --no-conf=true")
+                    + (config.isSavingSession() ? " --save-session=/data/data/com.gianlu.aria2android/files/bin/session --save-session-interval=10" : " ")
+                    + (loadConfig ? " --input-file=/data/data/com.gianlu.aria2android/files/bin/session" : " ")
                     + " --dir=" + config.getOutputDirectory()
                     + " --enable-rpc --rpc-listen-all=true --rpc-listen-port=" + config.getRpcPort()
                     + " --rpc-secret=" + config.getRpcToken()

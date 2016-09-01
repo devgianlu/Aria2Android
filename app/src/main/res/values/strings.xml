@@ -23,4 +23,6 @@
     <string name="restore">Restore</string>
 
     <string name="URL_releases">https://api.github.com/repos/aria2/aria2/releases</string>
+    <string name="outputDir_hint">/storage/emulated/0/Download</string>
+    <string name="saveSession">Save session</string>
 </resources>

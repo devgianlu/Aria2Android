@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -77,8 +78,19 @@ public class MainActivity extends AppCompatActivity {
 
         TextView version = ((TextView) findViewById(R.id.main_binVersion));
         assert version != null;
-
         version.setText(BinUtils.binVersion(this));
+
+        final CheckBox saveSession = (CheckBox) findViewById(R.id.options_saveSession);
+        assert saveSession != null;
+
+        saveSession.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                preferences.edit()
+                        .putBoolean(Utils.PREF_SAVE_SESSION, b)
+                        .apply();
+            }
+        });
 
         ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
         assert toggleServer != null;
@@ -152,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
+        saveSession.setChecked(preferences.getBoolean(Utils.PREF_SAVE_SESSION, true));
         rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
         rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
 
@@ -160,20 +173,23 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isRunning = isChecked;
 
-                if (isChecked)
+                if (isChecked) {
                     startService(new Intent(MainActivity.this, aria2Service.class)
                             .putExtra(aria2Service.CONFIG, new aria2StartConfig(
                                     outputPath.getText().toString(),
                                     null,
                                     false,
+                                    saveSession.isChecked(),
                                     getPort(outputPath),
                                     rpcToken.getText().toString())
                             ));
-                else
+                } else {
                     stopService(new Intent(MainActivity.this, aria2Service.class));
+                }
 
 
                 outputPath.setEnabled(!isChecked);
+                saveSession.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
                 rpcPort.setEnabled(!isChecked);
             }
@@ -235,8 +251,10 @@ public class MainActivity extends AppCompatActivity {
                 if (isRunning) {
                     Utils.UIToast(this, Utils.TOAST_MESSAGES.SERVER_RUNNING);
                     break;
+                } else {
+                    // TODO
+                    break;
                 }
-                break;
         }
         return super.onOptionsItemSelected(item);
     }

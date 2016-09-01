@@ -23,6 +23,7 @@ public class BinUtils {
 
                 if (ze.getName().endsWith("/aria2c")) {
                     File binParent = new File(context.getFilesDir().getPath() + "/bin");
+                    Runtime.getRuntime().exec("chmod 777 " + binParent.getPath());
                     if (!binParent.mkdirs()) continue;
 
                     File file = new File(binParent, "/aria2c");
