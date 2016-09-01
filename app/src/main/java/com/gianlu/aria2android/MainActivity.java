@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        aria2Service.setContext(this);
         aria2Service.handler = new IAria2() {
             @Override
             public void onServerStarted(InputStream in, InputStream err) {
@@ -174,6 +174,19 @@ public class MainActivity extends AppCompatActivity {
                 isRunning = isChecked;
 
                 if (isChecked) {
+                    File sessionFile = new File(getFilesDir().getPath() + "/bin/session");
+                    if (saveSession.isChecked() && !sessionFile.exists()) {
+                        try {
+                            if (!sessionFile.createNewFile()) {
+                                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE);
+                                saveSession.setChecked(false);
+                            }
+                        } catch (IOException ex) {
+                            Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE, ex);
+                            saveSession.setChecked(false);
+                        }
+                    }
+
                     startService(new Intent(MainActivity.this, aria2Service.class)
                             .putExtra(aria2Service.CONFIG, new aria2StartConfig(
                                     outputPath.getText().toString(),
