@@ -3,6 +3,7 @@ package com.gianlu.aria2android;
 import android.app.Activity;
 import android.content.Context;
 import android.util.ArrayMap;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -46,6 +47,13 @@ public class Utils {
         }
 
         return map;
+    }
+
+    public static TextView fastTextView(Context context, String text) {
+        TextView textView = new TextView(context);
+        textView.setText(text);
+
+        return textView;
     }
 
     public static void UIToast(final Activity context, final String text) {
@@ -175,7 +183,7 @@ public class Utils {
         OUTPUT_PATH_CANNOT_WRITE("Cannot write selected output path!", false),
         INVALID_RPC_PORT("Invalid RPC port!", false),
         INVALID_RPC_TOKEN("Invalid RPC token!", false),
-        SERVER_RUNNING("Server is running!", false);
+        UNEXPECTED_EXCEPTION("Unexpected exception! Don't worry.", true);
 
         private final String text;
         private final boolean isError;

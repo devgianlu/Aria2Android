@@ -25,4 +25,10 @@
     <string name="URL_releases">https://api.github.com/repos/aria2/aria2/releases</string>
     <string name="outputDir_hint">/storage/emulated/0/Download</string>
     <string name="saveSession">Save session</string>
+    <string name="aria2_notRunning">aria2 not running!</string>
+    <string name="aria2_notRunningMessage">aria2 is not running. Opening Aria2App will probably result in a connection error.\nDo you want to start it anyway?</string>
+    <string name="logs">Logs</string>
+    <string name="infoTag">"INFO: "</string>
+    <string name="warningTag">"WARNING: "</string>
+    <string name="errorTag">"ERROR: "</string>
 </resources>

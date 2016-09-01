@@ -1,131 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.gianlu.aria2android.MainActivity">
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <TextView
-        android:id="@+id/main_binVersion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <ToggleButton
-        android:id="@+id/main_toggleServer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="16dp"
-        android:textSize="16sp" />
-
-    <TextView
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:text="@string/options"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context="com.gianlu.aria2android.MainActivity">
 
         <TextView
+            android:id="@+id/main_binVersion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/outputDir" />
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/options_outputPath"
+        <ToggleButton
+            android:id="@+id/main_toggleServer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"
+            android:textSize="16sp" />
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/outputDir_hint"
-            android:inputType="textUri" />
-    </LinearLayout>
+            android:layout_marginBottom="4dp"
+            android:text="@string/options"
+            android:textStyle="bold" />
 
-    <CheckBox
-        android:layout_marginStart="16dp"
-        android:id="@+id/options_saveSession"
-        android:text="@string/saveSession"
-        android:layout_marginBottom="4dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/rpc"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:text="@string/rpcDisclaimer" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/rpcPort" />
-
-        <EditText
-            android:id="@+id/options_rpcPort"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/rpcPortInt"
-            android:inputType="number" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="@string/rpcToken" />
-
-        <EditText
-            android:id="@+id/options_rpcToken"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/rpcTokenHint"
-            android:inputType="textVisiblePassword" />
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/outputDir" />
+
+            <EditText
+                android:id="@+id/options_outputPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/outputDir_hint"
+                android:inputType="textUri" />
+        </LinearLayout>
+
+        <CheckBox
+            android:layout_marginStart="16dp"
+            android:id="@+id/options_saveSession"
+            android:text="@string/saveSession"
+            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/rpc"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:text="@string/rpcDisclaimer" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/rpcPort" />
+
+            <EditText
+                android:id="@+id/options_rpcPort"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/rpcPortInt"
+                android:inputType="number" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/rpcToken" />
+
+            <EditText
+                android:id="@+id/options_rpcToken"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/rpcTokenHint"
+                android:inputType="textVisiblePassword" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/aria2app_disclaimer" />
+
+            <Button
+                android:id="@+id/main_openAria2App"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginTop="8dp"
+                android:text="@string/openAria2App" />
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/logs"
+            android:textStyle="bold" />
+
+        <ListView
+            android:id="@+id/main_logs"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
     </LinearLayout>
+</ScrollView>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:text="@string/aria2app_disclaimer" />
-
-    <Button
-        android:id="@+id/main_openAria2App"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="8dp"
-        android:text="@string/openAria2App" />
-</LinearLayout>

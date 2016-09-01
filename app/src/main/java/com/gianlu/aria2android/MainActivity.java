@@ -12,17 +12,18 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.gianlu.aria2android.Logging.LoglineAdapter;
+import com.gianlu.aria2android.Logging.LoglineItem;
 import com.gianlu.aria2android.NetIO.AsyncRequest;
 import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
@@ -44,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;
 
-    // TODO: Save session
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,22 +57,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        final LoglineAdapter adapter = new LoglineAdapter(this, new ArrayList<LoglineItem>());
+        ((ListView) findViewById(R.id.main_logs)).setAdapter(adapter);
+
         aria2Service.handler = new IAria2() {
             @Override
             public void onServerStarted(InputStream in, InputStream err) {
-                streamListener = new StreamListener(in, err);
+                adapter.clear();
+                streamListener = new StreamListener(adapter, in, err);
+                adapter.addLine(LoglineItem.TYPE.INFO, "Server started!");
                 new Thread(streamListener).start();
             }
 
             @Override
             public void onException(Exception ex, boolean fatal) {
                 StreamListener.stop();
-                ex.printStackTrace();
+                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.UNEXPECTED_EXCEPTION, ex);
+                adapter.addLine(LoglineItem.TYPE.ERROR, "Server exception! " + ex.getMessage());
             }
 
             @Override
             public void onServerStopped() {
                 StreamListener.stop();
+                adapter.addLine(LoglineItem.TYPE.INFO, "Server stopped!");
             }
         };
 
@@ -94,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
         ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
         assert toggleServer != null;
+
+        final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
+        assert openAria2App != null;
 
         final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
         assert outputPath != null;
@@ -180,10 +190,12 @@ public class MainActivity extends AppCompatActivity {
                             if (!sessionFile.createNewFile()) {
                                 Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE);
                                 saveSession.setChecked(false);
+                                return;
                             }
                         } catch (IOException ex) {
                             Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE, ex);
                             saveSession.setChecked(false);
+                            return;
                         }
                     }
 
@@ -212,9 +224,6 @@ public class MainActivity extends AppCompatActivity {
             if (aria2Service.class.getName().equals(service.service.getClassName()))
                 toggleServer.setChecked(true);
 
-        Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
-        assert openAria2App != null;
-
         openAria2App.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -239,37 +248,34 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             })
                             .create().show();
-
                     return;
                 }
 
-                startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
-                        .putExtra("external", true)
-                        .putExtra("port", getPort(rpcPort))
-                        .putExtra("token", rpcToken.getText().toString()));
+                if (isRunning) {
+                    startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
+                            .putExtra("external", true)
+                            .putExtra("port", getPort(rpcPort))
+                            .putExtra("token", rpcToken.getText().toString()));
+                } else {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.aria2_notRunning)
+                            .setMessage(R.string.aria2_notRunningMessage)
+                            .setPositiveButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {}
+                            })
+                            .setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
+                                            .putExtra("external", true)
+                                            .putExtra("port", getPort(rpcPort))
+                                            .putExtra("token", rpcToken.getText().toString()));
+                                }
+                            }).create().show();
+                }
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mainMenu_options:
-                if (isRunning) {
-                    Utils.UIToast(this, Utils.TOAST_MESSAGES.SERVER_RUNNING);
-                    break;
-                } else {
-                    // TODO
-                    break;
-                }
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private int getPort(EditText port) {
