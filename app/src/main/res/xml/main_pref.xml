@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/others">
+        <Preference
+            android:key="logs"
+            android:summary="@string/logsSummary"
+            android:title="@string/logs" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/about_app">
+        <Preference
+            android:key="app_version"
+            android:title="@string/app_version" />
+        <Preference
+            android:key="email"
+            android:summary="@string/email"
+            android:title="@string/developer" />
+    </PreferenceCategory>
+</PreferenceScreen>

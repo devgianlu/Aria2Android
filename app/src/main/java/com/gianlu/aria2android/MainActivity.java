@@ -1,5 +1,6 @@
 package com.gianlu.aria2android;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -10,6 +11,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -55,6 +58,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
+
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.permissionRequest)
+                        .setMessage(R.string.writeStorageMessage)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                            }
+                        }).create().show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+        }
+
+
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         final LoglineAdapter adapter = new LoglineAdapter(this, new ArrayList<LoglineItem>());
@@ -184,6 +206,11 @@ public class MainActivity extends AppCompatActivity {
                 isRunning = isChecked;
 
                 if (isChecked) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.WRITE_STORAGE_DENIED);
+                        return;
+                    }
+
                     File sessionFile = new File(getFilesDir().getPath() + "/bin/session");
                     if (saveSession.isChecked() && !sessionFile.exists()) {
                         try {

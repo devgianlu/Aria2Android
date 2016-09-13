@@ -115,6 +115,11 @@ public class Utils {
         FAILED_CREATING_SESSION_FILE("Failed creating an empty session file!", true),
         OUTPUT_PATH_NOT_FOUND("Selected output path cannot be find!", false),
         OUTPUT_PATH_CANNOT_WRITE("Cannot write selected output path!", false),
+        WRITE_STORAGE_DENIED("You denied the write permission! Can't start aria2!", true),
+        COPIED_TO_CLIPBOARD("Message copied in the clipboard!", false),
+        NO_EMAIL_CLIENT("There are no email clients installed.", true),
+        LOGS_DELETED("Logs deleted!", false),
+        FATAL_EXCEPTION("Fatal exception!", true),
         INVALID_RPC_PORT("Invalid RPC port!", false),
         INVALID_RPC_TOKEN("Invalid RPC token!", false),
         UNEXPECTED_EXCEPTION("Unexpected exception! Don't worry.", true);

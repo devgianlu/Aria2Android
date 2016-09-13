@@ -14,7 +14,8 @@
         android:theme="@style/AppTheme">
 
         <!-- Main activity -->
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,6 +26,16 @@
 
         <!-- aria2 service -->
         <service android:name=".aria2Service" />
+
+        <!-- Preferences Activity -->
+        <activity
+            android:name=".PreferencesActivity"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- Logs Activity -->
+        <activity
+            android:name=".LogsActivity"
+            android:parentActivityName=".PreferencesActivity" />
     </application>
 
 </manifest>

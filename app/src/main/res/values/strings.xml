@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Aria2Android</string>
+    <string name="title_activity_logs" translatable="false">Aria2Android - Logs</string>
 
     <string name="loading_releases">Retrieving releases. Please wait…</string>
     <string name="downloading_bin">Downloading bin files…</string>
@@ -28,7 +29,20 @@
     <string name="aria2_notRunning">aria2 not running!</string>
     <string name="aria2_notRunningMessage">aria2 is not running. Opening Aria2App will probably result in a connection error.\nDo you want to start it anyway?</string>
     <string name="logs">Logs</string>
-    <string name="infoTag">"INFO: "</string>
-    <string name="warningTag">"WARNING: "</string>
-    <string name="errorTag">"ERROR: "</string>
+    <string name="infoTag">INFO: </string>
+    <string name="warningTag">WARNING: </string>
+    <string name="errorTag">ERROR: </string>
+    <string name="permissionRequest">Permission request</string>
+    <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
+
+    <string name="general">General</string>
+    <string name="about_app">About application</string>
+    <string name="app_version">App version</string>
+    <string name="developer">Developer: Gianlu (Report bugs or any suggestion)</string>
+    <string name="email" translatable="false">altomanigianluca@gmail.com</string>
+    <string name="unknown">Unknown</string>
+    <string name="copiedClipboard">Copied to clipboard!</string>
+    <string name="menu_deleteAllLogs">Delete all logs</string>
+    <string name="others">Others</string>
+    <string name="logsSummary">All application\'s log files</string>
 </resources>

@@ -44,16 +44,18 @@ public class aria2Service extends IntentService {
 
         String binPath = getFilesDir().getPath() + "/bin";
 
+        String command = binPath
+                + "/aria2c --daemon --check-certificate=false"
+                + (config.useConfig() ? " --conf-path=" + binPath + "/aria2.conf" : " --no-conf=true")
+                + (config.isSavingSession() ? " --save-session=" + binPath + "/session --save-session-interval=10" : " ")
+                + " --input-file=" + binPath + "/session"
+                + " --dir=" + config.getOutputDirectory()
+                + " --enable-rpc --rpc-listen-all=true --rpc-listen-port=" + config.getRpcPort()
+                + " --rpc-secret=" + config.getRpcToken()
+                + Utils.optionProcessor(config.getOptions());
+
         try {
-            process = Runtime.getRuntime().exec(binPath
-                    + "/aria2c --daemon --check-certificate=false"
-                    + (config.useConfig() ? " --conf-path=" + binPath + "/aria2.conf" : " --no-conf=true")
-                    + (config.isSavingSession() ? " --save-session=" + binPath + "/session --save-session-interval=10" : " ")
-                    + " --input-file=" + binPath + "/session"
-                    + " --dir=" + config.getOutputDirectory()
-                    + " --enable-rpc --rpc-listen-all=true --rpc-listen-port=" + config.getRpcPort()
-                    + " --rpc-secret=" + config.getRpcToken()
-                    + Utils.optionProcessor(config.getOptions()));
+            process = Runtime.getRuntime().exec(command);
         } catch (IOException ex) {
             handler.onException(ex, true);
             stopSelf();

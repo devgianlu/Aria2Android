@@ -1,6 +1,9 @@
 package com.gianlu.aria2android.Logging;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.View;
@@ -62,12 +65,12 @@ public class LoglineAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, final View convertView, ViewGroup parent) {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setPadding(12, 12, 12, 12);
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        LoglineItem item = getItem(position);
+        final LoglineItem item = getItem(position);
 
         TextView type = new TextView(context);
         type.setTypeface(Typeface.DEFAULT_BOLD);
@@ -87,6 +90,13 @@ public class LoglineAdapter extends BaseAdapter {
         }
         linearLayout.addView(type);
         linearLayout.addView(Utils.fastTextView(context, item.getMessage()));
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("error log", item.getMessage()));
+                Utils.UIToast(context, Utils.TOAST_MESSAGES.COPIED_TO_CLIPBOARD);
+            }
+        });
 
 
         return linearLayout;
