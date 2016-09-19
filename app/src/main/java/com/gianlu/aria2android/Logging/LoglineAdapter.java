@@ -47,6 +47,7 @@ public class LoglineAdapter extends BaseAdapter {
     }
 
     public void addLine(LoglineItem line) {
+        Utils.LogMe(context, line.getMessage(), line.getType() == LoglineItem.TYPE.ERROR);
         objs.add(line);
         context.runOnUiThread(new Runnable() {
             @Override

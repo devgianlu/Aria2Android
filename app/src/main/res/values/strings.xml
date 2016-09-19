@@ -45,4 +45,5 @@
     <string name="menu_deleteAllLogs">Delete all logs</string>
     <string name="others">Others</string>
     <string name="logsSummary">All application\'s log files</string>
+    <string name="preferences">Preferences</string>
 </resources>
