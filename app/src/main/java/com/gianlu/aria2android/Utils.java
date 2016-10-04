@@ -1,7 +1,9 @@
 package com.gianlu.aria2android;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +20,28 @@ public class Utils {
     public static final String PREF_RPC_PORT = "rpcPort";
     public static final String PREF_RPC_TOKEN = "rpcToken";
     public static final String PREF_SAVE_SESSION = "saveSession";
+
+    public static void showDialog(Activity activity, final Dialog dialog) {
+        if (activity == null || activity.isFinishing()) return;
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
+    }
+
+    public static void showDialog(Activity activity, final AlertDialog.Builder builder) {
+        if (activity == null || activity.isFinishing()) return;
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                builder.create().show();
+            }
+        });
+    }
 
     public static String optionProcessor(Map<String, String> options) {
         String extended = "";
@@ -46,6 +70,10 @@ public class Utils {
                 Toast.makeText(context, text, duration).show();
             }
         });
+    }
+
+    public static void UIToast(Activity context, String text) {
+        UIToast(context, text, Toast.LENGTH_SHORT);
     }
 
     public static void UIToast(final Activity context, final TOAST_MESSAGES message) {

@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.gianlu.aria2android.Google.Analytics;
+import com.gianlu.aria2android.Google.UncaughtExceptionHandler;
 import com.gianlu.aria2android.Logging.LoglineAdapter;
 import com.gianlu.aria2android.Logging.LoglineItem;
 import com.gianlu.aria2android.NetIO.AsyncRequest;
@@ -34,6 +36,7 @@ import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
+import com.google.android.gms.analytics.HitBuilders;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
         if (!BinUtils.binAvailable(this)) {
             downloadBinDialog();
@@ -208,6 +213,15 @@ public class MainActivity extends AppCompatActivity {
                 isRunning = isChecked;
 
                 if (isChecked) {
+                    preferences.edit().putLong("currentSessionDuration", System.currentTimeMillis()).apply();
+
+                    if (Analytics.isTrackingAllowed(MainActivity.this))
+                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
+                                .setCategory(Analytics.CATEGORY_USER_INPUT)
+                                .setAction(Analytics.ACTION_TURN_ON)
+                                .build());
+
+
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.WRITE_STORAGE_DENIED);
                         return;
@@ -239,6 +253,13 @@ public class MainActivity extends AppCompatActivity {
                             ));
                 } else {
                     stopService(new Intent(MainActivity.this, aria2Service.class));
+
+                    if (Analytics.isTrackingAllowed(MainActivity.this))
+                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
+                                .setCategory(Analytics.CATEGORY_USER_INPUT)
+                                .setAction(Analytics.ACTION_TURN_OFF)
+                                .setValue(preferences.getLong("currentSessionDuration", -1))
+                                .build());
                 }
 
 
@@ -285,6 +306,12 @@ public class MainActivity extends AppCompatActivity {
                             .putExtra("external", true)
                             .putExtra("port", getPort(rpcPort))
                             .putExtra("token", rpcToken.getText().toString()));
+
+                    if (Analytics.isTrackingAllowed(MainActivity.this))
+                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
+                                .setCategory(Analytics.CATEGORY_USER_INPUT)
+                                .setAction(Analytics.ACTION_OPENED_ARIA2APP)
+                                .build());
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle(R.string.aria2_notRunning)

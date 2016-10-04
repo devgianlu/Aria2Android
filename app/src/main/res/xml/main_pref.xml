@@ -8,6 +8,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/about_app">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="a2_trackingDisable"
+            android:summaryOff="@string/trackingOff"
+            android:summaryOn="@string/trackingOn"
+            android:title="@string/tracking" />
         <Preference
             android:key="app_version"
             android:title="@string/app_version" />
