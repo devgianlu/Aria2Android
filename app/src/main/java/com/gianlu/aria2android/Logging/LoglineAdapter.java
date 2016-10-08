@@ -96,7 +96,7 @@ public class LoglineAdapter extends BaseAdapter {
             @Override
             public void onClick(View view) {
                 ((ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("error log", item.getMessage()));
-                Utils.UIToast(context, Utils.TOAST_MESSAGES.COPIED_TO_CLIPBOARD);
+                CommonUtils.UIToast(context, Utils.ToastMessages.COPIED_TO_CLIPBOARD);
             }
         });
 

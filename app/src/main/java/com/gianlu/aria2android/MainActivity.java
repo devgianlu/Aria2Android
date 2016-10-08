@@ -36,6 +36,7 @@ import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
+import com.gianlu.commonutils.CommonUtils;
 import com.google.android.gms.analytics.HitBuilders;
 
 import org.json.JSONArray;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onException(Exception ex, boolean fatal) {
                 StreamListener.stop();
-                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.UNEXPECTED_EXCEPTION, ex);
+                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.UNEXPECTED_EXCEPTION, ex);
                 adapter.addLine(LoglineItem.TYPE.ERROR, "Server exception! " + ex.getMessage());
             }
 
@@ -150,10 +151,10 @@ public class MainActivity extends AppCompatActivity {
                                     .putString(Utils.PREF_OUTPUT_DIRECTORY, path.getAbsolutePath())
                                     .apply();
                         } else {
-                            Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.OUTPUT_PATH_CANNOT_WRITE, path.getAbsolutePath());
+                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_CANNOT_WRITE, path.getAbsolutePath());
                         }
                     } else {
-                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.OUTPUT_PATH_NOT_FOUND, path.getAbsolutePath());
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_NOT_FOUND, path.getAbsolutePath());
                     }
                 }
             }
@@ -170,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         port = Integer.parseInt(rpcPort.getText().toString());
                     } catch (Exception ex) {
-                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.INVALID_RPC_PORT, rpcPort.getText().toString());
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_PORT, rpcPort.getText().toString());
                         return;
                     }
 
@@ -179,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                                 .putInt(Utils.PREF_RPC_PORT, port)
                                 .apply();
                     } else {
-                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.INVALID_RPC_PORT, String.valueOf(port));
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_PORT, String.valueOf(port));
                     }
                 }
             }
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     if (rpcToken.getText().toString().isEmpty()) {
-                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.INVALID_RPC_TOKEN);
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_TOKEN);
                     } else {
                         preferences.edit()
                                 .putString(Utils.PREF_RPC_TOKEN, rpcToken.getText().toString())
@@ -224,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.WRITE_STORAGE_DENIED);
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.WRITE_STORAGE_DENIED);
                         return;
                     }
 
@@ -232,12 +233,12 @@ public class MainActivity extends AppCompatActivity {
                     if (saveSession.isChecked() && !sessionFile.exists()) {
                         try {
                             if (!sessionFile.createNewFile()) {
-                                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE);
+                                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_CREATING_SESSION_FILE);
                                 saveSession.setChecked(false);
                                 return;
                             }
                         } catch (IOException ex) {
-                            Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_CREATING_SESSION_FILE, ex);
+                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_CREATING_SESSION_FILE, ex);
                             saveSession.setChecked(false);
                             return;
                         }
@@ -373,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
                         releasesList.add(_release.optString("name"));
                     }
                 } catch (JSONException ex) {
-                    Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, ex);
+                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
                     return;
                 } finally {
                     pd.dismiss();
@@ -407,22 +408,22 @@ public class MainActivity extends AppCompatActivity {
 
                                         new DownloadBinFile(MainActivity.this).execute(new URL(downloadURL));
                                     } catch (Exception ex) {
-                                        Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, ex);
+                                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
                                     }
                                 }
 
                                 @Override
                                 public void onException(Exception exception) {
-                                    Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, exception);
+                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
                                 }
 
                                 @Override
                                 public void onFailed(int code, String message) {
-                                    Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
+                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
                                 }
                             })).start();
                         } catch (JSONException ex) {
-                            Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, ex);
+                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
                         }
                     }
                 })
@@ -440,13 +441,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onException(Exception exception) {
                 pd.dismiss();
-                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, exception);
+                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
             }
 
             @Override
             public void onFailed(int code, String message) {
                 pd.dismiss();
-                Utils.UIToast(MainActivity.this, Utils.TOAST_MESSAGES.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
+                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
             }
         })).start();
     }

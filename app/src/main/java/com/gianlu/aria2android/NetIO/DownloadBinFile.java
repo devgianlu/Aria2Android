@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import com.gianlu.aria2android.BinUtils;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
+import com.gianlu.commonutils.CommonUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,14 +49,14 @@ public class DownloadBinFile extends AsyncTask<URL, Integer, Object> {
             try {
                 BinUtils.unzipBin(new ByteArrayInputStream(out.toByteArray()), context);
             } catch (IOException ex) {
-                Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, ex);
+                CommonUtils.UIToast(context, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, ex);
             }
 
             context.recreate();
         } else if (result instanceof String) {
-            Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, (String) result);
+            CommonUtils.UIToast(context, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, (String) result);
         } else if (result instanceof Exception) {
-            Utils.UIToast(context, Utils.TOAST_MESSAGES.FAILED_DOWNLOADING_BIN, (Exception) result);
+            CommonUtils.UIToast(context, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, (Exception) result);
         }
     }
 
