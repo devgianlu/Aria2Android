@@ -49,6 +49,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Bin version check
 public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;

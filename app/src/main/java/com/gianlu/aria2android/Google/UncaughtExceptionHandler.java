@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
+import com.gianlu.commonutils.CommonUtils;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
@@ -72,6 +73,6 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
                     }
                 });
 
-        Utils.showDialog(context, builder);
+        CommonUtils.showDialog(context, builder);
     }
 }

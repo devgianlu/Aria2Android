@@ -23,6 +23,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.google.android.gms:play-services-analytics:9.6.1'
+    compile project(path: ':CommonUtils')
 }
 
 

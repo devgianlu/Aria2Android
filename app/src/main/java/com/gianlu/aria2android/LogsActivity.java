@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gianlu.aria2android.Google.UncaughtExceptionHandler;
+import com.gianlu.commonutils.CommonUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -216,7 +217,7 @@ public class LogsActivity extends AppCompatActivity {
                     break;
             }
             linearLayout.addView(type);
-            linearLayout.addView(Utils.fastTextView(LogsActivity.this, item.getMessage()));
+            linearLayout.addView(CommonUtils.fastTextView(LogsActivity.this, item.getMessage()));
 
 
             return linearLayout;

@@ -1,18 +1,10 @@
 package com.gianlu.aria2android;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.support.v7.app.AlertDialog;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Locale;
+import com.gianlu.commonutils.CommonUtils;
+
 import java.util.Map;
 
 public class Utils {
@@ -20,28 +12,6 @@ public class Utils {
     public static final String PREF_RPC_PORT = "rpcPort";
     public static final String PREF_RPC_TOKEN = "rpcToken";
     public static final String PREF_SAVE_SESSION = "saveSession";
-
-    public static void showDialog(Activity activity, final Dialog dialog) {
-        if (activity == null || activity.isFinishing()) return;
-
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                dialog.show();
-            }
-        });
-    }
-
-    public static void showDialog(Activity activity, final AlertDialog.Builder builder) {
-        if (activity == null || activity.isFinishing()) return;
-
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                builder.create().show();
-            }
-        });
-    }
 
     public static String optionProcessor(Map<String, String> options) {
         String extended = "";
@@ -54,13 +24,6 @@ public class Utils {
         }
 
         return extended;
-    }
-
-    public static TextView fastTextView(Context context, String text) {
-        TextView textView = new TextView(context);
-        textView.setText(text);
-
-        return textView;
     }
 
     public static void UIToast(final Activity context, final String text, final int duration) {
@@ -83,7 +46,7 @@ public class Utils {
                 Toast.makeText(context, message.toString() + (message.isError() ? " See logs for more..." : ""), Toast.LENGTH_SHORT).show();
             }
         });
-        LogMe(context, message.toString(), message.isError());
+        CommonUtils.logMe(context, message.toString(), message.isError());
     }
 
     public static void UIToast(final Activity context, final TOAST_MESSAGES message, final String message_extras) {
@@ -94,7 +57,7 @@ public class Utils {
             }
         });
 
-        LogMe(context, message + " Details: " + message_extras, message.isError());
+        CommonUtils.logMe(context, message + " Details: " + message_extras, message.isError());
     }
 
     public static void UIToast(final Activity context, final TOAST_MESSAGES message, final Throwable exception) {
@@ -105,36 +68,8 @@ public class Utils {
             }
         });
 
-        LogMe(context, message + " Details: " + exception.getMessage(), message.isError());
-        SecretLog(context, exception);
-    }
-
-    public static void SecretLog(Activity context, Throwable exx) {
-        exx.printStackTrace();
-
-        try {
-            FileOutputStream fOut = context.openFileOutput(new SimpleDateFormat("d-LL-yyyy", Locale.getDefault()).format(new java.util.Date()) + ".secret", Context.MODE_APPEND);
-            OutputStreamWriter osw = new OutputStreamWriter(fOut);
-
-            osw.write(new SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(new java.util.Date()) + " >> " + exx.toString() + "\n" + Arrays.toString(exx.getStackTrace()) + "\n\n");
-            osw.flush();
-            osw.close();
-        } catch (IOException ex) {
-            UIToast(context, "Logger: " + ex.getMessage(), Toast.LENGTH_LONG);
-        }
-    }
-
-    public static void LogMe(Activity context, String message, boolean isError) {
-        try {
-            FileOutputStream fOut = context.openFileOutput(new SimpleDateFormat("d-LL-yyyy", Locale.getDefault()).format(new java.util.Date()) + ".log", Context.MODE_APPEND);
-            OutputStreamWriter osw = new OutputStreamWriter(fOut);
-
-            osw.write((isError ? "--ERROR--" : "--INFO--") + new SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(new java.util.Date()) + " >> " + message.replace("\n", " ") + "\n");
-            osw.flush();
-            osw.close();
-        } catch (IOException ex) {
-            UIToast(context, "Logger: " + ex.getMessage(), Toast.LENGTH_LONG);
-        }
+        CommonUtils.logMe(context, message + " Details: " + exception.getMessage(), message.isError());
+        CommonUtils.secretLog(context, exception);
     }
 
     public enum TOAST_MESSAGES {
