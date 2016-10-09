@@ -17,12 +17,12 @@ public class aria2StartConfig implements Parcelable {
             return new aria2StartConfig[size];
         }
     };
-    private String outputDirectory;
+    private final String outputDirectory;
     private Map<String, String> options;
-    private boolean useConfig;
-    private boolean saveSession;
-    private int rpcPort;
-    private String rpcToken;
+    private final boolean useConfig;
+    private final boolean saveSession;
+    private final int rpcPort;
+    private final String rpcToken;
 
     public aria2StartConfig(String outputDirectory, Map<String, String> options, boolean useConfig, boolean saveSession, int rpcPort, String rpcToken) {
         this.outputDirectory = outputDirectory;
@@ -33,7 +33,7 @@ public class aria2StartConfig implements Parcelable {
         this.rpcToken = rpcToken;
     }
 
-    protected aria2StartConfig(Parcel in) {
+    private aria2StartConfig(Parcel in) {
         outputDirectory = in.readString();
         useConfig = in.readByte() != 0;
         saveSession = in.readByte() != 0;

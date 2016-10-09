@@ -9,6 +9,7 @@ import android.preference.PreferenceActivity;
 
 import com.gianlu.aria2android.Google.UncaughtExceptionHandler;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.LogsActivity;
 
 public class PreferencesActivity extends PreferenceActivity {
 

@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class StreamListener implements Runnable {
+class StreamListener implements Runnable {
     private static boolean _shouldStop;
-    private LoglineAdapter adapter;
-    private InputStream in;
-    private InputStream err;
+    private final LoglineAdapter adapter;
+    private final InputStream in;
+    private final InputStream err;
 
     public StreamListener(LoglineAdapter adapter, InputStream in, InputStream err) {
         this.adapter = adapter;

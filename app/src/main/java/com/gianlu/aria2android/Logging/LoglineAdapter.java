@@ -19,8 +19,8 @@ import com.gianlu.commonutils.CommonUtils;
 import java.util.List;
 
 public class LoglineAdapter extends BaseAdapter {
-    private Activity context;
-    private List<LoglineItem> objs;
+    private final Activity context;
+    private final List<LoglineItem> objs;
 
     public LoglineAdapter(Activity context, List<LoglineItem> objs) {
         this.context = context;
@@ -47,7 +47,7 @@ public class LoglineAdapter extends BaseAdapter {
         });
     }
 
-    public void addLine(LoglineItem line) {
+    private void addLine(LoglineItem line) {
         CommonUtils.logMe(context, line.getMessage(), line.getType() == LoglineItem.TYPE.ERROR);
         objs.add(line);
         context.runOnUiThread(new Runnable() {

@@ -32,8 +32,6 @@ public class Utils {
         public static final CommonUtils.ToastMessage WRITE_STORAGE_DENIED = new CommonUtils.ToastMessage("You denied the write permission! Can't start aria2!", true);
         public static final CommonUtils.ToastMessage COPIED_TO_CLIPBOARD = new CommonUtils.ToastMessage("Message copied in the clipboard!", false);
         public static final CommonUtils.ToastMessage NO_EMAIL_CLIENT = new CommonUtils.ToastMessage("There are no email clients installed.", true);
-        public static final CommonUtils.ToastMessage LOGS_DELETED = new CommonUtils.ToastMessage("Logs deleted!", false);
-        public static final CommonUtils.ToastMessage FATAL_EXCEPTION = new CommonUtils.ToastMessage("Fatal exception!", true);
         public static final CommonUtils.ToastMessage INVALID_RPC_PORT = new CommonUtils.ToastMessage("Invalid RPC port!", false);
         public static final CommonUtils.ToastMessage INVALID_RPC_TOKEN = new CommonUtils.ToastMessage("Invalid RPC token!", false);
         public static final CommonUtils.ToastMessage UNEXPECTED_EXCEPTION = new CommonUtils.ToastMessage("Unexpected exception! Don't worry.", true);

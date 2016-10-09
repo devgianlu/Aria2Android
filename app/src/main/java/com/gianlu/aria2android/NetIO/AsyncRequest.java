@@ -7,8 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class AsyncRequest implements Runnable {
-    private String url;
-    private IResponse handler;
+    private final String url;
+    private final IResponse handler;
 
     public AsyncRequest(String url, IResponse handler) {
         this.url = url;

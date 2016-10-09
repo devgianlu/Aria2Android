@@ -39,7 +39,7 @@
 
         <!-- Logs Activity -->
         <activity
-            android:name=".LogsActivity"
+            android:name="com.gianlu.commonutils.LogsActivity"
             android:parentActivityName=".PreferencesActivity" />
     </application>
 

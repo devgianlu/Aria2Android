@@ -19,7 +19,7 @@ public class aria2Service extends IntentService {
         super("aria2 service");
     }
 
-    public static void killService() {
+    private static void killService() {
         handler.onServerStopped();
         if (process != null)
             process.destroy();

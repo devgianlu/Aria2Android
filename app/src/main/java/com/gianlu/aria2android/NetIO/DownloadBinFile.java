@@ -17,7 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class DownloadBinFile extends AsyncTask<URL, Integer, Object> {
-    private Activity context;
+    private final Activity context;
     private ProgressDialog progressDialog;
 
     public DownloadBinFile(Activity context) {
