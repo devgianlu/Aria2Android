@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "549901434764",
+    "project_id": "firebase-aria2android"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549901434764:android:4e6b605694ff775f",
+        "android_client_info": {
+          "package_name": "com.gianlu.aria2android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwz15TRhHltvoBGVAGlxeCbwFnDK-f7kY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-78508159-5"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
