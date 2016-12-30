@@ -7,7 +7,7 @@
     <!-- Save downloads -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- Google Analytics -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Start service on boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -15,6 +15,7 @@
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
+        android:installLocation="internalOnly"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -31,7 +32,9 @@
         </activity>
 
         <!-- aria2 service -->
-        <service android:name=".aria2Service" />
+        <service
+            android:name=".aria2Service"
+            android:enabled="true" />
 
         <!-- Preferences Activity -->
         <activity
@@ -44,9 +47,12 @@
             android:parentActivityName=".PreferencesActivity" />
 
         <!-- Boot completed receiver -->
-        <receiver android:name=".BootCompletedReceiver" android:enabled="true" android:exported="false">
+        <receiver
+            android:name=".BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>

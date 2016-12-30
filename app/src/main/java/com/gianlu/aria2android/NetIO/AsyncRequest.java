@@ -22,11 +22,10 @@ public class AsyncRequest implements Runnable {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod("GET");
-
             conn.connect();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                handler.onFailed(conn.getResponseCode(), conn.getResponseMessage());
+                handler.onException(new StatusCodeException(conn.getResponseCode(), conn.getResponseMessage()));
                 return;
             }
 
@@ -36,6 +35,7 @@ public class AsyncRequest implements Runnable {
             while ((line = rd.readLine()) != null)
                 result.append(line);
             rd.close();
+            conn.disconnect();
 
             handler.onResponse(result.toString());
         } catch (IOException ex) {

@@ -68,6 +68,35 @@
             android:text="@string/saveSession" />
 
         <CheckBox
+            android:id="@+id/options_useConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/useConfig" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/configFile" />
+
+            <EditText
+                android:enabled="false"
+                android:id="@+id/options_configFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/configFileHint"
+                android:inputType="textUri" />
+        </LinearLayout>
+
+        <CheckBox
             android:id="@+id/options_startAtBoot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -149,7 +178,6 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/openAria2App" />
         </LinearLayout>
-
 
         <TextView
             android:layout_width="match_parent"

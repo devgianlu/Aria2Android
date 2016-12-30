@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class BinUtils {
+class BinUtils {
     public static void unzipBin(byte[] in, Context context) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(in)))) {
             ZipEntry ze;

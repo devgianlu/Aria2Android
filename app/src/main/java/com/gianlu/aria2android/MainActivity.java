@@ -49,7 +49,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Options file
 public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;
@@ -106,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onException(Exception ex, boolean fatal) {
+            public void onException(Exception ex) {
                 StreamListener.stop();
                 CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.UNEXPECTED_EXCEPTION, ex);
                 adapter.addLine(LoglineItem.TYPE.ERROR, getString(R.string.serverException, ex.getMessage()));
@@ -121,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
 
         TextView version = ((TextView) findViewById(R.id.main_binVersion));
         final CheckBox saveSession = (CheckBox) findViewById(R.id.options_saveSession);
+        final CheckBox useConfig = (CheckBox) findViewById(R.id.options_useConfig);
+        final EditText configFile = (EditText) findViewById(R.id.options_configFile);
         final CheckBox startAtBoot = (CheckBox) findViewById(R.id.options_startAtBoot);
         ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
         final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
@@ -148,6 +149,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        useConfig.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
+                preferences.edit()
+                        .putBoolean(Utils.PREF_USE_CONFIG, b)
+                        .apply();
+
+                configFile.setEnabled(b);
+            }
+        });
+
+        configFile.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    File file = new File(configFile.getText().toString());
+
+                    if (file.exists() && file.isFile()) {
+                        if (file.canRead()) {
+                            preferences.edit()
+                                    .putString(Utils.PREF_CONFIG_FILE, file.getAbsolutePath())
+                                    .apply();
+                        } else {
+                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.CONFIG_FILE_CANT_READ, file.getAbsolutePath());
+                        }
+                    } else {
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.CONFIG_FILE_NOT_FOUND, file.getAbsolutePath());
+                    }
+                }
+            }
+        });
+
         outputPath.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -160,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                                     .putString(Utils.PREF_OUTPUT_DIRECTORY, path.getAbsolutePath())
                                     .apply();
                         } else {
-                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_CANNOT_WRITE, path.getAbsolutePath());
+                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_CANT_WRITE, path.getAbsolutePath());
                         }
                     } else {
                         CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_NOT_FOUND, path.getAbsolutePath());
@@ -209,6 +242,8 @@ public class MainActivity extends AppCompatActivity {
 
         outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
         saveSession.setChecked(preferences.getBoolean(Utils.PREF_SAVE_SESSION, true));
+        useConfig.setChecked(preferences.getBoolean(Utils.PREF_USE_CONFIG, false));
+        configFile.setText(preferences.getString(Utils.PREF_CONFIG_FILE, ""));
         startAtBoot.setChecked(preferences.getBoolean(Utils.PREF_START_AT_BOOT, false));
         rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
         rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
@@ -252,12 +287,14 @@ public class MainActivity extends AppCompatActivity {
                             .putExtra(aria2Service.CONFIG, new aria2StartConfig(
                                     outputPath.getText().toString(),
                                     null,
-                                    false,
+                                    useConfig.isChecked(),
+                                    configFile.getText().toString(),
                                     saveSession.isChecked(),
                                     getPort(outputPath),
                                     rpcToken.getText().toString())
                             ));
                 } else {
+                    // TODO: Send Control-C to aria2c
                     stopService(new Intent(MainActivity.this, aria2Service.class));
 
                     if (Analytics.isTrackingAllowed(MainActivity.this)) {
@@ -276,6 +313,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 outputPath.setEnabled(!isChecked);
+                useConfig.setEnabled(!isChecked);
+                if (isChecked)
+                    configFile.setEnabled(false);
+                else
+                    configFile.setEnabled(useConfig.isChecked());
                 saveSession.setEnabled(!isChecked);
                 startAtBoot.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
@@ -429,11 +471,6 @@ public class MainActivity extends AppCompatActivity {
                                 public void onException(Exception exception) {
                                     CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
                                 }
-
-                                @Override
-                                public void onFailed(int code, String message) {
-                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
-                                }
                             })).start();
                         } catch (JSONException ex) {
                             CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
@@ -450,12 +487,6 @@ public class MainActivity extends AppCompatActivity {
             public void onException(Exception exception) {
                 pd.dismiss();
                 CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
-            }
-
-            @Override
-            public void onFailed(int code, String message) {
-                pd.dismiss();
-                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, "#" + code + ": " + message);
             }
         })).start();
     }

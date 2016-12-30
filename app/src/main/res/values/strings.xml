@@ -49,4 +49,7 @@
     <string name="serverStarted">Server started!</string>
     <string name="changeBinVersion">Change bin version</string>
     <string name="startServiceAtBoot">Start service on system boot</string>
+    <string name="useConfig">Use config file</string>
+    <string name="configFile">Config file:</string>
+    <string name="configFileHint">aria2 config file</string>
 </resources>

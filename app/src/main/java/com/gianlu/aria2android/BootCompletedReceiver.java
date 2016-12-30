@@ -24,7 +24,8 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     .putExtra(aria2Service.CONFIG, new aria2StartConfig(
                             preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()),
                             null,
-                            false,
+                            preferences.getBoolean(Utils.PREF_USE_CONFIG, false),
+                            preferences.getString(Utils.PREF_CONFIG_FILE, ""),
                             preferences.getBoolean(Utils.PREF_SAVE_SESSION, true),
                             preferences.getInt(Utils.PREF_RPC_PORT, 6800),
                             preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"))
