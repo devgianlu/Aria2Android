@@ -21,9 +21,17 @@ public class aria2Service extends IntentService {
     }
 
     private static void killService() {
-        handler.onServerStopped();
+        try {
+            Runtime.getRuntime().exec("pkill aria2c");
+            process.waitFor();
+        } catch (IOException | InterruptedException ex) {
+            handler.onException(ex);
+        }
+
         if (process != null)
             process.destroy();
+
+        handler.onServerStopped();
     }
 
     @Override

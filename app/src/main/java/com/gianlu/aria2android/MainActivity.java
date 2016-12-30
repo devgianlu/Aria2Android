@@ -294,7 +294,6 @@ public class MainActivity extends AppCompatActivity {
                                     rpcToken.getText().toString())
                             ));
                 } else {
-                    // TODO: Send Control-C to aria2c
                     stopService(new Intent(MainActivity.this, aria2Service.class));
 
                     if (Analytics.isTrackingAllowed(MainActivity.this)) {
