@@ -25,13 +25,15 @@ public class aria2Service extends IntentService {
             Runtime.getRuntime().exec("pkill aria2c");
             process.waitFor();
         } catch (IOException | InterruptedException ex) {
-            handler.onException(ex);
+            if (handler != null)
+                handler.onException(ex);
         }
 
         if (process != null)
             process.destroy();
 
-        handler.onServerStopped();
+        if (handler != null)
+            handler.onServerStopped();
     }
 
     @Override
@@ -67,12 +69,14 @@ public class aria2Service extends IntentService {
         try {
             process = Runtime.getRuntime().exec(command);
         } catch (IOException ex) {
-            handler.onException(ex);
+            if (handler != null)
+                handler.onException(ex);
             stopSelf();
             return;
         }
 
-        handler.onServerStarted(process.getInputStream(), process.getErrorStream());
+        if (handler != null)
+            handler.onServerStarted(process.getInputStream(), process.getErrorStream());
     }
 
     @Override
