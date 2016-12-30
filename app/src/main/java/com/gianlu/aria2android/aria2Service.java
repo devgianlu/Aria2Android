@@ -7,6 +7,7 @@ import android.content.Intent;
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
@@ -42,13 +43,15 @@ public class aria2Service extends IntentService {
     protected void onHandleIntent(Intent intent) {
         aria2StartConfig config = intent.getParcelableExtra(CONFIG);
 
-        String binPath = getFilesDir().getPath() + "/bin";
+        String binPath = new File(getFilesDir(), "aria2c").getAbsolutePath();
+        String confPath = new File(getFilesDir(), "aria2c.conf").getAbsolutePath();
+        String sessionPath = new File(getFilesDir(), "session").getAbsolutePath();
 
         String command = binPath
-                + "/aria2c --daemon --check-certificate=false"
-                + (config.useConfig() ? " --conf-path=" + binPath + "/aria2.conf" : " --no-conf=true")
-                + (config.isSavingSession() ? " --save-session=" + binPath + "/session --save-session-interval=10" : " ")
-                + " --input-file=" + binPath + "/session"
+                + " --daemon --check-certificate=false"
+                + (config.useConfig() ? " --conf-path=" + confPath : " --no-conf=true")
+                + (config.isSavingSession() ? " --save-session=" + sessionPath + " --save-session-interval=10" : " ")
+                + " --input-file=" + sessionPath
                 + " --dir=" + config.getOutputDirectory()
                 + " --enable-rpc --rpc-listen-all=true --rpc-listen-port=" + config.getRpcPort()
                 + " --rpc-secret=" + config.getRpcToken()

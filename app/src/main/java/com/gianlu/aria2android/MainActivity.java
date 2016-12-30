@@ -32,7 +32,6 @@ import com.gianlu.aria2android.Google.UncaughtExceptionHandler;
 import com.gianlu.aria2android.Logging.LoglineAdapter;
 import com.gianlu.aria2android.Logging.LoglineItem;
 import com.gianlu.aria2android.NetIO.AsyncRequest;
-import com.gianlu.aria2android.NetIO.DownloadBinFile;
 import com.gianlu.aria2android.NetIO.IResponse;
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
@@ -50,15 +49,24 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Bin version check
+// TODO: Options file
 public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;
+
+    private static int getPort(EditText port) {
+        try {
+            return Integer.parseInt(port.getText().toString());
+        } catch (Exception ex) {
+            return 6800;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        CommonUtils.DEBUG = BuildConfig.DEBUG;
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
         if (!BinUtils.binAvailable(this)) {
@@ -67,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -85,9 +92,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         final LoglineAdapter adapter = new LoglineAdapter(this, new ArrayList<LoglineItem>());
         ((ListView) findViewById(R.id.main_logs)).setAdapter(adapter);
 
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             public void onServerStarted(InputStream in, InputStream err) {
                 adapter.clear();
                 streamListener = new StreamListener(adapter, in, err);
-                adapter.addLine(LoglineItem.TYPE.INFO, "Server started!");
+                adapter.addLine(LoglineItem.TYPE.INFO, getString(R.string.serverStarted));
                 new Thread(streamListener).start();
             }
 
@@ -104,22 +109,26 @@ public class MainActivity extends AppCompatActivity {
             public void onException(Exception ex, boolean fatal) {
                 StreamListener.stop();
                 CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.UNEXPECTED_EXCEPTION, ex);
-                adapter.addLine(LoglineItem.TYPE.ERROR, "Server exception! " + ex.getMessage());
+                adapter.addLine(LoglineItem.TYPE.ERROR, getString(R.string.serverException, ex.getMessage()));
             }
 
             @Override
             public void onServerStopped() {
                 StreamListener.stop();
-                adapter.addLine(LoglineItem.TYPE.INFO, "Server stopped!");
+                adapter.addLine(LoglineItem.TYPE.INFO, getString(R.string.serverStopped));
             }
         };
 
         TextView version = ((TextView) findViewById(R.id.main_binVersion));
-        assert version != null;
-        version.setText(BinUtils.binVersion(this));
-
         final CheckBox saveSession = (CheckBox) findViewById(R.id.options_saveSession);
-        assert saveSession != null;
+        final CheckBox startAtBoot = (CheckBox) findViewById(R.id.options_startAtBoot);
+        ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
+        final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
+        final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
+        final EditText rpcPort = (EditText) findViewById(R.id.options_rpcPort);
+        final EditText rpcToken = (EditText) findViewById(R.id.options_rpcToken);
+
+        version.setText(BinUtils.binVersion(this));
 
         saveSession.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -130,14 +139,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
-        assert toggleServer != null;
-
-        final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
-        assert openAria2App != null;
-
-        final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
-        assert outputPath != null;
+        startAtBoot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
+                preferences.edit()
+                        .putBoolean(Utils.PREF_START_AT_BOOT, b)
+                        .apply();
+            }
+        });
 
         outputPath.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -159,9 +168,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        final EditText rpcPort = (EditText) findViewById(R.id.options_rpcPort);
-        assert rpcPort != null;
 
         rpcPort.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -186,9 +192,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final EditText rpcToken = (EditText) findViewById(R.id.options_rpcToken);
-        assert rpcToken != null;
-
         rpcToken.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -206,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
         outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
         saveSession.setChecked(preferences.getBoolean(Utils.PREF_SAVE_SESSION, true));
+        startAtBoot.setChecked(preferences.getBoolean(Utils.PREF_START_AT_BOOT, false));
         rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
         rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
 
@@ -215,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                 isRunning = isChecked;
 
                 if (isChecked) {
-                    preferences.edit().putLong("currentSessionDuration", System.currentTimeMillis()).apply();
+                    preferences.edit().putLong("currentSessionStart", System.currentTimeMillis()).apply();
 
                     if (Analytics.isTrackingAllowed(MainActivity.this))
                         Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
@@ -229,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    File sessionFile = new File(getFilesDir().getPath() + "/bin/session");
+                    File sessionFile = new File(getFilesDir(), "session");
                     if (saveSession.isChecked() && !sessionFile.exists()) {
                         try {
                             if (!sessionFile.createNewFile()) {
@@ -256,17 +260,24 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     stopService(new Intent(MainActivity.this, aria2Service.class));
 
-                    if (Analytics.isTrackingAllowed(MainActivity.this))
+                    if (Analytics.isTrackingAllowed(MainActivity.this)) {
                         Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
                                 .setCategory(Analytics.CATEGORY_USER_INPUT)
                                 .setAction(Analytics.ACTION_TURN_OFF)
-                                .setValue(preferences.getLong("currentSessionDuration", -1))
                                 .build());
-                }
 
+                        if (preferences.getLong("currentSessionStart", -1) != -1)
+                            Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.TimingBuilder()
+                                    .setCategory(Analytics.CATEGORY_TIMING)
+                                    .setLabel(Analytics.LABEL_SESSION_DURATION)
+                                    .setValue(System.currentTimeMillis() - preferences.getLong("currentSessionStart", -1))
+                                    .build());
+                    }
+                }
 
                 outputPath.setEnabled(!isChecked);
                 saveSession.setEnabled(!isChecked);
+                startAtBoot.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
                 rpcPort.setEnabled(!isChecked);
             }
@@ -294,11 +305,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             })
-                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            })
+                            .setNegativeButton(android.R.string.no, null)
                             .create().show();
                     return;
                 }
@@ -320,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
                             .setMessage(R.string.aria2_notRunningMessage)
                             .setPositiveButton(android.R.string.no, new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {}
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
                             })
                             .setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 @Override
@@ -336,28 +344,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private int getPort(EditText port) {
-        try {
-            return Integer.parseInt(port.getText().toString());
-        } catch (Exception ex) {
-            return 6800;
-        }
-    }
-
     private void downloadBinDialog() {
-        final ProgressDialog pd = new ProgressDialog(this);
-        pd.setIndeterminate(true);
-        pd.setMessage(getString(R.string.loading_releases));
+        final ProgressDialog pd = CommonUtils.fastIndeterminateProgressDialog(this, R.string.loading_releases);
+        final ProgressDialog pdd = CommonUtils.fastIndeterminateProgressDialog(MainActivity.this, R.string.downloading_bin);
 
         new Thread(new AsyncRequest(getString(R.string.URL_releases), new IResponse() {
             @Override
             public void onStart() {
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        pd.show();
-                    }
-                });
+                CommonUtils.showDialog(MainActivity.this, pd);
             }
 
             @Override
@@ -390,12 +384,7 @@ public class MainActivity extends AppCompatActivity {
                             new Thread(new AsyncRequest(jReleases.getJSONObject(which).getString("url"), new IResponse() {
                                 @Override
                                 public void onStart() {
-                                    MainActivity.this.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.show();
-                                        }
-                                    });
+                                    CommonUtils.showDialog(MainActivity.this, pd);
                                 }
 
                                 @Override
@@ -406,7 +395,31 @@ public class MainActivity extends AppCompatActivity {
                                     try {
                                         downloadURL = new JSONObject(response).getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
 
-                                        new DownloadBinFile(MainActivity.this).execute(new URL(downloadURL));
+                                        CommonUtils.showDialog(MainActivity.this, pdd);
+                                        BinUtils.downloadBin(new URL(downloadURL), new BinUtils.IDownload() {
+                                            @Override
+                                            public void onDone(byte[] out) {
+                                                try {
+                                                    BinUtils.unzipBin(out, MainActivity.this);
+                                                } catch (IOException ex) {
+                                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, ex);
+                                                }
+
+                                                pdd.dismiss();
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        recreate();
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onException(Exception ex) {
+                                                pdd.dismiss();
+                                                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, ex);
+                                            }
+                                        });
                                     } catch (Exception ex) {
                                         CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
                                     }
@@ -430,12 +443,7 @@ public class MainActivity extends AppCompatActivity {
                         .setCancelable(false)
                         .setTitle(R.string.whichRelease);
 
-                MainActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        builder.create().show();
-                    }
-                });
+                CommonUtils.showDialog(MainActivity.this, builder);
             }
 
             @Override
@@ -455,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -464,7 +472,13 @@ public class MainActivity extends AppCompatActivity {
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferencesActivity.class));
                 break;
+            case R.id.mainMenu_changeBin:
+                if (BinUtils.delete(this))
+                    downloadBinDialog();
+                else
+                    CommonUtils.UIToast(this, Utils.ToastMessages.CANT_DELETE_BIN);
+                break;
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 }

@@ -12,6 +12,8 @@ import com.google.android.gms.analytics.Tracker;
 
 public class Analytics {
     public static final String CATEGORY_USER_INPUT = "User input";
+    public static final String CATEGORY_TIMING = "Timings";
+    public static final String LABEL_SESSION_DURATION = "Session duration";
     public static final String ACTION_TURN_ON = "aria2 turned on";
     public static final String ACTION_TURN_OFF = "aria2 turned off";
     public static final String ACTION_OPENED_ARIA2APP = "Opened Aria2App";

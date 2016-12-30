@@ -9,6 +9,7 @@ public class Utils {
     public static final String PREF_RPC_PORT = "rpcPort";
     public static final String PREF_RPC_TOKEN = "rpcToken";
     public static final String PREF_SAVE_SESSION = "saveSession";
+    public static final String PREF_START_AT_BOOT = "startAtBoot";
 
     public static String optionProcessor(Map<String, String> options) {
         String extended = "";
@@ -32,6 +33,7 @@ public class Utils {
         public static final CommonUtils.ToastMessage WRITE_STORAGE_DENIED = new CommonUtils.ToastMessage("You denied the write permission! Can't start aria2!", true);
         public static final CommonUtils.ToastMessage COPIED_TO_CLIPBOARD = new CommonUtils.ToastMessage("Message copied in the clipboard!", false);
         public static final CommonUtils.ToastMessage NO_EMAIL_CLIENT = new CommonUtils.ToastMessage("There are no email clients installed.", true);
+        public static final CommonUtils.ToastMessage CANT_DELETE_BIN = new CommonUtils.ToastMessage("Can't delete the bin file! Please clear application data.", true);
         public static final CommonUtils.ToastMessage INVALID_RPC_PORT = new CommonUtils.ToastMessage("Invalid RPC port!", false);
         public static final CommonUtils.ToastMessage INVALID_RPC_TOKEN = new CommonUtils.ToastMessage("Invalid RPC token!", false);
         public static final CommonUtils.ToastMessage UNEXPECTED_EXCEPTION = new CommonUtils.ToastMessage("Unexpected exception! Don't worry.", true);

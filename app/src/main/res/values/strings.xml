@@ -44,4 +44,9 @@
     <string name="tracking">Disable anonymous statistics</string>
     <string name="trackingOn">No statistics will be sent to the developer.</string>
     <string name="trackingOff">Statistics about the application behavior will be sent to the developer. (No personal data will be sent)</string>
+    <string name="serverStopped">Server stopped!</string>
+    <string name="serverException">Server exception! %s</string>
+    <string name="serverStarted">Server started!</string>
+    <string name="changeBinVersion">Change bin version</string>
+    <string name="startServiceAtBoot">Start service on system boot</string>
 </resources>
