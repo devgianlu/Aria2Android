@@ -57,6 +57,7 @@ public class LoglineAdapter extends BaseAdapter {
             }
         });
     }
+
     public void addLine(LoglineItem.TYPE type, String message) {
         addLine(new LoglineItem(type, message));
     }

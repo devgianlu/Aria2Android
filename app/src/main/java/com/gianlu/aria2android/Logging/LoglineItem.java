@@ -4,16 +4,16 @@ public class LoglineItem {
     private final TYPE type;
     private final String message;
 
-    public LoglineItem(TYPE type, String message) {
+    LoglineItem(TYPE type, String message) {
         this.type = type;
         this.message = message;
     }
 
-    public TYPE getType() {
+    TYPE getType() {
         return type;
     }
 
-    public String getMessage() {
+    String getMessage() {
         return message;
     }
 

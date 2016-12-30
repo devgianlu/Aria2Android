@@ -5,15 +5,15 @@ import com.gianlu.commonutils.CommonUtils;
 import java.util.Map;
 
 public class Utils {
-    public static final String PREF_OUTPUT_DIRECTORY = "outputPath";
-    public static final String PREF_RPC_PORT = "rpcPort";
-    public static final String PREF_RPC_TOKEN = "rpcToken";
-    public static final String PREF_SAVE_SESSION = "saveSession";
-    public static final String PREF_START_AT_BOOT = "startAtBoot";
-    public static final String PREF_USE_CONFIG = "useConfig";
-    public static final String PREF_CONFIG_FILE = "configFile";
+    static final String PREF_OUTPUT_DIRECTORY = "outputPath";
+    static final String PREF_RPC_PORT = "rpcPort";
+    static final String PREF_RPC_TOKEN = "rpcToken";
+    static final String PREF_SAVE_SESSION = "saveSession";
+    static final String PREF_START_AT_BOOT = "startAtBoot";
+    static final String PREF_USE_CONFIG = "useConfig";
+    static final String PREF_CONFIG_FILE = "configFile";
 
-    public static String optionProcessor(Map<String, String> options) {
+    static String optionProcessor(Map<String, String> options) {
         String extended = "";
         if (options == null || options.isEmpty()) return "";
 
@@ -34,7 +34,6 @@ public class Utils {
         public static final CommonUtils.ToastMessage OUTPUT_PATH_CANT_WRITE = new CommonUtils.ToastMessage("Cannot write selected output path!", false);
         public static final CommonUtils.ToastMessage WRITE_STORAGE_DENIED = new CommonUtils.ToastMessage("You denied the write permission! Can't start aria2!", true);
         public static final CommonUtils.ToastMessage COPIED_TO_CLIPBOARD = new CommonUtils.ToastMessage("Message copied in the clipboard!", false);
-        public static final CommonUtils.ToastMessage NO_EMAIL_CLIENT = new CommonUtils.ToastMessage("There are no email clients installed.", true);
         public static final CommonUtils.ToastMessage CANT_DELETE_BIN = new CommonUtils.ToastMessage("Can't delete the bin file! Please clear application data.", true);
         public static final CommonUtils.ToastMessage INVALID_RPC_PORT = new CommonUtils.ToastMessage("Invalid RPC port!", false);
         public static final CommonUtils.ToastMessage INVALID_RPC_TOKEN = new CommonUtils.ToastMessage("Invalid RPC token!", false);

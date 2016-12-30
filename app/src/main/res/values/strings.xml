@@ -38,9 +38,6 @@
     <string name="logsSummary">All application\'s log files</string>
     <string name="preferences">Preferences</string>
 
-    <string name="fatalException">Fatal exception</string>
-    <string name="fatalException_message">I am sorry for the inconvenience and I would be grateful if you send me a report of what happened!\nThe Developer</string>
-    <string name="sendReport">Send report</string>
     <string name="tracking">Disable anonymous statistics</string>
     <string name="trackingOn">No statistics will be sent to the developer.</string>
     <string name="trackingOff">Statistics about the application behavior will be sent to the developer. (No personal data will be sent)</string>

@@ -1,20 +1,15 @@
 package com.gianlu.aria2android.Google;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 
 import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.R;
-import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.CommonUtils;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Locale;
 
 public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
@@ -40,39 +35,6 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
                         .build());
         }
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(R.string.fatalException)
-                .setMessage(R.string.fatalException_message)
-                .setPositiveButton(R.string.sendReport, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("message/rfc822");
-                        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{context.getString(R.string.email)});
-                        intent.putExtra(Intent.EXTRA_SUBJECT, "Aria2App");
-                        intent.putExtra(Intent.EXTRA_TEXT, "OS Version: " + System.getProperty("os.version") + "(" + android.os.Build.VERSION.INCREMENTAL + ")" +
-                                "\nOS API Level: " + android.os.Build.VERSION.SDK_INT +
-                                "\nDevice: " + android.os.Build.DEVICE +
-                                "\nModel (and Product): " + android.os.Build.MODEL + " (" + android.os.Build.PRODUCT + ")" +
-                                "\n\nException" + throwable.toString() +
-                                "\nStacktrace: " + Arrays.toString(throwable.getStackTrace()));
-                        try {
-                            context.startActivity(Intent.createChooser(intent, "Send mail to the developer..."));
-                            CommonUtils.UIToast(context, "Thank you! :)");
-                        } catch (android.content.ActivityNotFoundException ex) {
-                            CommonUtils.UIToast(context, Utils.ToastMessages.NO_EMAIL_CLIENT);
-                        }
-
-                        System.exit(1);
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        System.exit(1);
-                    }
-                });
-
-        CommonUtils.showDialog(context, builder);
+        CommonUtils.sendEmail(context, context.getString(R.string.app_name));
     }
 }

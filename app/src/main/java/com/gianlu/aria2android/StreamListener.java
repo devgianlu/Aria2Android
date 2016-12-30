@@ -14,13 +14,13 @@ class StreamListener implements Runnable {
     private final InputStream in;
     private final InputStream err;
 
-    public StreamListener(LoglineAdapter adapter, InputStream in, InputStream err) {
+    StreamListener(LoglineAdapter adapter, InputStream in, InputStream err) {
         this.adapter = adapter;
         this.in = in;
         this.err = err;
     }
 
-    public static void stop() {
+    static void stop() {
         _shouldStop = true;
     }
 

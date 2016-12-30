@@ -19,7 +19,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 class BinUtils {
-    public static void unzipBin(byte[] in, Context context) throws IOException {
+    static void unzipBin(byte[] in, Context context) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new ByteArrayInputStream(in)))) {
             ZipEntry ze;
             while ((ze = zis.getNextEntry()) != null) {
@@ -40,12 +40,7 @@ class BinUtils {
         }
     }
 
-    public interface IDownload {
-        void onDone(byte[] out);
-        void onException(Exception ex);
-    }
-
-    public static void downloadBin(final URL url, final IDownload handler) {
+    static void downloadBin(final URL url, final IDownload handler) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -76,18 +71,17 @@ class BinUtils {
         }).start();
     }
 
-    public static boolean binAvailable(Context context) {
+    static boolean binAvailable(Context context) {
         File file = new File(context.getFilesDir(), "aria2c");
         return file.exists() && !file.isDirectory();
     }
 
-
-    public static boolean delete(Context context) {
+    static boolean delete(Context context) {
         File file = new File(context.getFilesDir(), "aria2c");
         return file.delete();
     }
 
-    public static String binVersion(Context context) {
+    static String binVersion(Context context) {
         try {
             return new BufferedReader(
                     new InputStreamReader(
@@ -97,5 +91,11 @@ class BinUtils {
         } catch (IOException e) {
             return "Unknown";
         }
+    }
+
+    interface IDownload {
+        void onDone(byte[] out);
+
+        void onException(Exception ex);
     }
 }
