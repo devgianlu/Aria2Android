@@ -352,10 +352,13 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (isRunning) {
-                    startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
-                            .putExtra("external", true)
-                            .putExtra("port", getPort(rpcPort))
-                            .putExtra("token", rpcToken.getText().toString()));
+                    Intent intent = getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app");
+                    if (intent != null) {
+                        startActivity(intent
+                                .putExtra("external", true)
+                                .putExtra("port", getPort(rpcPort))
+                                .putExtra("token", rpcToken.getText().toString()));
+                    }
 
                     if (Analytics.isTrackingAllowed(MainActivity.this))
                         Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
