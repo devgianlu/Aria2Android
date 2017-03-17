@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import com.gianlu.aria2android.Logging.LoglineAdapter;
 import com.gianlu.aria2android.Logging.LoglineItem;
+import com.gianlu.commonutils.CommonUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,13 +31,13 @@ class StreamListener implements Runnable {
         BufferedReader ereader = new BufferedReader(new InputStreamReader(err));
 
         while (!_shouldStop) {
-            String line;
-            String linee;
             try {
+                String line;
                 if ((line = reader.readLine()) != null) {
                     adapter.addLine(LoglineItem.TYPE.INFO, line);
                 }
 
+                String linee;
                 if ((linee = ereader.readLine()) != null) {
                     if (linee.startsWith("WARNING:")) {
                         adapter.addLine(LoglineItem.TYPE.WARNING, linee.replace("WARNING:", ""));
@@ -44,8 +45,8 @@ class StreamListener implements Runnable {
                         adapter.addLine(LoglineItem.TYPE.ERROR, linee.replace("ERROR:", ""));
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                CommonUtils.logMe(adapter.getContext(), ex);
             }
         }
     }

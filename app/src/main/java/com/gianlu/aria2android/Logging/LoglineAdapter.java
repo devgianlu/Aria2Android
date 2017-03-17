@@ -27,6 +27,10 @@ public class LoglineAdapter extends BaseAdapter {
         this.objs = objs;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     @Override
     public int getCount() {
         return objs.size();

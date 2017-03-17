@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 
 import com.gianlu.aria2android.aria2.IAria2;
@@ -43,6 +44,7 @@ public class aria2Service extends IntentService {
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(PendingIntent.getActivity(this, new Random().nextInt(), new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentText("aria2 is currently running").build());
 
         onHandleIntent(intent);
