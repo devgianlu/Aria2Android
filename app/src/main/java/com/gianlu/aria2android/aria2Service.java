@@ -15,14 +15,16 @@ import java.util.Random;
 public class aria2Service extends IntentService {
     public static final String CONFIG = "config";
     public static IAria2 handler;
-    private static Process process;
-    private static PerformanceMonitor monitor;
+    private final int NOTIFICATION_ID = new Random().nextInt();
+    private Process process;
+    private PerformanceMonitor monitor;
+    private Notification.Builder builder;
 
     public aria2Service() {
         super("aria2 service");
     }
 
-    private static void killService() {
+    private void killService() {
         try {
             Runtime.getRuntime().exec("pkill aria2c");
             process.waitFor();
@@ -34,22 +36,21 @@ public class aria2Service extends IntentService {
         if (process != null)
             process.destroy();
 
-        if (monitor != null)
-            monitor.stop();
-
         if (handler != null)
             handler.onServerStopped();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(new Random().nextInt(100), new Notification.Builder(getBaseContext()).setContentTitle("aria2 service")
+        builder = new Notification.Builder(getBaseContext()).setContentTitle("aria2 service")
                 .setShowWhen(false)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(PendingIntent.getActivity(this, new Random().nextInt(), new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
-                .setContentText("aria2 is currently running").build());
+                .setContentText("aria2 is currently running");
+
+        startForeground(NOTIFICATION_ID, builder.build());
 
         onHandleIntent(intent);
         return START_STICKY;
@@ -84,12 +85,15 @@ public class aria2Service extends IntentService {
         if (handler != null)
             handler.onServerStarted(process.getInputStream(), process.getErrorStream());
 
-        monitor = new PerformanceMonitor(this);
+        monitor = new PerformanceMonitor(this, NOTIFICATION_ID, builder);
         new Thread(monitor).start();
     }
 
     @Override
     public void onDestroy() {
         killService();
+
+        if (monitor != null)
+            monitor.stop();
     }
 }
