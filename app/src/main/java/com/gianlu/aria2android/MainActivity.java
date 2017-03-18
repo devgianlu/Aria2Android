@@ -87,11 +87,16 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         final LoglineAdapter adapter = new LoglineAdapter(this, new ArrayList<LoglineItem>());
-        ((ListView) findViewById(R.id.main_logs)).setAdapter(adapter);
+        final ListView logs = (ListView) findViewById(R.id.main_logs);
+        final TextView noLogs = (TextView) findViewById(R.id.main_noLogs);
+        logs.setAdapter(adapter);
 
         aria2Service.handler = new IAria2() {
             @Override
             public void onServerStarted(InputStream in, InputStream err) {
+                noLogs.setVisibility(View.GONE);
+                logs.setVisibility(View.VISIBLE);
+
                 adapter.clear();
                 streamListener = new StreamListener(adapter, in, err);
                 adapter.addLine(LoglineItem.TYPE.INFO, getString(R.string.serverStarted));
@@ -112,16 +117,18 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        TextView version = ((TextView) findViewById(R.id.main_binVersion));
+        final TextView version = ((TextView) findViewById(R.id.main_binVersion));
         final CheckBox saveSession = (CheckBox) findViewById(R.id.options_saveSession);
         final CheckBox useConfig = (CheckBox) findViewById(R.id.options_useConfig);
         final EditText configFile = (EditText) findViewById(R.id.options_configFile);
         final CheckBox startAtBoot = (CheckBox) findViewById(R.id.options_startAtBoot);
-        ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
+        final ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
         final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
         final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
         final EditText rpcPort = (EditText) findViewById(R.id.options_rpcPort);
         final EditText rpcToken = (EditText) findViewById(R.id.options_rpcToken);
+        final CheckBox showPerformance = (CheckBox) findViewById(R.id.main_showPerformance);
+        final EditText updateDelay = (EditText) findViewById(R.id.main_updateDelay);
 
         version.setText(BinUtils.binVersion(this));
 
@@ -234,6 +241,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        showPerformance.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
+                preferences.edit()
+                        .putBoolean(Utils.PREF_SHOW_PERFORMANCE, b)
+                        .apply();
+
+                updateDelay.setEnabled(b);
+            }
+        });
+
+        updateDelay.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    int delay;
+                    try {
+                        delay = Integer.parseInt(updateDelay.getText().toString());
+                    } catch (Exception ex) {
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_DELAY, updateDelay.getText().toString());
+                        return;
+                    }
+
+                    if (delay > 0) {
+                        preferences.edit()
+                                .putInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, delay)
+                                .apply();
+                    } else {
+                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_DELAY, String.valueOf(delay));
+                    }
+                }
+            }
+        });
+
         outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
         saveSession.setChecked(preferences.getBoolean(Utils.PREF_SAVE_SESSION, true));
         useConfig.setChecked(preferences.getBoolean(Utils.PREF_USE_CONFIG, false));
@@ -241,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
         startAtBoot.setChecked(preferences.getBoolean(Utils.PREF_START_AT_BOOT, false));
         rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
         rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
+        showPerformance.setChecked(preferences.getBoolean(Utils.PREF_SHOW_PERFORMANCE, true));
+        updateDelay.setText(String.valueOf(preferences.getInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, 1)));
 
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -315,6 +358,11 @@ public class MainActivity extends AppCompatActivity {
                 startAtBoot.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
                 rpcPort.setEnabled(!isChecked);
+                showPerformance.setEnabled(!isChecked);
+                if (isChecked)
+                    updateDelay.setEnabled(false);
+                else
+                    updateDelay.setEnabled(showPerformance.isChecked());
             }
         });
 

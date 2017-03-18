@@ -1,9 +1,11 @@
 package com.gianlu.aria2android;
 
 import android.app.IntentService;
-import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 
 import com.gianlu.aria2android.aria2.IAria2;
 import com.gianlu.aria2android.aria2.aria2StartConfig;
@@ -18,7 +20,7 @@ public class aria2Service extends IntentService {
     private final int NOTIFICATION_ID = new Random().nextInt();
     private Process process;
     private PerformanceMonitor monitor;
-    private Notification.Builder builder;
+    private NotificationCompat.Builder builder;
 
     public aria2Service() {
         super("aria2 service");
@@ -36,13 +38,19 @@ public class aria2Service extends IntentService {
         if (process != null)
             process.destroy();
 
+        if (monitor != null)
+            monitor.stop();
+
         if (handler != null)
             handler.onServerStopped();
+
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NOTIFICATION_ID);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        builder = new Notification.Builder(getBaseContext()).setContentTitle("aria2 service")
+        builder = new NotificationCompat.Builder(getBaseContext())
+                .setContentTitle("aria2 service")
                 .setShowWhen(false)
                 .setAutoCancel(false)
                 .setOngoing(true)
@@ -85,15 +93,18 @@ public class aria2Service extends IntentService {
         if (handler != null)
             handler.onServerStarted(process.getInputStream(), process.getErrorStream());
 
-        monitor = new PerformanceMonitor(this, NOTIFICATION_ID, builder);
-        new Thread(monitor).start();
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Utils.PREF_SHOW_PERFORMANCE, true)) {
+            monitor = new PerformanceMonitor(
+                    this,
+                    PreferenceManager.getDefaultSharedPreferences(this).getInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, 1),
+                    NOTIFICATION_ID,
+                    builder);
+            new Thread(monitor).start();
+        }
     }
 
     @Override
     public void onDestroy() {
         killService();
-
-        if (monitor != null)
-            monitor.stop();
     }
 }

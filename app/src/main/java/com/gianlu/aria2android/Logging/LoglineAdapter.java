@@ -80,6 +80,7 @@ public class LoglineAdapter extends BaseAdapter {
         final LoglineItem item = getItem(position);
 
         TextView type = new TextView(context);
+        type.setPadding(0, 0, 8, 0);
         type.setTypeface(Typeface.DEFAULT_BOLD);
         switch (item.getType()) {
             case INFO:
@@ -104,7 +105,6 @@ public class LoglineAdapter extends BaseAdapter {
                 CommonUtils.UIToast(context, Utils.ToastMessages.COPIED_TO_CLIPBOARD);
             }
         });
-
 
         return linearLayout;
     }

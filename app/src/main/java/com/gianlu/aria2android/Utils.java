@@ -11,6 +11,8 @@ public class Utils {
     static final String PREF_RPC_PORT = "rpcPort";
     static final String PREF_RPC_TOKEN = "rpcToken";
     static final String PREF_SAVE_SESSION = "saveSession";
+    static final String PREF_SHOW_PERFORMANCE = "showPerformance";
+    static final String PREF_NOTIFICATION_UPDATE_DELAY = "updateDelay";
     static final String PREF_START_AT_BOOT = "startAtBoot";
     static final String PREF_USE_CONFIG = "useConfig";
     static final String PREF_CONFIG_FILE = "configFile";
@@ -51,5 +53,6 @@ public class Utils {
         public static final CommonUtils.ToastMessage UNEXPECTED_EXCEPTION = new CommonUtils.ToastMessage("Unexpected exception! Don't worry.", true);
         public static final CommonUtils.ToastMessage CONFIG_FILE_CANT_READ = new CommonUtils.ToastMessage("Selected config file doesn't exist!", false);
         public static final CommonUtils.ToastMessage CONFIG_FILE_NOT_FOUND = new CommonUtils.ToastMessage("Selected config file can't be read!", false);
+        public static final CommonUtils.ToastMessage INVALID_DELAY = new CommonUtils.ToastMessage("Invalid delay!", false);
     }
 }

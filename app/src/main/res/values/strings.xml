@@ -22,9 +22,6 @@
     <string name="aria2_notRunning">aria2 not running!</string>
     <string name="aria2_notRunningMessage">aria2 is not running. Opening Aria2App will probably result in a connection error.\nDo you want to start it anyway?</string>
     <string name="logs">Logs</string>
-    <string name="infoTag">INFO: </string>
-    <string name="warningTag">WARNING: </string>
-    <string name="errorTag">ERROR: </string>
     <string name="permissionRequest">Permission request</string>
     <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
     <string name="about_app">About application</string>
@@ -45,4 +42,9 @@
     <string name="startServiceAtBoot">Start service on system boot</string>
     <string name="useConfig">Use config file: </string>
     <string name="configFileHint">aria2 config file</string>
+    <string name="notification">Notification</string>
+    <string name="showPerformance">Show performance</string>
+    <string name="notificationUpdateDelay">Update delay:</string>
+    <string name="notificationUpdateDelayHint">1 sec</string>
+    <string name="noLogs">No logs!</string>
 </resources>
