@@ -53,13 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;
 
-    private static int getPort(EditText port) {
-        try {
-            return Integer.parseInt(port.getText().toString());
-        } catch (Exception ex) {
-            return 6800;
-        }
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
                                     useConfig.isChecked(),
                                     configFile.getText().toString(),
                                     saveSession.isChecked(),
-                                    getPort(outputPath),
+                                    Utils.getPort(outputPath),
                                     rpcToken.getText().toString())
                             ));
                 } else {
@@ -356,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
                     if (intent != null) {
                         startActivity(intent
                                 .putExtra("external", true)
-                                .putExtra("port", getPort(rpcPort))
+                                .putExtra("port", Utils.getPort(rpcPort))
                                 .putExtra("token", rpcToken.getText().toString()));
                     }
 
@@ -379,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
                                             .putExtra("external", true)
-                                            .putExtra("port", getPort(rpcPort))
+                                            .putExtra("port", Utils.getPort(rpcPort))
                                             .putExtra("token", rpcToken.getText().toString()));
                                 }
                             }).create().show();

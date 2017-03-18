@@ -11,12 +11,11 @@
     <string name="rpcPortInt">6800</string>
     <string name="rpcToken">Token:</string>
     <string name="rpcTokenHint">aria2</string>
-    <string name="aria2app_disclaimer">Now, to manage aria2 you can use any UI interface, such as Aria2App.</string>
+    <string name="aria2app_disclaimer">To manage aria2 you can use any UI interface, such as Aria2App.</string>
     <string name="openAria2App">Open Aria2App</string>
     <string name="aria2App_not_installed">Aria2App is not installed</string>
     <string name="aria2App_not_installed_message">Aria2App is not installed. Would you like to install it now?</string>
     <string name="options">Options</string>
-
     <string name="URL_releases">https://api.github.com/repos/aria2/aria2/releases</string>
     <string name="outputDir_hint">/storage/emulated/0/Download</string>
     <string name="saveSession">Save session</string>
@@ -28,7 +27,6 @@
     <string name="errorTag">ERROR: </string>
     <string name="permissionRequest">Permission request</string>
     <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
-
     <string name="about_app">About application</string>
     <string name="app_version">App version</string>
     <string name="developer">Developer: Gianlu (Report bugs or any suggestion)</string>
@@ -37,7 +35,6 @@
     <string name="others">Others</string>
     <string name="logsSummary">All application\'s log files</string>
     <string name="preferences">Preferences</string>
-
     <string name="tracking">Disable anonymous statistics</string>
     <string name="trackingOn">No statistics will be sent to the developer.</string>
     <string name="trackingOff">Statistics about the application behavior will be sent to the developer. (No personal data will be sent)</string>
@@ -46,7 +43,6 @@
     <string name="serverStarted">Server started!</string>
     <string name="changeBinVersion">Change bin version</string>
     <string name="startServiceAtBoot">Start service on system boot</string>
-    <string name="useConfig">Use config file</string>
-    <string name="configFile">Config file:</string>
+    <string name="useConfig">Use config file: </string>
     <string name="configFileHint">aria2 config file</string>
 </resources>

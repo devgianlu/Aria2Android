@@ -1,5 +1,7 @@
 package com.gianlu.aria2android;
 
+import android.widget.EditText;
+
 import com.gianlu.commonutils.CommonUtils;
 
 import java.util.Map;
@@ -24,6 +26,14 @@ public class Utils {
         }
 
         return extended;
+    }
+
+    public static int getPort(EditText port) {
+        try {
+            return Integer.parseInt(port.getText().toString());
+        } catch (Exception ex) {
+            return 6800;
+        }
     }
 
     public static class ToastMessages {
