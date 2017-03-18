@@ -16,6 +16,7 @@ public class aria2Service extends IntentService {
     public static final String CONFIG = "config";
     public static IAria2 handler;
     private static Process process;
+    private static PerformanceMonitor monitor;
 
     public aria2Service() {
         super("aria2 service");
@@ -32,6 +33,9 @@ public class aria2Service extends IntentService {
 
         if (process != null)
             process.destroy();
+
+        if (monitor != null)
+            monitor.stop();
 
         if (handler != null)
             handler.onServerStopped();
@@ -79,6 +83,9 @@ public class aria2Service extends IntentService {
 
         if (handler != null)
             handler.onServerStarted(process.getInputStream(), process.getErrorStream());
+
+        monitor = new PerformanceMonitor(this);
+        new Thread(monitor).start();
     }
 
     @Override

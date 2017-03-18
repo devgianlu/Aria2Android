@@ -46,7 +46,8 @@ class StreamListener implements Runnable {
                     }
                 }
             } catch (IOException ex) {
-                CommonUtils.logMe(adapter.getContext(), ex);
+                if (!_shouldStop)
+                    CommonUtils.logMe(adapter.getContext(), ex);
             }
         }
     }

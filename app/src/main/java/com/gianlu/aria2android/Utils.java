@@ -36,6 +36,7 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class ToastMessages {
         public static final CommonUtils.ToastMessage FAILED_RETRIEVING_RELEASES = new CommonUtils.ToastMessage("Failed retrieving releases!", true);
         public static final CommonUtils.ToastMessage FAILED_DOWNLOADING_BIN = new CommonUtils.ToastMessage("Failed downloading bin files!", true);
