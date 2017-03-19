@@ -25,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lines="1"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
             android:textSize="12sp" />
 
         <TextView
@@ -32,6 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lines="1"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
             android:textSize="12sp" />
 
         <LinearLayout
@@ -45,6 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:lines="1"
+                android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
                 android:textSize="12sp" />
 
             <TextView
@@ -52,6 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:lines="1"
+                android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
                 android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>

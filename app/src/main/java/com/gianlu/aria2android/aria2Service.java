@@ -45,6 +45,7 @@ public class aria2Service extends IntentService {
             handler.onServerStopped();
 
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NOTIFICATION_ID);
+        stopSelf();
     }
 
     @Override
@@ -106,5 +107,6 @@ public class aria2Service extends IntentService {
     @Override
     public void onDestroy() {
         killService();
+        super.onDestroy();
     }
 }

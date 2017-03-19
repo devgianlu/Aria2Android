@@ -8,6 +8,6 @@
     <bool name="ga_reportUncaughtExceptions">true</bool>
 
     <screenName name="com.gianlu.aria2android.MainActivity">Screen~Main</screenName>
-    <screenName name="com.gianlu.aria2android.LogsActivity">Screen~Logs</screenName>
+    <screenName name="com.gianlu.commonutils.LogsActivity">Screen~Logs</screenName>
     <screenName name="com.gianlu.aria2android.PreferencesActivity">Screen~Preferences</screenName>
 </resources>
