@@ -1,25 +1,28 @@
-package com.gianlu.aria2android.Google;
+package com.gianlu.aria2android;
 
 import android.app.Application;
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.gianlu.aria2android.BuildConfig;
-import com.gianlu.aria2android.R;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
-public class Analytics {
+import java.util.Map;
+
+public class ThisApplication extends Application {
     public static final String CATEGORY_USER_INPUT = "User input";
     public static final String CATEGORY_TIMING = "Timings";
     public static final String LABEL_SESSION_DURATION = "Session duration";
     public static final String ACTION_TURN_ON = "aria2 turned on";
     public static final String ACTION_TURN_OFF = "aria2 turned off";
     public static final String ACTION_OPENED_ARIA2APP = "Opened Aria2App";
-    private static Tracker tracker = null;
+    private static Tracker tracker;
 
-    public static Tracker getDefaultTracker(Application application) {
+    @NonNull
+    private static Tracker getTracker(Application application) {
         if (tracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(application.getApplicationContext());
             analytics.enableAutoActivityReports(application);
@@ -31,12 +34,17 @@ public class Analytics {
         return tracker;
     }
 
-    @Nullable
-    static Tracker getTracker() {
-        return tracker;
+    public static void sendAnalytics(Context context, @Nullable Map<String, String> map) {
+        if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean("a2_trackingDisable", false) && !BuildConfig.DEBUG)
+            if (tracker != null)
+                tracker.send(map);
     }
 
-    public static boolean isTrackingAllowed(Context context) {
-        return !PreferenceManager.getDefaultSharedPreferences(context).getBoolean("a2_trackingDisable", false) && !BuildConfig.DEBUG;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        FirebaseAnalytics.getInstance(this).setAnalyticsCollectionEnabled(!BuildConfig.DEBUG);
+        tracker = getTracker(this);
     }
 }

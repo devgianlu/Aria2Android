@@ -8,8 +8,8 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 8
-        versionName "1.4.1"
+        versionCode 9
+        versionName "1.4.2"
     }
     buildTypes {
         release {
@@ -23,11 +23,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:support-v4:25.2.0'
-    compile 'com.google.android.gms:play-services-analytics:10.2.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.google.android.gms:play-services-analytics:10.2.4'
     compile project(path: ':CommonUtils')
 }
-
 
 apply plugin: 'com.google.gms.google-services'

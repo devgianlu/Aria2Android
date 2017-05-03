@@ -27,8 +27,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.gianlu.aria2android.Google.Analytics;
-import com.gianlu.aria2android.Google.UncaughtExceptionHandler;
 import com.gianlu.aria2android.Logging.LoglineAdapter;
 import com.gianlu.aria2android.Logging.LoglineItem;
 import com.gianlu.aria2android.NetIO.AsyncRequest;
@@ -52,8 +50,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private StreamListener streamListener;
     private boolean isRunning;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -293,12 +289,10 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     preferences.edit().putLong("currentSessionStart", System.currentTimeMillis()).apply();
 
-                    if (Analytics.isTrackingAllowed(MainActivity.this))
-                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
-                                .setCategory(Analytics.CATEGORY_USER_INPUT)
-                                .setAction(Analytics.ACTION_TURN_ON)
-                                .build());
-
+                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                            .setAction(ThisApplication.ACTION_TURN_ON)
+                            .build());
 
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.WRITE_STORAGE_DENIED);
@@ -333,27 +327,23 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     stopService(new Intent(MainActivity.this, aria2Service.class));
 
-                    if (Analytics.isTrackingAllowed(MainActivity.this)) {
-                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
-                                .setCategory(Analytics.CATEGORY_USER_INPUT)
-                                .setAction(Analytics.ACTION_TURN_OFF)
-                                .build());
+                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                            .setAction(ThisApplication.ACTION_TURN_OFF)
+                            .build());
 
-                        if (preferences.getLong("currentSessionStart", -1) != -1)
-                            Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.TimingBuilder()
-                                    .setCategory(Analytics.CATEGORY_TIMING)
-                                    .setLabel(Analytics.LABEL_SESSION_DURATION)
-                                    .setValue(System.currentTimeMillis() - preferences.getLong("currentSessionStart", -1))
-                                    .build());
-                    }
+                    if (preferences.getLong("currentSessionStart", -1) != -1)
+                        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
+                                .setCategory(ThisApplication.CATEGORY_TIMING)
+                                .setLabel(ThisApplication.LABEL_SESSION_DURATION)
+                                .setValue(System.currentTimeMillis() - preferences.getLong("currentSessionStart", -1))
+                                .build());
                 }
 
                 outputPath.setEnabled(!isChecked);
                 useConfig.setEnabled(!isChecked);
-                if (isChecked)
-                    configFile.setEnabled(false);
-                else
-                    configFile.setEnabled(useConfig.isChecked());
+                if (isChecked) configFile.setEnabled(false);
+                else configFile.setEnabled(useConfig.isChecked());
                 saveSession.setEnabled(!isChecked);
                 startAtBoot.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
@@ -402,11 +392,10 @@ public class MainActivity extends AppCompatActivity {
                                 .putExtra("token", rpcToken.getText().toString()));
                     }
 
-                    if (Analytics.isTrackingAllowed(MainActivity.this))
-                        Analytics.getDefaultTracker(getApplication()).send(new HitBuilders.EventBuilder()
-                                .setCategory(Analytics.CATEGORY_USER_INPUT)
-                                .setAction(Analytics.ACTION_OPENED_ARIA2APP)
-                                .build());
+                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                            .setAction(ThisApplication.ACTION_OPENED_ARIA2APP)
+                            .build());
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle(R.string.aria2_notRunning)

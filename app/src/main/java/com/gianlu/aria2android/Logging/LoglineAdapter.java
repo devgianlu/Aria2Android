@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.SuperTextView;
 
 import java.util.List;
 
@@ -97,7 +98,7 @@ public class LoglineAdapter extends BaseAdapter {
                 break;
         }
         linearLayout.addView(type);
-        linearLayout.addView(CommonUtils.fastTextView(context, item.getMessage()));
+        linearLayout.addView(new SuperTextView(context, item.getMessage()));
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
