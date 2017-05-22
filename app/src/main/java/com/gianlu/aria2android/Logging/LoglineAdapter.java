@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.SuperTextView;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class LoglineAdapter extends BaseAdapter {
     }
 
     private void addLine(LoglineItem line) {
-        CommonUtils.logMe(context, line.getMessage(), line.getType() == LoglineItem.TYPE.ERROR);
+        Logging.logMe(context, line.getMessage(), line.getType() == LoglineItem.TYPE.ERROR);
         objs.add(line);
         context.runOnUiThread(new Runnable() {
             @Override

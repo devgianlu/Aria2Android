@@ -6,6 +6,7 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +51,7 @@ class PerformanceMonitor implements Runnable {
             }
         } catch (IOException ex) {
             stop();
-            CommonUtils.logMe(context, ex);
+            Logging.logMe(context, ex);
             manager.cancel(NOTIFICATION_ID);
         }
     }
@@ -63,7 +64,7 @@ class PerformanceMonitor implements Runnable {
         layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + CommonUtils.timeFormatter((System.currentTimeMillis() - startTime) / 1000));
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + pid);
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + cpuUsage + "%");
-        layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024));
+        layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
         manager.notify(NOTIFICATION_ID, builder.build());
     }

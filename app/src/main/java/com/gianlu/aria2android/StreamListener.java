@@ -2,7 +2,7 @@ package com.gianlu.aria2android;
 
 import com.gianlu.aria2android.Logging.LoglineAdapter;
 import com.gianlu.aria2android.Logging.LoglineItem;
-import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,7 +47,7 @@ class StreamListener implements Runnable {
                 }
             } catch (IOException ex) {
                 if (!_shouldStop)
-                    CommonUtils.logMe(adapter.getContext(), ex);
+                    Logging.logMe(adapter.getContext(), ex);
             }
         }
     }

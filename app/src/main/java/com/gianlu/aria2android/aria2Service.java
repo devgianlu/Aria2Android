@@ -67,6 +67,7 @@ public class aria2Service extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (intent == null) return;
         aria2StartConfig config = (aria2StartConfig) intent.getSerializableExtra(CONFIG);
 
         String binPath = new File(getFilesDir(), "aria2c").getAbsolutePath();
