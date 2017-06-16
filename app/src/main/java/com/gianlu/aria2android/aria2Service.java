@@ -29,20 +29,14 @@ public class aria2Service extends IntentService {
     private void killService() {
         try {
             Runtime.getRuntime().exec("pkill aria2c");
+            process.destroy();
             process.waitFor();
         } catch (IOException | InterruptedException ex) {
-            if (handler != null)
-                handler.onException(ex);
+            if (handler != null) handler.onException(ex);
         }
 
-        if (process != null)
-            process.destroy();
-
-        if (monitor != null)
-            monitor.stop();
-
-        if (handler != null)
-            handler.onServerStopped();
+        if (monitor != null) monitor.stop();
+        if (handler != null) handler.onServerStopped();
 
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NOTIFICATION_ID);
         stopSelf();
@@ -86,8 +80,7 @@ public class aria2Service extends IntentService {
         try {
             process = Runtime.getRuntime().exec(command);
         } catch (IOException ex) {
-            if (handler != null)
-                handler.onException(ex);
+            if (handler != null) handler.onException(ex);
             stopSelf();
             return;
         }
@@ -105,9 +98,10 @@ public class aria2Service extends IntentService {
         }
     }
 
+
     @Override
     public void onDestroy() {
-        killService();
         super.onDestroy();
+        killService();
     }
 }

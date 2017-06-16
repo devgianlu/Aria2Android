@@ -348,10 +348,8 @@ public class MainActivity extends AppCompatActivity {
                 rpcToken.setEnabled(!isChecked);
                 rpcPort.setEnabled(!isChecked);
                 showPerformance.setEnabled(!isChecked);
-                if (isChecked)
-                    updateDelay.setEnabled(false);
-                else
-                    updateDelay.setEnabled(showPerformance.isChecked());
+                if (isChecked) updateDelay.setEnabled(false);
+                else updateDelay.setEnabled(showPerformance.isChecked());
             }
         });
 
