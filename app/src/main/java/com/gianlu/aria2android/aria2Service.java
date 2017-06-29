@@ -29,8 +29,10 @@ public class aria2Service extends IntentService {
     private void killService() {
         try {
             Runtime.getRuntime().exec("pkill aria2c");
-            process.destroy();
-            process.waitFor();
+            if (process != null) {
+                process.destroy();
+                process.waitFor();
+            }
         } catch (IOException | InterruptedException ex) {
             if (handler != null) handler.onException(ex);
         }
@@ -89,8 +91,7 @@ public class aria2Service extends IntentService {
             handler.onServerStarted(process.getInputStream(), process.getErrorStream());
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Utils.PREF_SHOW_PERFORMANCE, true)) {
-            monitor = new PerformanceMonitor(
-                    this,
+            monitor = new PerformanceMonitor(this,
                     PreferenceManager.getDefaultSharedPreferences(this).getInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, 1),
                     NOTIFICATION_ID,
                     builder);

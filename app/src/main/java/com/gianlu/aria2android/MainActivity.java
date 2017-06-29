@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
 
         if (!BinUtils.binAvailable(this)) {
-            downloadBinDialog();
+            downloadBinDialog(true);
             return;
         }
 
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void downloadBinDialog() {
+    private void downloadBinDialog(final boolean compulsory) {
         final ProgressDialog pd = CommonUtils.fastIndeterminateProgressDialog(this, R.string.loading_releases);
         final ProgressDialog pdd = CommonUtils.fastIndeterminateProgressDialog(MainActivity.this, R.string.downloading_bin);
 
@@ -436,7 +436,6 @@ public class MainActivity extends AppCompatActivity {
 
                     for (int c = 0; c < jReleases.length(); c++) {
                         JSONObject _release = jReleases.getJSONObject(c);
-
                         releasesList.add(_release.optString("name"));
                     }
                 } catch (JSONException ex) {
@@ -466,6 +465,8 @@ public class MainActivity extends AppCompatActivity {
                                     String downloadURL;
                                     try {
                                         downloadURL = new JSONObject(response).getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
+
+                                        BinUtils.delete(MainActivity.this);
 
                                         CommonUtils.showDialog(MainActivity.this, pdd);
                                         BinUtils.downloadBin(new URL(downloadURL), new BinUtils.IDownload() {
@@ -507,8 +508,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 })
-                        .setCancelable(false)
+                        .setCancelable(!compulsory)
                         .setTitle(R.string.whichRelease);
+
+                if (!compulsory) builder.setNegativeButton(android.R.string.cancel, null);
 
                 CommonUtils.showDialog(MainActivity.this, builder);
             }
@@ -534,10 +537,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, PreferencesActivity.class));
                 break;
             case R.id.mainMenu_changeBin:
-                if (BinUtils.delete(this))
-                    downloadBinDialog();
-                else
-                    CommonUtils.UIToast(this, Utils.ToastMessages.CANT_DELETE_BIN);
+                downloadBinDialog(false);
                 break;
         }
         return true;

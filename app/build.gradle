@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion "26.0.0"
 
     defaultConfig {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 11
-        versionName "1.4.4"
+        versionCode 12
+        versionName "1.4.5"
     }
     buildTypes {
         release {

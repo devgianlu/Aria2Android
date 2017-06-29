@@ -28,7 +28,7 @@ class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
                     .setFatal(true)
                     .build());
 
-            UncaughtExceptionActivity.startActivity(context, context.getString(R.string.app_name));
+            UncaughtExceptionActivity.startActivity(context, context.getString(R.string.app_name), throwable);
         }
     }
 }

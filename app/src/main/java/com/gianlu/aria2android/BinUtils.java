@@ -76,9 +76,10 @@ class BinUtils {
         return file.exists() && !file.isDirectory();
     }
 
-    static boolean delete(Context context) {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    static void delete(Context context) {
         File file = new File(context.getFilesDir(), "aria2c");
-        return file.delete();
+        file.delete();
     }
 
     static String binVersion(Context context) {
