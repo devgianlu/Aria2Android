@@ -39,9 +39,6 @@
             android:enabled="true" />
 
         <!-- Preferences Activity -->
-        <activity
-            android:name=".PreferencesActivity"
-            android:parentActivityName=".MainActivity" />
 
         <!-- Logs Activity -->
         <activity

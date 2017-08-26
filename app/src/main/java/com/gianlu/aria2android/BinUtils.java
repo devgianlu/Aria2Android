@@ -120,9 +120,6 @@ public class BinUtils {
                 .append(" --rpc-listen-port=").append(config.rpcPort)
                 .append(" --rpc-secret=").append(config.rpcToken);
 
-        if (config.useConfig) builder.append(" --conf-path=").append(config.configFile);
-        else builder.append(" --no-conf=true");
-
         if (config.saveSession)
             builder.append(" --save-session=").append(sessionPath).append(" --save-session-interval=10");
         else builder.append(" ");

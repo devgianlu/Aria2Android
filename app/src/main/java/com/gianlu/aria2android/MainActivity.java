@@ -83,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
         final TextView version = findViewById(R.id.main_binVersion);
         final CheckBox saveSession = findViewById(R.id.options_saveSession);
-        final CheckBox useConfig = findViewById(R.id.options_useConfig);
-        final SuperEditText configFile = findViewById(R.id.options_configFile);
         final CheckBox startAtBoot = findViewById(R.id.options_startAtBoot);
         final ToggleButton toggleServer = findViewById(R.id.main_toggleServer);
         final Button openAria2App = findViewById(R.id.main_openAria2App);
@@ -107,33 +105,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                 Prefs.putBoolean(MainActivity.this, PKeys.START_AT_BOOT, b);
-            }
-        });
-
-        useConfig.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                Prefs.putBoolean(MainActivity.this, PKeys.USE_CONFIG, b);
-                configFile.setEnabled(b);
-                if (!b) configFile.setErrorEnabled(false);
-            }
-        });
-
-        configFile.setValidator(new SuperEditText.Validator() {
-            @Override
-            public void validate(String text) throws SuperEditText.InvalidInputException {
-                if (!useConfig.isChecked()) return;
-
-                File file = new File(text);
-                if (file.exists() && file.isFile()) {
-                    if (file.canRead()) {
-                        Prefs.putString(MainActivity.this, PKeys.CONFIG_FILE, file.getAbsolutePath());
-                    } else {
-                        throw new SuperEditText.InvalidInputException(R.string.cannotReadConfigFile);
-                    }
-                } else {
-                    throw new SuperEditText.InvalidInputException(R.string.configFileDoesNotExist);
-                }
             }
         });
 
@@ -203,9 +174,6 @@ public class MainActivity extends AppCompatActivity {
 
         outputPath.setText(Prefs.getString(this, PKeys.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
         saveSession.setChecked(Prefs.getBoolean(this, PKeys.SAVE_SESSION, true));
-        useConfig.setChecked(Prefs.getBoolean(this, PKeys.USE_CONFIG, false));
-        configFile.setText(Prefs.getString(this, PKeys.CONFIG_FILE, ""));
-        configFile.setEnabled(useConfig.isChecked());
         startAtBoot.setChecked(Prefs.getBoolean(this, PKeys.START_AT_BOOT, false));
         rpcPort.setText(String.valueOf(Prefs.getInt(this, PKeys.RPC_PORT, 6800)));
         rpcToken.setText(Prefs.getString(this, PKeys.RPC_TOKEN, "aria2"));
@@ -221,9 +189,6 @@ public class MainActivity extends AppCompatActivity {
                 else stopService();
 
                 outputPath.setEnabled(!isChecked);
-                useConfig.setEnabled(!isChecked);
-                if (isChecked) configFile.setEnabled(false);
-                else configFile.setEnabled(useConfig.isChecked());
                 saveSession.setEnabled(!isChecked);
                 startAtBoot.setEnabled(!isChecked);
                 rpcToken.setEnabled(!isChecked);
@@ -294,9 +259,11 @@ public class MainActivity extends AppCompatActivity {
         if (Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1) != -1) {
             ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
                     .setCategory(ThisApplication.CATEGORY_TIMING)
-                    .setLabel(ThisApplication.LABEL_SESSION_DURATION)
+                    .setVariable(ThisApplication.LABEL_SESSION_DURATION)
                     .setValue(System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1))
                     .build());
+
+            Prefs.putLong(this, PKeys.CURRENT_SESSION_START, -1);
         }
     }
 

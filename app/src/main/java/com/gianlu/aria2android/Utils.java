@@ -12,7 +12,7 @@ public class Utils {
         StringBuilder extended = new StringBuilder();
 
         for (Map.Entry<String, String> entry : options.entrySet()) {
-            if (entry.getKey().isEmpty() || entry.getValue().isEmpty()) continue;
+            if (entry.getKey().isEmpty()) continue;
             extended.append(" --").append(entry.getKey()).append("=").append(entry.getValue());
         }
 

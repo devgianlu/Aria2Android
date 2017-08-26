@@ -1,0 +1,10 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:icon="@drawable/ic_announcement_black_24dp"
+        android:title="@string/logs" />
+
+    <header
+        android:fragment="com.gianlu.aria2android.PreferencesActivity$AboutFragment"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/about_app" />
+</preference-headers>

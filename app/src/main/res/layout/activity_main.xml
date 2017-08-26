@@ -53,26 +53,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/saveSession" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <CheckBox
-                    android:id="@+id/options_useConfig"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/useConfig" />
-
-                <com.gianlu.aria2android.SuperEditText
-                    android:id="@+id/options_configFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/configFile" />
-            </LinearLayout>
-
             <CheckBox
                 android:id="@+id/options_startAtBoot"
                 android:layout_width="match_parent"

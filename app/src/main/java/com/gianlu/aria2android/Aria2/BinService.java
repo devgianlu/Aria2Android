@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -39,23 +38,22 @@ public class BinService extends IntentService implements StreamListener.IStreamL
             Runtime.getRuntime().exec("pkill aria2c");
             process.waitFor();
         } catch (IOException | InterruptedException ex) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("ex", ex);
-            dispatchAction(Action.SERVER_EX, bundle);
+            dispatchAction(Action.SERVER_EX, ex, null);
         }
 
         if (process != null) process.destroy();
         if (monitor != null) monitor.stopSafe();
         if (streamListener != null) streamListener.stopSafe();
-        dispatchAction(Action.SERVER_STOP, null);
+        dispatchAction(Action.SERVER_STOP, null, null);
 
         manager.cancel(NOTIFICATION_ID);
         stopSelf();
     }
 
-    private void dispatchAction(Action action, @Nullable Bundle extras) {
+    private void dispatchAction(Action action, @Nullable Throwable ex, @Nullable Logging.LogLine msg) {
         Intent intent = new Intent(action.toString());
-        if (extras != null) intent.putExtras(extras);
+        if (ex != null) intent.putExtra("ex", ex);
+        if (msg != null) intent.putExtra("msg", msg);
         LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
     }
 
@@ -82,16 +80,14 @@ public class BinService extends IntentService implements StreamListener.IStreamL
         try {
             process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, (StartConfig) intent.getSerializableExtra(CONFIG)));
         } catch (IOException ex) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("ex", ex);
-            dispatchAction(Action.SERVER_EX, bundle);
+            dispatchAction(Action.SERVER_EX, ex, null);
             stopSelf();
             return;
         }
 
         streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
         streamListener.start();
-        dispatchAction(Action.SERVER_START, null);
+        dispatchAction(Action.SERVER_START, null, null);
 
         if (Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true)) {
             monitor = new PerformanceMonitor(this, manager, builder);
@@ -107,9 +103,7 @@ public class BinService extends IntentService implements StreamListener.IStreamL
 
     @Override
     public void onNewLogLine(Logging.LogLine line) {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("msg", line);
-        dispatchAction(Action.SERVER_MSG, bundle);
+        dispatchAction(Action.SERVER_MSG, null, line);
     }
 
     public enum Action {
