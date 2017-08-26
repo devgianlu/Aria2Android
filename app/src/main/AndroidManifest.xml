@@ -39,6 +39,9 @@
             android:enabled="true" />
 
         <!-- Preferences Activity -->
+        <activity
+            android:name=".PreferencesActivity"
+            android:parentActivityName=".MainActivity" />
 
         <!-- Logs Activity -->
         <activity
@@ -48,14 +51,20 @@
         <!-- Download bin Activity -->
         <activity android:name=".DownloadBinActivity" />
 
+        <!-- Custom options editor Activity -->
+        <activity
+            android:name=".ConfigEditorActivity"
+            android:parentActivityName=".MainActivity" />
+
         <!-- Boot completed receiver -->
         <receiver
             android:name=".BootCompletedReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>
+
 </manifest>

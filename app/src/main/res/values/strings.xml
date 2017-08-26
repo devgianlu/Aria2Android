@@ -56,4 +56,16 @@
     <string name="rpcToken">RPC token</string>
     <string name="updateInterval">Update interval (sec)</string>
     <string name="changeBinVersion_message">Are you sure you want to change the bin version?</string>
+    <string name="customOptions">Custom options</string>
+    <string name="done">Done</string>
+    <string name="unsavedChanges">There are unsaved changes</string>
+    <string name="unsavedChanges_message">Some changes you made to the configuration file may have not been saved. Do you wan\'t to save them before exiting?</string>
+    <string name="importConfig">Import config</string>
+    <string name="fileNotFound">The selected file couldn\'t be found!</string>
+    <string name="cannotImport">Cannot import the selected file!</string>
+    <string name="failedSavingCustomOptions">Failed saving custom options!</string>
+    <string name="updatedApp_importedConfig">Imported config file</string>
+    <string name="updatedApp_importedConfig_message">This version of the app introduced a new feature: the custom options editor. Your config file has been imported here.</string>
+    <string name="failedLoading">Failed loading!</string>
+    <string name="failedLoadingOptions">Failed loading custom options!</string>
 </resources>

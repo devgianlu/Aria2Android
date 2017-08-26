@@ -34,6 +34,8 @@ import com.gianlu.commonutils.Prefs;
 import com.gianlu.commonutils.Toaster;
 import com.google.android.gms.analytics.HitBuilders;
 
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,6 +93,13 @@ public class MainActivity extends AppCompatActivity {
         final SuperEditText rpcToken = findViewById(R.id.options_rpcToken);
         final CheckBox showPerformance = findViewById(R.id.main_showPerformance);
         final SuperEditText updateDelay = findViewById(R.id.main_updateDelay);
+        final Button customOptions = findViewById(R.id.main_customOptions);
+        customOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class));
+            }
+        });
 
         version.setText(BinUtils.binVersion(this));
 
@@ -185,17 +194,21 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isRunning = isChecked;
 
-                if (isChecked) startService();
-                else stopService();
+                boolean successful;
+                if (isChecked) successful = startService();
+                else successful = stopService();
 
-                outputPath.setEnabled(!isChecked);
-                saveSession.setEnabled(!isChecked);
-                startAtBoot.setEnabled(!isChecked);
-                rpcToken.setEnabled(!isChecked);
-                rpcPort.setEnabled(!isChecked);
-                showPerformance.setEnabled(!isChecked);
-                if (isChecked) updateDelay.setEnabled(false);
-                else updateDelay.setEnabled(showPerformance.isChecked());
+                if (successful) {
+                    outputPath.setEnabled(!isChecked);
+                    customOptions.setEnabled(!isChecked);
+                    saveSession.setEnabled(!isChecked);
+                    startAtBoot.setEnabled(!isChecked);
+                    rpcToken.setEnabled(!isChecked);
+                    rpcPort.setEnabled(!isChecked);
+                    showPerformance.setEnabled(!isChecked);
+                    if (isChecked) updateDelay.setEnabled(false);
+                    else updateDelay.setEnabled(showPerformance.isChecked());
+                }
             }
         });
 
@@ -209,9 +222,18 @@ public class MainActivity extends AppCompatActivity {
                 openAria2App();
             }
         });
+
+        // Backward compatibility
+        if (Prefs.getBoolean(this, PKeys.DEPRECATED_USE_CONFIG, false)) {
+            File file = new File(Prefs.getString(this, PKeys.DEPRECATED_CONFIG_FILE, ""));
+            if (file.exists() && file.isFile() && file.canRead()) {
+                startActivity(new Intent(this, ConfigEditorActivity.class)
+                        .putExtra("import", file.getAbsolutePath()));
+            }
+        }
     }
 
-    private void startService() {
+    private boolean startService() {
         Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
         ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
                 .setCategory(ThisApplication.CATEGORY_USER_INPUT)
@@ -220,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Toaster.show(MainActivity.this, Utils.Messages.WRITE_STORAGE_DENIED);
-            return;
+            return false;
         }
 
         File sessionFile = new File(getFilesDir(), "session");
@@ -228,11 +250,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (!sessionFile.createNewFile()) {
                     Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE);
-                    return;
+                    return false;
                 }
             } catch (IOException ex) {
                 Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE, ex);
-                return;
+                return false;
             }
         }
 
@@ -243,11 +265,19 @@ public class MainActivity extends AppCompatActivity {
         receiver = new ServiceBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
 
-        startService(new Intent(MainActivity.this, BinService.class)
-                .putExtra(BinService.CONFIG, StartConfig.fromPrefs(this)));
+        try {
+            startService(new Intent(MainActivity.this, BinService.class)
+                    .putExtra(BinService.CONFIG, StartConfig.fromPrefs(this)));
+
+            return true;
+        } catch (JSONException ex) {
+            Toaster.show(this, Utils.Messages.FAILED_LOADING_OPTIONS, ex);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            return false;
+        }
     }
 
-    private void stopService() {
+    private boolean stopService() {
         stopService(new Intent(MainActivity.this, BinService.class));
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
 
@@ -265,6 +295,8 @@ public class MainActivity extends AppCompatActivity {
 
             Prefs.putLong(this, PKeys.CURRENT_SESSION_START, -1);
         }
+
+        return true;
     }
 
     private void installAria2App() {

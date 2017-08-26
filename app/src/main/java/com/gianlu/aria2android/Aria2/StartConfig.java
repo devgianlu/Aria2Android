@@ -4,7 +4,11 @@ import android.content.Context;
 import android.os.Environment;
 
 import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.Prefs;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,9 +28,11 @@ public class StartConfig implements Serializable {
         this.rpcToken = rpcToken;
     }
 
-    public static StartConfig fromPrefs(Context context) {
+    public static StartConfig fromPrefs(Context context) throws JSONException {
+        HashMap<String, String> options = new HashMap<>();
+        Utils.toMap(new JSONObject(Prefs.getBase64String(context, PKeys.CUSTOM_OPTIONS, "{}")), options);
         return new StartConfig(Prefs.getString(context, PKeys.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()),
-                null, // TODO: Config file editor
+                options,
                 Prefs.getBoolean(context, PKeys.SAVE_SESSION, true),
                 Prefs.getInt(context, PKeys.RPC_PORT, 6800),
                 Prefs.getString(context, PKeys.RPC_TOKEN, "aria2"));

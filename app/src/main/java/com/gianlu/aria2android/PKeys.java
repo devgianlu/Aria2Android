@@ -10,7 +10,10 @@ public enum PKeys implements Prefs.PrefKey {
     SAVE_SESSION("saveSession"),
     NOTIFICATION_UPDATE_DELAY("updateDelay"),
     START_AT_BOOT("startAtBoot"),
-    CURRENT_SESSION_START("currentSessionStart");
+    CURRENT_SESSION_START("currentSessionStart"),
+    CUSTOM_OPTIONS("customOptions"),
+    DEPRECATED_USE_CONFIG("useConfig"),
+    DEPRECATED_CONFIG_FILE("configFile");
 
     private final String key;
 
