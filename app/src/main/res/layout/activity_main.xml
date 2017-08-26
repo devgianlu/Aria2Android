@@ -8,10 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/main_binVersion"
@@ -44,24 +41,11 @@
             android:orientation="vertical"
             android:paddingStart="16dp">
 
-            <LinearLayout
+            <com.gianlu.aria2android.SuperEditText
+                android:id="@+id/options_outputPath"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/outputDir" />
-
-                <EditText
-                    android:id="@+id/options_outputPath"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/outputDir_hint"
-                    android:inputType="textUri" />
-            </LinearLayout>
+                android:hint="@string/outputPath" />
 
             <CheckBox
                 android:id="@+id/options_saveSession"
@@ -72,6 +56,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <CheckBox
@@ -81,14 +66,11 @@
                     android:layout_marginEnd="4dp"
                     android:text="@string/useConfig" />
 
-                <EditText
+                <com.gianlu.aria2android.SuperEditText
                     android:id="@+id/options_configFile"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:enabled="false"
-                    android:hint="@string/configFileHint"
-                    android:inputType="textUri" />
+                    android:hint="@string/configFile" />
             </LinearLayout>
 
             <CheckBox
@@ -117,46 +99,25 @@
                 android:layout_height="wrap_content"
                 android:text="@string/rpcDisclaimer" />
 
-            <LinearLayout
+            <com.gianlu.aria2android.SuperEditText
+                android:id="@+id/options_rpcPort"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/rpcPort" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/rpcPort" />
-
-                <EditText
-                    android:id="@+id/options_rpcPort"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/rpcPortInt"
-                    android:inputType="number" />
-            </LinearLayout>
-
-            <LinearLayout
+            <com.gianlu.aria2android.SuperEditText
+                android:id="@+id/options_rpcToken"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/rpcToken" />
-
-                <EditText
-                    android:id="@+id/options_rpcToken"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/rpcTokenHint"
-                    android:inputType="textVisiblePassword" />
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/rpcToken" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="4dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -195,24 +156,11 @@
                 android:layout_height="wrap_content"
                 android:text="@string/showPerformance" />
 
-            <LinearLayout
+            <com.gianlu.aria2android.SuperEditText
+                android:id="@+id/main_updateDelay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/notificationUpdateDelay" />
-
-                <EditText
-                    android:id="@+id/main_updateDelay"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/notificationUpdateDelayHint"
-                    android:inputType="number" />
-            </LinearLayout>
+                android:hint="@string/updateInterval" />
         </LinearLayout>
 
         <TextView
@@ -225,21 +173,21 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="wrap_content"
+            android:minHeight="200dp">
 
             <TextView
                 android:id="@+id/main_noLogs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="center"
+                android:layout_marginTop="48dp"
                 android:text="@string/noLogs"
                 android:textAlignment="center" />
 
             <ListView
                 android:id="@+id/main_logs"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:visibility="gone"
                 tools:ignore="NestedScrolling" />
         </FrameLayout>

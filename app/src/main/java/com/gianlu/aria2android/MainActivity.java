@@ -2,63 +2,57 @@ package com.gianlu.aria2android;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.gianlu.aria2android.Logging.LoglineAdapter;
-import com.gianlu.aria2android.Logging.LoglineItem;
-import com.gianlu.aria2android.NetIO.AsyncRequest;
-import com.gianlu.aria2android.NetIO.IResponse;
-import com.gianlu.aria2android.aria2.IAria2;
-import com.gianlu.aria2android.aria2.aria2StartConfig;
+import com.gianlu.aria2android.Aria2.BinService;
+import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Toaster;
 import com.google.android.gms.analytics.HitBuilders;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private StreamListener streamListener;
+    private final static int WRITE_PERMISSION_CODE = 6745;
     private boolean isRunning;
+    private ServiceBroadcastReceiver receiver;
+    private Logging.LogLineAdapter adapter;
+    private ListView logs;
+    private TextView noLogs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-
         if (!BinUtils.binAvailable(this)) {
-            downloadBinDialog(true);
+            startActivity(new Intent(this, DownloadBinActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
             return;
         }
 
@@ -66,278 +60,165 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                new AlertDialog.Builder(this)
+                AlertDialog.Builder builder = new AlertDialog.Builder(this)
                         .setTitle(R.string.permissionRequest)
                         .setMessage(R.string.writeStorageMessage)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
                             }
-                        }).create().show();
+                        });
+
+                CommonUtils.showDialog(this, builder);
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
             }
         }
 
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final LoglineAdapter adapter = new LoglineAdapter(this, new ArrayList<LoglineItem>());
-        final ListView logs = (ListView) findViewById(R.id.main_logs);
-        final TextView noLogs = (TextView) findViewById(R.id.main_noLogs);
+        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>());
+        logs = findViewById(R.id.main_logs);
+        noLogs = findViewById(R.id.main_noLogs);
         logs.setAdapter(adapter);
 
-        aria2Service.handler = new IAria2() {
-            @Override
-            public void onServerStarted(InputStream in, InputStream err) {
-                noLogs.setVisibility(View.GONE);
-                logs.setVisibility(View.VISIBLE);
-
-                adapter.clear();
-                streamListener = new StreamListener(adapter, in, err);
-                adapter.addLine(LoglineItem.TYPE.INFO, getString(R.string.serverStarted));
-                new Thread(streamListener).start();
-            }
-
-            @Override
-            public void onException(Exception ex) {
-                StreamListener.stop();
-                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.UNEXPECTED_EXCEPTION, ex);
-                adapter.addLine(LoglineItem.TYPE.ERROR, getString(R.string.serverException, ex.getMessage()));
-            }
-
-            @Override
-            public void onServerStopped() {
-                StreamListener.stop();
-                adapter.addLine(LoglineItem.TYPE.INFO, getString(R.string.serverStopped));
-            }
-        };
-
-        final TextView version = ((TextView) findViewById(R.id.main_binVersion));
-        final CheckBox saveSession = (CheckBox) findViewById(R.id.options_saveSession);
-        final CheckBox useConfig = (CheckBox) findViewById(R.id.options_useConfig);
-        final EditText configFile = (EditText) findViewById(R.id.options_configFile);
-        final CheckBox startAtBoot = (CheckBox) findViewById(R.id.options_startAtBoot);
-        final ToggleButton toggleServer = (ToggleButton) findViewById(R.id.main_toggleServer);
-        final Button openAria2App = (Button) findViewById(R.id.main_openAria2App);
-        final EditText outputPath = (EditText) findViewById(R.id.options_outputPath);
-        final EditText rpcPort = (EditText) findViewById(R.id.options_rpcPort);
-        final EditText rpcToken = (EditText) findViewById(R.id.options_rpcToken);
-        final CheckBox showPerformance = (CheckBox) findViewById(R.id.main_showPerformance);
-        final EditText updateDelay = (EditText) findViewById(R.id.main_updateDelay);
+        final TextView version = findViewById(R.id.main_binVersion);
+        final CheckBox saveSession = findViewById(R.id.options_saveSession);
+        final CheckBox useConfig = findViewById(R.id.options_useConfig);
+        final SuperEditText configFile = findViewById(R.id.options_configFile);
+        final CheckBox startAtBoot = findViewById(R.id.options_startAtBoot);
+        final ToggleButton toggleServer = findViewById(R.id.main_toggleServer);
+        final Button openAria2App = findViewById(R.id.main_openAria2App);
+        final SuperEditText outputPath = findViewById(R.id.options_outputPath);
+        final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
+        final SuperEditText rpcToken = findViewById(R.id.options_rpcToken);
+        final CheckBox showPerformance = findViewById(R.id.main_showPerformance);
+        final SuperEditText updateDelay = findViewById(R.id.main_updateDelay);
 
         version.setText(BinUtils.binVersion(this));
 
         saveSession.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                preferences.edit()
-                        .putBoolean(Utils.PREF_SAVE_SESSION, b)
-                        .apply();
+                Prefs.putBoolean(MainActivity.this, PKeys.SAVE_SESSION, b);
             }
         });
 
         startAtBoot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                preferences.edit()
-                        .putBoolean(Utils.PREF_START_AT_BOOT, b)
-                        .apply();
+                Prefs.putBoolean(MainActivity.this, PKeys.START_AT_BOOT, b);
             }
         });
 
         useConfig.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                preferences.edit()
-                        .putBoolean(Utils.PREF_USE_CONFIG, b)
-                        .apply();
-
+                Prefs.putBoolean(MainActivity.this, PKeys.USE_CONFIG, b);
                 configFile.setEnabled(b);
+                if (!b) configFile.setErrorEnabled(false);
             }
         });
 
-        configFile.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        configFile.setValidator(new SuperEditText.Validator() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    File file = new File(configFile.getText().toString());
+            public void validate(String text) throws SuperEditText.InvalidInputException {
+                if (!useConfig.isChecked()) return;
 
-                    if (file.exists() && file.isFile()) {
-                        if (file.canRead()) {
-                            preferences.edit()
-                                    .putString(Utils.PREF_CONFIG_FILE, file.getAbsolutePath())
-                                    .apply();
-                        } else {
-                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.CONFIG_FILE_CANT_READ, file.getAbsolutePath());
-                        }
+                File file = new File(text);
+                if (file.exists() && file.isFile()) {
+                    if (file.canRead()) {
+                        Prefs.putString(MainActivity.this, PKeys.CONFIG_FILE, file.getAbsolutePath());
                     } else {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.CONFIG_FILE_NOT_FOUND, file.getAbsolutePath());
+                        throw new SuperEditText.InvalidInputException(R.string.cannotReadConfigFile);
                     }
+                } else {
+                    throw new SuperEditText.InvalidInputException(R.string.configFileDoesNotExist);
                 }
             }
         });
 
-        outputPath.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        outputPath.setValidator(new SuperEditText.Validator() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    File path = new File(outputPath.getText().toString());
-
-                    if (path.exists()) {
-                        if (path.canWrite()) {
-                            preferences.edit()
-                                    .putString(Utils.PREF_OUTPUT_DIRECTORY, path.getAbsolutePath())
-                                    .apply();
-                        } else {
-                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_CANT_WRITE, path.getAbsolutePath());
-                        }
+            public void validate(String text) throws SuperEditText.InvalidInputException {
+                File path = new File(text);
+                if (path.exists()) {
+                    if (path.canWrite()) {
+                        Prefs.putString(MainActivity.this, PKeys.OUTPUT_DIRECTORY, path.getAbsolutePath());
                     } else {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.OUTPUT_PATH_NOT_FOUND, path.getAbsolutePath());
+                        throw new SuperEditText.InvalidInputException(R.string.cannotWriteOutputDirectory);
                     }
+                } else {
+                    throw new SuperEditText.InvalidInputException(R.string.outputDirectoryDoesNotExist);
                 }
             }
         });
 
-        rpcPort.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        rpcPort.setValidator(new SuperEditText.Validator() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    int port;
-                    try {
-                        port = Integer.parseInt(rpcPort.getText().toString());
-                    } catch (Exception ex) {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_PORT, rpcPort.getText().toString());
-                        return;
-                    }
-
-                    if (port > 0 && port < 65535) {
-                        preferences.edit()
-                                .putInt(Utils.PREF_RPC_PORT, port)
-                                .apply();
-                    } else {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_PORT, String.valueOf(port));
-                    }
+            public void validate(String text) throws SuperEditText.InvalidInputException {
+                int port;
+                try {
+                    port = Integer.parseInt(text);
+                } catch (Exception ex) {
+                    throw new SuperEditText.InvalidInputException(R.string.invalidPort);
                 }
+
+                if (port > 0 && port < 65535) Prefs.putInt(MainActivity.this, PKeys.RPC_PORT, port);
+                else throw new SuperEditText.InvalidInputException(R.string.invalidPort);
             }
         });
 
-        rpcToken.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        rpcToken.setValidator(new SuperEditText.Validator() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    if (rpcToken.getText().toString().isEmpty()) {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_RPC_TOKEN);
-                    } else {
-                        preferences.edit()
-                                .putString(Utils.PREF_RPC_TOKEN, rpcToken.getText().toString())
-                                .apply();
-                    }
-                }
+            public void validate(String text) throws SuperEditText.InvalidInputException {
+                if (text.isEmpty())
+                    throw new SuperEditText.InvalidInputException(R.string.invalidToken);
+                else Prefs.putString(MainActivity.this, PKeys.RPC_TOKEN, text);
             }
         });
 
         showPerformance.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                preferences.edit()
-                        .putBoolean(Utils.PREF_SHOW_PERFORMANCE, b)
-                        .apply();
-
+                Prefs.putBoolean(MainActivity.this, PKeys.SHOW_PERFORMANCE, b);
                 updateDelay.setEnabled(b);
             }
         });
 
-        updateDelay.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        updateDelay.setValidator(new SuperEditText.Validator() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    int delay;
-                    try {
-                        delay = Integer.parseInt(updateDelay.getText().toString());
-                    } catch (Exception ex) {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_DELAY, updateDelay.getText().toString());
-                        return;
-                    }
-
-                    if (delay > 0) {
-                        preferences.edit()
-                                .putInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, delay)
-                                .apply();
-                    } else {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.INVALID_DELAY, String.valueOf(delay));
-                    }
+            public void validate(String text) throws SuperEditText.InvalidInputException {
+                int delay;
+                try {
+                    delay = Integer.parseInt(text);
+                } catch (Exception ex) {
+                    throw new SuperEditText.InvalidInputException(R.string.invalidUpdateDelay);
                 }
+
+                if (delay > 0)
+                    Prefs.putInt(MainActivity.this, PKeys.NOTIFICATION_UPDATE_DELAY, delay);
+                else throw new SuperEditText.InvalidInputException(R.string.invalidUpdateDelay);
             }
         });
 
-        outputPath.setText(preferences.getString(Utils.PREF_OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
-        saveSession.setChecked(preferences.getBoolean(Utils.PREF_SAVE_SESSION, true));
-        useConfig.setChecked(preferences.getBoolean(Utils.PREF_USE_CONFIG, false));
-        configFile.setText(preferences.getString(Utils.PREF_CONFIG_FILE, ""));
-        startAtBoot.setChecked(preferences.getBoolean(Utils.PREF_START_AT_BOOT, false));
-        rpcPort.setText(String.valueOf(preferences.getInt(Utils.PREF_RPC_PORT, 6800)));
-        rpcToken.setText(preferences.getString(Utils.PREF_RPC_TOKEN, "aria2"));
-        showPerformance.setChecked(preferences.getBoolean(Utils.PREF_SHOW_PERFORMANCE, true));
-        updateDelay.setText(String.valueOf(preferences.getInt(Utils.PREF_NOTIFICATION_UPDATE_DELAY, 1)));
+        outputPath.setText(Prefs.getString(this, PKeys.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
+        saveSession.setChecked(Prefs.getBoolean(this, PKeys.SAVE_SESSION, true));
+        useConfig.setChecked(Prefs.getBoolean(this, PKeys.USE_CONFIG, false));
+        configFile.setText(Prefs.getString(this, PKeys.CONFIG_FILE, ""));
+        configFile.setEnabled(useConfig.isChecked());
+        startAtBoot.setChecked(Prefs.getBoolean(this, PKeys.START_AT_BOOT, false));
+        rpcPort.setText(String.valueOf(Prefs.getInt(this, PKeys.RPC_PORT, 6800)));
+        rpcToken.setText(Prefs.getString(this, PKeys.RPC_TOKEN, "aria2"));
+        showPerformance.setChecked(Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true));
+        updateDelay.setText(String.valueOf(Prefs.getInt(this, PKeys.NOTIFICATION_UPDATE_DELAY, 1)));
 
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isRunning = isChecked;
 
-                if (isChecked) {
-                    preferences.edit().putLong("currentSessionStart", System.currentTimeMillis()).apply();
-
-                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                            .setAction(ThisApplication.ACTION_TURN_ON)
-                            .build());
-
-                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.WRITE_STORAGE_DENIED);
-                        return;
-                    }
-
-                    File sessionFile = new File(getFilesDir(), "session");
-                    if (saveSession.isChecked() && !sessionFile.exists()) {
-                        try {
-                            if (!sessionFile.createNewFile()) {
-                                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_CREATING_SESSION_FILE);
-                                saveSession.setChecked(false);
-                                return;
-                            }
-                        } catch (IOException ex) {
-                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_CREATING_SESSION_FILE, ex);
-                            saveSession.setChecked(false);
-                            return;
-                        }
-                    }
-
-                    startService(new Intent(MainActivity.this, aria2Service.class)
-                            .putExtra(aria2Service.CONFIG, new aria2StartConfig(
-                                    outputPath.getText().toString(),
-                                    null,
-                                    useConfig.isChecked(),
-                                    configFile.getText().toString(),
-                                    saveSession.isChecked(),
-                                    Utils.getPort(outputPath),
-                                    rpcToken.getText().toString())
-                            ));
-                } else {
-                    stopService(new Intent(MainActivity.this, aria2Service.class));
-
-                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                            .setAction(ThisApplication.ACTION_TURN_OFF)
-                            .build());
-
-                    if (preferences.getLong("currentSessionStart", -1) != -1)
-                        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
-                                .setCategory(ThisApplication.CATEGORY_TIMING)
-                                .setLabel(ThisApplication.LABEL_SESSION_DURATION)
-                                .setValue(System.currentTimeMillis() - preferences.getLong("currentSessionStart", -1))
-                                .build());
-                }
+                if (isChecked) startService();
+                else stopService();
 
                 outputPath.setEnabled(!isChecked);
                 useConfig.setEnabled(!isChecked);
@@ -353,175 +234,131 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        for (ActivityManager.RunningServiceInfo service : ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE))
-            if (aria2Service.class.getName().equals(service.service.getClassName()))
+        for (ActivityManager.RunningServiceInfo service : ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) // FIXME
+            if (BinService.class.getName().equals(service.service.getClassName()))
                 toggleServer.setChecked(true);
 
         openAria2App.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
-                } catch (PackageManager.NameNotFoundException ex) {
-                    new AlertDialog.Builder(MainActivity.this).setTitle(R.string.aria2App_not_installed)
-                            .setMessage(R.string.aria2App_not_installed_message)
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    try {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
-                                    } catch (android.content.ActivityNotFoundException ex) {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
-                                    }
-                                }
-                            })
-                            .setNegativeButton(android.R.string.no, null)
-                            .create().show();
-                    return;
-                }
-
-                if (isRunning) {
-                    Intent intent = getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app");
-                    if (intent != null) {
-                        startActivity(intent
-                                .putExtra("external", true)
-                                .putExtra("port", Utils.getPort(rpcPort))
-                                .putExtra("token", rpcToken.getText().toString()));
-                    }
-
-                    ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                            .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                            .setAction(ThisApplication.ACTION_OPENED_ARIA2APP)
-                            .build());
-                } else {
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle(R.string.aria2_notRunning)
-                            .setMessage(R.string.aria2_notRunningMessage)
-                            .setPositiveButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                }
-                            })
-                            .setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    startActivity(getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app")
-                                            .putExtra("external", true)
-                                            .putExtra("port", Utils.getPort(rpcPort))
-                                            .putExtra("token", rpcToken.getText().toString()));
-                                }
-                            }).create().show();
-                }
+                openAria2App();
             }
         });
     }
 
-    private void downloadBinDialog(final boolean compulsory) {
-        final ProgressDialog pd = CommonUtils.fastIndeterminateProgressDialog(this, R.string.loading_releases);
-        final ProgressDialog pdd = CommonUtils.fastIndeterminateProgressDialog(MainActivity.this, R.string.downloading_bin);
+    private void startService() {
+        Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
+        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                .setAction(ThisApplication.ACTION_TURN_ON)
+                .build());
 
-        new Thread(new AsyncRequest(getString(R.string.URL_releases), new IResponse() {
-            @Override
-            public void onStart() {
-                CommonUtils.showDialog(MainActivity.this, pd);
-            }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Toaster.show(MainActivity.this, Utils.Messages.WRITE_STORAGE_DENIED);
+            return;
+        }
 
-            @Override
-            public void onResponse(String response) {
-                final JSONArray jReleases;
-                List<String> releasesList = new ArrayList<>();
-
-                try {
-                    jReleases = new JSONArray(response);
-
-                    for (int c = 0; c < jReleases.length(); c++) {
-                        JSONObject _release = jReleases.getJSONObject(c);
-                        releasesList.add(_release.optString("name"));
-                    }
-                } catch (JSONException ex) {
-                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
+        File sessionFile = new File(getFilesDir(), "session");
+        if (Prefs.getBoolean(this, PKeys.SAVE_SESSION, true) && !sessionFile.exists()) {
+            try {
+                if (!sessionFile.createNewFile()) {
+                    Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE);
                     return;
-                } finally {
-                    pd.dismiss();
                 }
+            } catch (IOException ex) {
+                Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE, ex);
+                return;
+            }
+        }
 
-                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setSingleChoiceItems(new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, releasesList), 0, new DialogInterface.OnClickListener() {
+        IntentFilter filter = new IntentFilter();
+        for (BinService.Action action : BinService.Action.values())
+            filter.addAction(action.toString());
+
+        receiver = new ServiceBroadcastReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+
+        startService(new Intent(MainActivity.this, BinService.class)
+                .putExtra(BinService.CONFIG, StartConfig.fromPrefs(this)));
+    }
+
+    private void stopService() {
+        stopService(new Intent(MainActivity.this, BinService.class));
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+
+        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                .setAction(ThisApplication.ACTION_TURN_OFF)
+                .build());
+
+        if (Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1) != -1) {
+            ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
+                    .setCategory(ThisApplication.CATEGORY_TIMING)
+                    .setLabel(ThisApplication.LABEL_SESSION_DURATION)
+                    .setValue(System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1))
+                    .build());
+        }
+    }
+
+    private void installAria2App() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this).setTitle(R.string.aria2AppNotInstalled)
+                .setMessage(R.string.aria2AppNotInstalled_message)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(final DialogInterface dialog, int which) {
-                        dialog.dismiss();
-
+                    public void onClick(DialogInterface dialog, int which) {
                         try {
-                            new Thread(new AsyncRequest(jReleases.getJSONObject(which).getString("url"), new IResponse() {
-                                @Override
-                                public void onStart() {
-                                    CommonUtils.showDialog(MainActivity.this, pd);
-                                }
 
-                                @Override
-                                public void onResponse(String response) {
-                                    pd.dismiss();
-
-                                    String downloadURL;
-                                    try {
-                                        downloadURL = new JSONObject(response).getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
-
-                                        BinUtils.delete(MainActivity.this);
-
-                                        CommonUtils.showDialog(MainActivity.this, pdd);
-                                        BinUtils.downloadBin(new URL(downloadURL), new BinUtils.IDownload() {
-                                            @Override
-                                            public void onDone(byte[] out) {
-                                                try {
-                                                    BinUtils.unzipBin(out, MainActivity.this);
-                                                } catch (IOException ex) {
-                                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, ex);
-                                                }
-
-                                                pdd.dismiss();
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        recreate();
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onException(Exception ex) {
-                                                pdd.dismiss();
-                                                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_DOWNLOADING_BIN, ex);
-                                            }
-                                        });
-                                    } catch (Exception ex) {
-                                        CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
-                                    }
-                                }
-
-                                @Override
-                                public void onException(Exception exception) {
-                                    CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
-                                }
-                            })).start();
-                        } catch (JSONException ex) {
-                            CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, ex);
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
+                        } catch (android.content.ActivityNotFoundException ex) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
                         }
                     }
                 })
-                        .setCancelable(!compulsory)
-                        .setTitle(R.string.whichRelease);
+                .setNegativeButton(android.R.string.no, null);
 
-                if (!compulsory) builder.setNegativeButton(android.R.string.cancel, null);
+        CommonUtils.showDialog(this, builder);
+    }
 
-                CommonUtils.showDialog(MainActivity.this, builder);
-            }
+    private void openAria2App() {
+        try {
+            getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
+        } catch (PackageManager.NameNotFoundException ex) {
+            Logging.logMe(this, ex);
+            installAria2App();
+            return;
+        }
 
-            @Override
-            public void onException(Exception exception) {
-                pd.dismiss();
-                CommonUtils.UIToast(MainActivity.this, Utils.ToastMessages.FAILED_RETRIEVING_RELEASES, exception);
-            }
-        })).start();
+        if (isRunning) {
+            startAria2App();
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+                    .setTitle(R.string.aria2NotRunning)
+                    .setMessage(R.string.aria2NotRunning_message)
+                    .setPositiveButton(android.R.string.no, null)
+                    .setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            startAria2App();
+                        }
+                    });
+
+            CommonUtils.showDialog(MainActivity.this, builder);
+        }
+    }
+
+    private void startAria2App() {
+        Intent intent = getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app");
+        if (intent != null) {
+            startActivity(intent
+                    .putExtra("external", true)
+                    .putExtra("port", Prefs.getInt(this, PKeys.RPC_PORT, 6800))
+                    .putExtra("token", Prefs.getString(this, PKeys.RPC_TOKEN, "aria2")));
+        }
+
+        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
+                .setAction(ThisApplication.ACTION_OPENED_ARIA2APP)
+                .build());
     }
 
     @Override
@@ -535,11 +372,59 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferencesActivity.class));
-                break;
+                return true;
             case R.id.mainMenu_changeBin:
-                downloadBinDialog(false);
-                break;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.changeBinVersion)
+                        .setMessage(R.string.changeBinVersion_message)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (BinUtils.delete(MainActivity.this)) {
+                                    startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                    finish();
+                                } else {
+                                    Toaster.show(MainActivity.this, Utils.Messages.CANT_DELETE_BIN);
+                                }
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null);
+
+                CommonUtils.showDialog(this, builder);
+                return true;
         }
-        return true;
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class ServiceBroadcastReceiver extends BroadcastReceiver { // FIXME: Not receiving some actions
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            BinService.Action action = BinService.Action.find(intent);
+            if (action != null) {
+                switch (action) {
+                    case SERVER_START:
+                        noLogs.setVisibility(View.GONE);
+                        logs.setVisibility(View.VISIBLE);
+
+                        adapter.clear();
+                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
+                        break;
+                    case SERVER_STOP:
+                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
+                        break;
+                    case SERVER_EX:
+                        Exception ex = (Exception) intent.getSerializableExtra("ex");
+                        Logging.logMe(MainActivity.this, ex);
+                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
+                        break;
+                    case SERVER_MSG:
+                        adapter.add((Logging.LogLine) intent.getSerializableExtra("msg"));
+                        break;
+                }
+            }
+        }
     }
 }

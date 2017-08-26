@@ -18,8 +18,6 @@ public class PreferencesActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.main_pref);
 
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
-
         findPreference("email").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

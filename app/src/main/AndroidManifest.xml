@@ -21,9 +21,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- Main activity -->
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +35,7 @@
 
         <!-- aria2 service -->
         <service
-            android:name=".aria2Service"
+            android:name=".Aria2.BinService"
             android:enabled="true" />
 
         <!-- Preferences Activity -->
@@ -46,6 +47,9 @@
         <activity
             android:name="com.gianlu.commonutils.LogsActivity"
             android:parentActivityName=".PreferencesActivity" />
+
+        <!-- Download bin Activity -->
+        <activity android:name=".DownloadBinActivity" />
 
         <!-- Boot completed receiver -->
         <receiver

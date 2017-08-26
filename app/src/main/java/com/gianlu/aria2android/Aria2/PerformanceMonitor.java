@@ -1,12 +1,15 @@
-package com.gianlu.aria2android;
+package com.gianlu.aria2android.Aria2;
 
 import android.app.NotificationManager;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
+import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.R;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.Prefs;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,21 +17,19 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class PerformanceMonitor implements Runnable {
+public class PerformanceMonitor extends Thread {
     private static final Pattern pattern = Pattern.compile("(\\d*?)\\s+(\\d*?)\\s+(\\d*?)%\\s(.)\\s+(\\d*?)\\s+(\\d*?)K\\s+(\\d*?)K\\s+(..)\\s(.*?)\\s+(.*)$");
     private final NotificationManager manager;
     private final Context context;
     private final int delay;
-    private final int NOTIFICATION_ID;
     private final NotificationCompat.Builder builder;
     private final long startTime;
-    private boolean _stop = false;
+    private volatile boolean _stop = false;
 
-    PerformanceMonitor(Context context, int delay, int NOTIFICATION_ID, NotificationCompat.Builder builder) {
-        this.manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    public PerformanceMonitor(Context context, NotificationManager manager, NotificationCompat.Builder builder) {
+        this.manager = manager;
         this.context = context;
-        this.delay = delay;
-        this.NOTIFICATION_ID = NOTIFICATION_ID;
+        this.delay = Prefs.getInt(context, PKeys.NOTIFICATION_UPDATE_DELAY, 1);
         this.builder = builder;
         this.startTime = System.currentTimeMillis();
     }
@@ -50,26 +51,24 @@ class PerformanceMonitor implements Runnable {
                 }
             }
         } catch (IOException ex) {
-            stop();
+            stopSafe();
             Logging.logMe(context, ex);
-            manager.cancel(NOTIFICATION_ID);
+            manager.cancel(BinService.NOTIFICATION_ID);
         }
     }
 
     private void sendNotification(String pid, String cpuUsage, String rss) {
-        if (_stop)
-            return;
-
+        if (_stop) return;
         RemoteViews layout = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
         layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + CommonUtils.timeFormatter((System.currentTimeMillis() - startTime) / 1000));
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + pid);
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + cpuUsage + "%");
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
-        manager.notify(NOTIFICATION_ID, builder.build());
+        manager.notify(BinService.NOTIFICATION_ID, builder.build());
     }
 
-    void stop() {
+    public void stopSafe() {
         _stop = true;
     }
 }
