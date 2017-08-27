@@ -2,15 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Missing icons -->
+    <item
+        android:id="@+id/configEditor_add"
+        android:icon="@drawable/ic_add_white_48dp"
+        android:title="@string/newOption"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/configEditor_done"
+        android:icon="@drawable/ic_done_white_48dp"
         android:title="@string/done"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/configEditor_import"
+        android:icon="@drawable/ic_attach_file_white_48dp"
         android:title="@string/importConfig"
         app:showAsAction="ifRoom" />
 </menu>

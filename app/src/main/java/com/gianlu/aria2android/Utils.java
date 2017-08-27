@@ -29,9 +29,9 @@ public class Utils {
         String[] lines = options.split("\n");
         for (String line : lines) {
             line = line.trim();
-            if (line.startsWith("#") || !line.contains("=")) continue;
+            if (line.startsWith("#")) continue;
             String[] split = line.split("=");
-            map.put(split[0], split[1]);
+            map.put(split[0], split.length == 1 ? null : split[1]);
         }
         return map;
     }
@@ -40,7 +40,7 @@ public class Utils {
         Iterator<String> iterator = obj.keys();
         while (iterator.hasNext()) {
             String key = iterator.next();
-            map.put(key, obj.getString(key));
+            map.put(key, obj.optString(key, null));
         }
     }
 
