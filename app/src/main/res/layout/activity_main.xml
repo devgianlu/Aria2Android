@@ -180,7 +180,7 @@
                 android:text="@string/noLogs"
                 android:textAlignment="center" />
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/main_logs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

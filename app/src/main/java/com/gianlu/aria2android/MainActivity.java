@@ -16,13 +16,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Logging.LogLineAdapter adapter;
-    private ListView logs;
+    private RecyclerView logs;
     private TextView noLogs;
 
     @Override
@@ -78,8 +80,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>());
+        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>(), null);
         logs = findViewById(R.id.main_logs);
+        logs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        logs.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         noLogs = findViewById(R.id.main_noLogs);
         logs.setAdapter(adapter);
 
@@ -397,32 +401,37 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class ServiceBroadcastReceiver extends BroadcastReceiver { // FIXME: Not receiving some actions
+    private class ServiceBroadcastReceiver extends BroadcastReceiver {
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            BinService.Action action = BinService.Action.find(intent);
-            if (action != null) {
-                switch (action) {
-                    case SERVER_START:
-                        noLogs.setVisibility(View.GONE);
-                        logs.setVisibility(View.VISIBLE);
+        public void onReceive(Context context, final Intent intent) {
+            final BinService.Action action = BinService.Action.find(intent);
+            if (action != null && intent != null) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        switch (action) {
+                            case SERVER_START:
+                                noLogs.setVisibility(View.GONE);
+                                logs.setVisibility(View.VISIBLE);
 
-                        adapter.clear();
-                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
-                        break;
-                    case SERVER_STOP:
-                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
-                        break;
-                    case SERVER_EX:
-                        Exception ex = (Exception) intent.getSerializableExtra("ex");
-                        Logging.logMe(MainActivity.this, ex);
-                        adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
-                        break;
-                    case SERVER_MSG:
-                        adapter.add((Logging.LogLine) intent.getSerializableExtra("msg"));
-                        break;
-                }
+                                adapter.clear();
+                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
+                                break;
+                            case SERVER_STOP:
+                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
+                                break;
+                            case SERVER_EX:
+                                Exception ex = (Exception) intent.getSerializableExtra("ex");
+                                Logging.logMe(MainActivity.this, ex);
+                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
+                                break;
+                            case SERVER_MSG:
+                                adapter.add((Logging.LogLine) intent.getSerializableExtra("msg"));
+                                break;
+                        }
+                    }
+                });
             }
         }
     }

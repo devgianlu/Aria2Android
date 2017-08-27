@@ -148,8 +148,8 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
     @SuppressLint("InflateParams")
     private void showAddDialog() {
         LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.new_option_dialog, null, false);
-        final EditText key = layout.findViewById(R.id.editOptionDialog_value);
-        final EditText value = layout.findViewById(R.id.editOptionDialog_newValue);
+        final EditText key = layout.findViewById(R.id.editOptionDialog_key);
+        final EditText value = layout.findViewById(R.id.editOptionDialog_value);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.newOption)

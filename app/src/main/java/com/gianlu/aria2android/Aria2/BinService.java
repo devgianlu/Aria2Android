@@ -54,7 +54,7 @@ public class BinService extends IntentService implements StreamListener.IStreamL
         Intent intent = new Intent(action.toString());
         if (ex != null) intent.putExtra("ex", ex);
         if (msg != null) intent.putExtra("msg", msg);
-        LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
