@@ -68,4 +68,6 @@
     <string name="key">Key:</string>
     <string name="value">Value:</string>
     <string name="newOption">New option</string>
+    <string name="failedStarting">Failed starting the server!</string>
+    <string name="failedStopping">Failed stopping the server!</string>
 </resources>

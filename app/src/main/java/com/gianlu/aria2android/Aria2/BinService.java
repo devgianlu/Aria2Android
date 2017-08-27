@@ -1,109 +1,94 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.gianlu.aria2android.BinUtils;
-import com.gianlu.aria2android.MainActivity;
-import com.gianlu.aria2android.PKeys;
-import com.gianlu.aria2android.R;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Prefs;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Random;
 
-public class BinService extends IntentService implements StreamListener.IStreamListener {
-    public static final String CONFIG = "config";
-    public final static int NOTIFICATION_ID = new Random().nextInt();
-    private static final String CHANNEL_ID = "aria2android";
+public class BinService extends Service implements StreamListener.IStreamListener {
+    public static final int START = 0;
+    public static final int STOP = 1;
+    private final HandlerThread serviceThread = new HandlerThread("aria2c service");
+    private Messenger messenger;
     private Process process;
-    private NotificationManager manager;
-    private PerformanceMonitor monitor;
-    private NotificationCompat.Builder builder;
+    private LocalBroadcastManager broadcastManager;
     private StreamListener streamListener;
 
-    public BinService() {
-        super("aria2 service");
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        if (messenger == null) {
+            serviceThread.start();
+            broadcastManager = LocalBroadcastManager.getInstance(this);
+            messenger = new Messenger(new LocalHandler());
+        }
+
+        return messenger.getBinder();
     }
 
-    private void killService() {
+    private void startBin(StartConfig config) {
+        try {
+            process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config)); // FIXME: May fail without noticing
+            streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
+        } catch (IOException ex) {
+            ex(ex);
+        }
+
+        dispatchBroadcast(Action.SERVER_START, null, null);
+    }
+
+    private void ex(Exception ex) {
+        Logging.logMe(this, ex);
+        dispatchBroadcast(Action.SERVER_EX, null, ex);
+    }
+
+    private void stopBin() {
         try {
             Runtime.getRuntime().exec("pkill aria2c");
-            process.waitFor();
-        } catch (IOException | InterruptedException ex) {
-            dispatchAction(Action.SERVER_EX, ex, null);
-        }
-
-        if (process != null) process.destroy();
-        if (monitor != null) monitor.stopSafe();
-        if (streamListener != null) streamListener.stopSafe();
-        dispatchAction(Action.SERVER_STOP, null, null);
-
-        manager.cancel(NOTIFICATION_ID);
-        stopSelf();
-    }
-
-    private void dispatchAction(Action action, @Nullable Throwable ex, @Nullable Logging.LogLine msg) {
-        Intent intent = new Intent(action.toString());
-        if (ex != null) intent.putExtra("ex", ex);
-        if (msg != null) intent.putExtra("msg", msg);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        builder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                .setContentTitle("aria2c service")
-                .setShowWhen(false)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(PendingIntent.getActivity(this, new Random().nextInt(), new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
-                .setContentText("aria2c is currently running");
-
-        startForeground(NOTIFICATION_ID, builder.build());
-
-        onHandleIntent(intent);
-        return START_STICKY;
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        try {
-            process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, (StartConfig) intent.getSerializableExtra(CONFIG)));
         } catch (IOException ex) {
-            dispatchAction(Action.SERVER_EX, ex, null);
-            stopSelf();
-            return;
+            ex(ex);
         }
 
-        streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
-        streamListener.start();
-        dispatchAction(Action.SERVER_START, null, null);
-
-        if (Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true)) {
-            monitor = new PerformanceMonitor(this, manager, builder);
-            monitor.start();
+        if (process != null) {
+            try {
+                process.destroy();
+                process.waitFor();
+                process = null;
+            } catch (InterruptedException ex) {
+                ex(ex);
+            }
         }
+
+        if (streamListener != null) {
+            streamListener.stopSafe();
+            streamListener = null;
+        }
+
+        dispatchBroadcast(Action.SERVER_STOP, null, null);
     }
 
-    @Override
-    public void onDestroy() {
-        killService();
-        super.onDestroy();
+    private void dispatchBroadcast(Action action, @Nullable Logging.LogLine msg, @Nullable Throwable ex) {
+        Intent intent = new Intent(action.toString());
+        if (msg != null) intent.putExtra("msg", msg);
+        if (ex != null) intent.putExtra("ex", ex);
+        broadcastManager.sendBroadcast(intent);
     }
 
     @Override
     public void onNewLogLine(Logging.LogLine line) {
-        dispatchAction(Action.SERVER_MSG, null, line);
+        dispatchBroadcast(Action.SERVER_MSG, line, null);
     }
 
     public enum Action {
@@ -124,6 +109,28 @@ public class BinService extends IntentService implements StreamListener.IStreamL
         @Override
         public String toString() {
             return "com.gianlu.aria2android." + name();
+        }
+    }
+
+    @SuppressLint("HandlerLeak")
+    private class LocalHandler extends Handler {
+
+        LocalHandler() {
+            super(serviceThread.getLooper());
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case START:
+                    startBin((StartConfig) msg.obj);
+                    break;
+                case STOP:
+                    stopBin();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
         }
     }
 }

@@ -3,14 +3,20 @@ package com.gianlu.aria2android;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -49,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
     private Logging.LogLineAdapter adapter;
     private RecyclerView logs;
     private TextView noLogs;
+    private Messenger serviceMessenger;
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            serviceMessenger = new Messenger(iBinder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            serviceMessenger = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,22 +286,39 @@ public class MainActivity extends AppCompatActivity {
 
         receiver = new ServiceBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
-
         try {
-            startService(new Intent(MainActivity.this, BinService.class)
-                    .putExtra(BinService.CONFIG, StartConfig.fromPrefs(this)));
-
+            serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(this)));
             return true;
         } catch (JSONException ex) {
             Toaster.show(this, Utils.Messages.FAILED_LOADING_OPTIONS, ex);
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             return false;
+        } catch (RemoteException ex) {
+            Toaster.show(this, Utils.Messages.FAILED_STARTING, ex);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            return false;
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        unbindService(serviceConnection);
+        super.onStop();
+    }
+
     private boolean stopService() {
-        stopService(new Intent(MainActivity.this, BinService.class));
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        try {
+            serviceMessenger.send(Message.obtain(null, BinService.STOP, null));
+        } catch (RemoteException ex) {
+            Toaster.show(this, Utils.Messages.FAILED_STOPPING, ex);
+            return false;
+        }
 
         ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
                 .setCategory(ThisApplication.CATEGORY_USER_INPUT)
@@ -420,6 +455,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case SERVER_STOP:
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
+                                LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");

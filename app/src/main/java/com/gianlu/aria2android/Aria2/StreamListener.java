@@ -1,5 +1,6 @@
 package com.gianlu.aria2android.Aria2;
 
+import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
@@ -33,6 +34,7 @@ public class StreamListener extends Thread {
                 String inLine;
                 if ((inLine = in.readLine()) != null) {
                     listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.INFO, inLine));
+                    if (BuildConfig.DEBUG) System.out.println("aria2c: " + inLine);
                 }
 
                 String errLine;
@@ -42,9 +44,14 @@ public class StreamListener extends Thread {
                     } else if (errLine.startsWith("ERROR:")) {
                         listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, errLine.replace("ERROR:", "")));
                     }
+
+                    // FIXME: Something may end up here
+
+                    if (BuildConfig.DEBUG) System.err.println("aria2c: " + errLine);
                 }
             } catch (IOException ex) {
-                listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Failed parsing the log line: " + ex.getMessage()));
+                if (BuildConfig.DEBUG) ex.printStackTrace();
+                listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Failed parsing the log: " + ex.getMessage()));
             }
         }
     }

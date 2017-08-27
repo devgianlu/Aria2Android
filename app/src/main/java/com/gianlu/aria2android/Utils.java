@@ -58,5 +58,7 @@ public class Utils {
         public static final Toaster.Message FILE_NOT_FOUND = new Toaster.Message(R.string.fileNotFound, false);
         public static final Toaster.Message FAILED_LOADING_OPTIONS = new Toaster.Message(R.string.failedLoadingOptions, true);
         public static final Toaster.Message FAILED_SAVING_CUSTOM_OPTIONS = new Toaster.Message(R.string.failedSavingCustomOptions, true);
+        public static final Toaster.Message FAILED_STARTING = new Toaster.Message(R.string.failedStarting, true);
+        public static final Toaster.Message FAILED_STOPPING = new Toaster.Message(R.string.failedStopping, true);
     }
 }

@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PerformanceMonitor extends Thread {
+public class PerformanceMonitor extends Thread { // TODO: Reimplement this
     private static final Pattern pattern = Pattern.compile("(\\d*?)\\s+(\\d*?)\\s+(\\d*?)%\\s(.)\\s+(\\d*?)\\s+(\\d*?)K\\s+(\\d*?)K\\s+(..)\\s(.*?)\\s+(.*)$");
     private final NotificationManager manager;
     private final Context context;
@@ -26,8 +26,8 @@ public class PerformanceMonitor extends Thread {
     private final long startTime;
     private volatile boolean _stop = false;
 
-    public PerformanceMonitor(Context context, NotificationManager manager, NotificationCompat.Builder builder) {
-        this.manager = manager;
+    public PerformanceMonitor(Context context, NotificationCompat.Builder builder) {
+        this.manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         this.context = context;
         this.delay = Prefs.getInt(context, PKeys.NOTIFICATION_UPDATE_DELAY, 1);
         this.builder = builder;
@@ -53,7 +53,7 @@ public class PerformanceMonitor extends Thread {
         } catch (IOException ex) {
             stopSafe();
             Logging.logMe(context, ex);
-            manager.cancel(BinService.NOTIFICATION_ID);
+            // manager.cancel(BinService.NOTIFICATION_ID);
         }
     }
 
@@ -65,7 +65,7 @@ public class PerformanceMonitor extends Thread {
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + cpuUsage + "%");
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
-        manager.notify(BinService.NOTIFICATION_ID, builder.build());
+        // manager.notify(BinService.NOTIFICATION_ID, builder.build());
     }
 
     public void stopSafe() {
