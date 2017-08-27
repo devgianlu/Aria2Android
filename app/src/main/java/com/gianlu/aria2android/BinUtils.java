@@ -124,7 +124,7 @@ public class BinUtils {
             builder.append(" --save-session=").append(sessionPath).append(" --save-session-interval=10");
         else builder.append(" ");
 
-        builder.append(Utils.optionsParser(config.options));
+        builder.append(Utils.optionsBuilder(config.options));
 
         return builder.toString();
     }

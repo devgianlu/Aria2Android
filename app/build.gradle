@@ -28,6 +28,4 @@ dependencies {
     compile 'com.google.android.gms:play-services-analytics:11.2.0'
 }
 
-
-
 apply plugin: 'com.google.gms.google-services'

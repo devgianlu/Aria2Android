@@ -28,9 +28,10 @@ public class Utils {
         Map<String, String> map = new HashMap<>();
         String[] lines = options.split("\n");
         for (String line : lines) {
-            if (!line.startsWith("--") || !line.contains("=")) continue;
+            line = line.trim();
+            if (line.startsWith("#") || !line.contains("=")) continue;
             String[] split = line.split("=");
-            map.put(split[0].substring(2), split[1]);
+            map.put(split[0], split[1]);
         }
         return map;
     }

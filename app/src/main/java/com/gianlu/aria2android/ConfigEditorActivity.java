@@ -1,5 +1,6 @@
 package com.gianlu.aria2android;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -116,12 +117,15 @@ public class ConfigEditorActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == IMPORT_CODE) {
-            try {
-                InputStream in = getContentResolver().openInputStream(data.getData());
-                if (in != null) importOptionsFromStream(in);
-                else Toaster.show(this, Utils.Messages.CANNOT_IMPORT, new Exception("in is null!"));
-            } catch (FileNotFoundException ex) {
-                Toaster.show(this, Utils.Messages.FILE_NOT_FOUND, ex);
+            if (resultCode == Activity.RESULT_OK) {
+                try {
+                    InputStream in = getContentResolver().openInputStream(data.getData());
+                    if (in != null) importOptionsFromStream(in);
+                    else
+                        Toaster.show(this, Utils.Messages.CANNOT_IMPORT, new Exception("in is null!"));
+                } catch (FileNotFoundException ex) {
+                    Toaster.show(this, Utils.Messages.FILE_NOT_FOUND, ex);
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -157,7 +161,7 @@ public class ConfigEditorActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.configEditor_import:
-                Intent intent = new Intent();
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
                 startActivityForResult(Intent.createChooser(intent, "Import from another configuration file..."), IMPORT_CODE);
                 return true;
