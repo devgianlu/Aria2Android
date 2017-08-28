@@ -11,3 +11,4 @@ settings.gradle
 Thumbs.db
 /.idea/markdown-navigator
 /.idea/markdown-*
+/app/release
