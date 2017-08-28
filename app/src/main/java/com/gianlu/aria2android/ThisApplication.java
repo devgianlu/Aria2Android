@@ -21,6 +21,8 @@ public class ThisApplication extends Application {
     public static final String ACTION_TURN_OFF = "aria2 turned off";
     public static final String ACTION_OPENED_ARIA2APP = "Opened Aria2App";
     public static final String ACTION_DONATE_OPEN = "Opened donation dialog";
+    public static final String CATEGORY_UNKNOWN_LOG_LINE = "Unknown log line";
+    public static final String ACTION_UNKNOWN_LOG_LINE = "Unknown log line read";
     private static Tracker tracker;
 
     @NonNull

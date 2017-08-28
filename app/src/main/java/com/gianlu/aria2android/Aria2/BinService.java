@@ -14,11 +14,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.gianlu.aria2android.BinUtils;
+import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.MainActivity;
 import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.R;
+import com.gianlu.aria2android.ThisApplication;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
+import com.google.android.gms.analytics.HitBuilders;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -51,6 +54,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
         try {
             process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
             streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
+            streamListener.start();
         } catch (IOException ex) {
             ex(ex);
         }
@@ -119,6 +123,30 @@ public class BinService extends Service implements StreamListener.IStreamListene
     @Override
     public void onNewLogLine(Logging.LogLine line) {
         dispatchBroadcast(Action.SERVER_MSG, line, null);
+    }
+
+    @Override
+    public void onTerminated() {
+        if (process != null) {
+            try {
+                process.waitFor();
+                int exit = process.exitValue(); // TODO: Create map of exit codes
+                if (exit > 0) ex(new Exception("aria2c terminated with exit code " + exit));
+                stopBin();
+            } catch (InterruptedException | IllegalThreadStateException ex) {
+                ex(ex);
+            }
+        }
+    }
+
+    @Override
+    public void unknownLogLine(String line) {
+        if (BuildConfig.DEBUG) System.out.println("UNKNOWN LINE: " + line);
+        ThisApplication.sendAnalytics(this, new HitBuilders.EventBuilder()
+                .setCategory(ThisApplication.CATEGORY_UNKNOWN_LOG_LINE)
+                .setAction(ThisApplication.ACTION_UNKNOWN_LOG_LINE)
+                .setLabel(line)
+                .build());
     }
 
     public enum Action {

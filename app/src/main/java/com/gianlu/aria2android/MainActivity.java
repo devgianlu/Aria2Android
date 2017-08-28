@@ -1,7 +1,6 @@
 package com.gianlu.aria2android;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -234,9 +233,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        for (ActivityManager.RunningServiceInfo service : ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).getRunningServices(Integer.MAX_VALUE)) // FIXME
-            if (BinService.class.getName().equals(service.service.getClassName()))
-                toggleServer.setChecked(true);
+        toggleServer.setChecked(serviceMessenger != null && serviceMessenger.getBinder().isBinderAlive());
 
         openAria2App.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -453,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
                                 adapter.clear();
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                                 break;
-                            case SERVER_STOP:
+                            case SERVER_STOP: // FIXME: Should change button state
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
                                 LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
                                 break;
