@@ -29,7 +29,7 @@
     <string name="startServiceAtBoot">Start service on system boot</string>
     <string name="notification">Notification</string>
     <string name="showPerformance">Show performance</string>
-    <string name="noLogs">There are no logs!</string>
+    <string name="noLogs">The log is empty.</string>
     <string name="retrievingReleases">Retrieving releases. Please wait…</string>
     <string name="failedRetrievingReleases_reason">Failed retrieving releases: %s</string>
     <string name="publishedAt"><![CDATA[<b>Published at:</b>]]> %s</string>
@@ -70,4 +70,5 @@
     <string name="newOption">New option</string>
     <string name="failedStarting">Failed starting the server!</string>
     <string name="failedStopping">Failed stopping the server!</string>
+    <string name="clear">Clear</string>
 </resources>

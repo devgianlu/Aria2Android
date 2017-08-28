@@ -122,6 +122,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class));
             }
         });
+        final Button clear = findViewById(R.id.main_clear);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (adapter != null) {
+                    adapter.clear();
+                    noLogs.setVisibility(View.VISIBLE);
+                    logs.setVisibility(View.GONE);
+                }
+            }
+        });
 
         version.setText(BinUtils.binVersion(this));
 
@@ -228,6 +239,7 @@ public class MainActivity extends AppCompatActivity {
                     rpcToken.setEnabled(!isChecked);
                     rpcPort.setEnabled(!isChecked);
                     showPerformance.setEnabled(!isChecked);
+                    clear.setEnabled(!isChecked);
                     if (isChecked) updateDelay.setEnabled(false);
                     else updateDelay.setEnabled(showPerformance.isChecked());
                 }
@@ -445,10 +457,11 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        noLogs.setVisibility(View.GONE);
+                        logs.setVisibility(View.VISIBLE);
+
                         switch (action) {
                             case SERVER_START:
-                                noLogs.setVisibility(View.GONE);
-                                logs.setVisibility(View.VISIBLE);
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                                 break;
                             case SERVER_STOP:
