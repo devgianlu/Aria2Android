@@ -246,8 +246,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        toggleServer.setChecked(serviceMessenger != null && serviceMessenger.getBinder().isBinderAlive());
-
         openAria2App.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
