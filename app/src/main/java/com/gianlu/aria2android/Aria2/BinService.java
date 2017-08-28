@@ -1,6 +1,7 @@
 package com.gianlu.aria2android.Aria2;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -9,10 +10,15 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.gianlu.aria2android.BinUtils;
+import com.gianlu.aria2android.MainActivity;
+import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.R;
 import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.Prefs;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -20,11 +26,14 @@ import java.util.Objects;
 public class BinService extends Service implements StreamListener.IStreamListener {
     public static final int START = 0;
     public static final int STOP = 1;
+    public static final int NOTIFICATION_ID = 4534532;
+    private static final String CHANNEL_ID = "aria2android";
     private final HandlerThread serviceThread = new HandlerThread("aria2c service");
     private Messenger messenger;
     private Process process;
     private LocalBroadcastManager broadcastManager;
     private StreamListener streamListener;
+    private PerformanceMonitor performanceMonitor;
 
     @Nullable
     @Override
@@ -40,10 +49,25 @@ public class BinService extends Service implements StreamListener.IStreamListene
 
     private void startBin(StartConfig config) {
         try {
-            process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config)); // FIXME: May fail without noticing
+            process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
             streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
         } catch (IOException ex) {
             ex(ex);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                .setContentTitle("aria2c service")
+                .setShowWhen(false)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(PendingIntent.getActivity(this, 5756, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentText("aria2c is currently running");
+
+        startForeground(NOTIFICATION_ID, builder.build());
+        if (Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true)) {
+            performanceMonitor = new PerformanceMonitor(this, builder);
+            performanceMonitor.start();
         }
 
         dispatchBroadcast(Action.SERVER_START, null, null);
@@ -76,6 +100,12 @@ public class BinService extends Service implements StreamListener.IStreamListene
             streamListener = null;
         }
 
+        if (performanceMonitor != null) {
+            performanceMonitor.stopSafe();
+            streamListener = null;
+        }
+
+        stopForeground(true);
         dispatchBroadcast(Action.SERVER_STOP, null, null);
     }
 

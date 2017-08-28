@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PerformanceMonitor extends Thread { // TODO: Reimplement this
+public class PerformanceMonitor extends Thread {
     private static final Pattern pattern = Pattern.compile("(\\d*?)\\s+(\\d*?)\\s+(\\d*?)%\\s(.)\\s+(\\d*?)\\s+(\\d*?)K\\s+(\\d*?)K\\s+(..)\\s(.*?)\\s+(.*)$");
     private final NotificationManager manager;
     private final Context context;
@@ -38,22 +38,21 @@ public class PerformanceMonitor extends Thread { // TODO: Reimplement this
     public void run() {
         try {
             Process process = Runtime.getRuntime().exec("top -d " + String.valueOf(delay));
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
             String line;
             while ((line = reader.readLine()) != null && !_stop) {
                 if (line.contains("aria2c")) {
                     Matcher matcher = pattern.matcher(line);
-                    if (matcher.find()) {
+                    if (matcher.find())
                         sendNotification(matcher.group(1), matcher.group(3), matcher.group(7));
-                    }
                 }
             }
         } catch (IOException ex) {
             stopSafe();
             Logging.logMe(context, ex);
-            // manager.cancel(BinService.NOTIFICATION_ID);
+            builder.setCustomContentView(null);
+            manager.notify(BinService.NOTIFICATION_ID, builder.build());
         }
     }
 
@@ -65,7 +64,7 @@ public class PerformanceMonitor extends Thread { // TODO: Reimplement this
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + cpuUsage + "%");
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
-        // manager.notify(BinService.NOTIFICATION_ID, builder.build());
+        manager.notify(BinService.NOTIFICATION_ID, builder.build());
     }
 
     public void stopSafe() {

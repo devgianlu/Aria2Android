@@ -11,6 +11,8 @@
         android:layout_height="56dp"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="8dp"
+        android:padding="2dp"
+        android:scaleType="fitCenter"
         android:src="@mipmap/ic_launcher" />
 
     <LinearLayout
