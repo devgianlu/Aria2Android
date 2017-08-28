@@ -24,7 +24,6 @@ android {
 
 dependencies {
     compile project(':CommonUtils')
-    compile 'com.android.support:support-v4:26.0.1'
     compile 'com.google.android.gms:play-services-analytics:11.2.0'
 }
 
