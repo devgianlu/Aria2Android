@@ -71,4 +71,7 @@
     <string name="failedStarting">Failed starting the server!</string>
     <string name="failedStopping">Failed stopping the server!</string>
     <string name="clear">Clear</string>
+    <string name="accessControlAllowOriginAll">Access Control Allow Origin all</string>
+    <string name="accessControlAllowOriginAll_disclaimer">Enabling the option above you\'ll set the <b>Access-Control-Allow-Origin</b> header to <b>*</b>. You should enable this only if you\'re trying to connect from an external device. Please consider reading this post: http://gianlu.xyz/aria2android/about-cors/</string>
+    <string name="noCustomOptions">You have no custom options.</string>
 </resources>

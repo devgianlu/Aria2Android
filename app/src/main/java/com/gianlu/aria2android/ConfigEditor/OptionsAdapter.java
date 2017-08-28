@@ -28,6 +28,7 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         this.inflater = LayoutInflater.from(context);
         this.listener = listener;
         this.edited = new ArrayList<>();
+        if (listener != null) listener.onItemsCountChanged(options.size());
     }
 
     @Override
@@ -38,11 +39,13 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
     public void notifyOptionEdited(int pos) {
         edited.add(pos);
         notifyItemChanged(pos);
+        if (listener != null) listener.onItemsCountChanged(options.size());
     }
 
     public void saved() {
         edited.clear();
         notifyDataSetChanged();
+        if (listener != null) listener.onItemsCountChanged(options.size());
     }
 
     @Override
@@ -61,7 +64,10 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (listener != null) listener.onRemoveOption(entry.getKey());
+                if (listener != null) {
+                    listener.onRemoveOption(entry.getKey());
+                    listener.onItemsCountChanged(options.size());
+                }
             }
         });
 
@@ -80,6 +86,8 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         void onEditOption(String key);
 
         void onRemoveOption(String key);
+
+        void onItemsCountChanged(int count);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

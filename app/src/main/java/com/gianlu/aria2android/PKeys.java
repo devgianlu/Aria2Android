@@ -13,7 +13,8 @@ public enum PKeys implements Prefs.PrefKey {
     CURRENT_SESSION_START("currentSessionStart"),
     CUSTOM_OPTIONS("customOptions"),
     DEPRECATED_USE_CONFIG("useConfig"),
-    DEPRECATED_CONFIG_FILE("configFile");
+    DEPRECATED_CONFIG_FILE("configFile"),
+    RPC_ALLOW_ORIGIN_ALL("allowOriginAll");
 
     private final String key;
 

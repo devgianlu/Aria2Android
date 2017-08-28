@@ -14,10 +14,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.gianlu.aria2android.ConfigEditor.OptionsAdapter;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.MessageLayout;
 import com.gianlu.commonutils.Prefs;
 import com.gianlu.commonutils.SuperTextView;
 import com.gianlu.commonutils.Toaster;
@@ -39,6 +41,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
     private final Map<String, String> options = new HashMap<>();
     private boolean hasChanges = false;
     private OptionsAdapter adapter;
+    private FrameLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
         setContentView(R.layout.activity_config_editor);
         setTitle(R.string.customOptions);
 
+        layout = findViewById(R.id.configEditor);
         RecyclerView list = findViewById(R.id.configEditor_list);
         list.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
@@ -252,6 +256,15 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
             hasChanges = true;
             options.remove(key);
             adapter.notifyItemRemoved(pos);
+        }
+    }
+
+    @Override
+    public void onItemsCountChanged(int count) {
+        if (count == 0) {
+            MessageLayout.show(layout, R.string.noCustomOptions, R.drawable.ic_info_outline_black_48dp);
+        } else {
+            MessageLayout.hide(layout);
         }
     }
 }

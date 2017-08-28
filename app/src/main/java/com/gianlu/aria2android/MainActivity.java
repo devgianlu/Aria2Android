@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         final SuperEditText outputPath = findViewById(R.id.options_outputPath);
         final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
         final SuperEditText rpcToken = findViewById(R.id.options_rpcToken);
+        final CheckBox allowOriginAll = findViewById(R.id.options_allowOriginAll);
         final CheckBox showPerformance = findViewById(R.id.main_showPerformance);
         final SuperEditText updateDelay = findViewById(R.id.main_updateDelay);
         final Button customOptions = findViewById(R.id.main_customOptions);
@@ -190,6 +191,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        allowOriginAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Prefs.putBoolean(MainActivity.this, PKeys.RPC_ALLOW_ORIGIN_ALL, b);
+            }
+        });
+
         showPerformance.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
@@ -219,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         startAtBoot.setChecked(Prefs.getBoolean(this, PKeys.START_AT_BOOT, false));
         rpcPort.setText(String.valueOf(Prefs.getInt(this, PKeys.RPC_PORT, 6800)));
         rpcToken.setText(Prefs.getString(this, PKeys.RPC_TOKEN, "aria2"));
+        allowOriginAll.setChecked(Prefs.getBoolean(this, PKeys.RPC_ALLOW_ORIGIN_ALL, false));
         showPerformance.setChecked(Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true));
         updateDelay.setText(String.valueOf(Prefs.getInt(this, PKeys.NOTIFICATION_UPDATE_DELAY, 1)));
 
@@ -238,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                     startAtBoot.setEnabled(!isChecked);
                     rpcToken.setEnabled(!isChecked);
                     rpcPort.setEnabled(!isChecked);
+                    allowOriginAll.setEnabled(!isChecked);
                     showPerformance.setEnabled(!isChecked);
                     clear.setEnabled(!isChecked);
                     if (isChecked) updateDelay.setEnabled(false);

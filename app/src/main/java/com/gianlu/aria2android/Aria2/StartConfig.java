@@ -19,13 +19,15 @@ public class StartConfig implements Serializable {
     public final boolean saveSession;
     public final int rpcPort;
     public final String rpcToken;
+    public final boolean allowOriginAll;
 
-    public StartConfig(String outputDirectory, HashMap<String, String> options, boolean saveSession, int rpcPort, String rpcToken) {
+    public StartConfig(String outputDirectory, HashMap<String, String> options, boolean saveSession, int rpcPort, String rpcToken, boolean allowOriginAll) {
         this.outputDirectory = outputDirectory;
         this.options = options;
         this.saveSession = saveSession;
         this.rpcPort = rpcPort;
         this.rpcToken = rpcToken;
+        this.allowOriginAll = allowOriginAll;
     }
 
     public static StartConfig fromPrefs(Context context) throws JSONException {
@@ -35,6 +37,7 @@ public class StartConfig implements Serializable {
                 options,
                 Prefs.getBoolean(context, PKeys.SAVE_SESSION, true),
                 Prefs.getInt(context, PKeys.RPC_PORT, 6800),
-                Prefs.getString(context, PKeys.RPC_TOKEN, "aria2"));
+                Prefs.getString(context, PKeys.RPC_TOKEN, "aria2"),
+                Prefs.getBoolean(context, PKeys.RPC_ALLOW_ORIGIN_ALL, false));
     }
 }

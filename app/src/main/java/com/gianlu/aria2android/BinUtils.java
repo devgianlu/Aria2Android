@@ -124,6 +124,9 @@ public class BinUtils {
             builder.append(" --save-session=").append(sessionPath).append(" --save-session-interval=10");
         else builder.append(" ");
 
+        if (config.allowOriginAll) builder.append(" --rpc-allow-origin-all=true");
+        else builder.append(" ");
+
         builder.append(Utils.optionsBuilder(config.options));
 
         return builder.toString();
