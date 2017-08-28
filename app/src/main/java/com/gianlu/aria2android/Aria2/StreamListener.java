@@ -12,14 +12,16 @@ import java.util.regex.Pattern;
 
 public class StreamListener extends Thread {
     private static final Pattern UNRECOGNIZED_OPTION_PATTERN = Pattern.compile("aria2c: unrecognized option `(.*?)'");
+    private final Process process;
     private final InputStream in;
     private final InputStream err;
     private final IStreamListener listener;
     private volatile boolean _shouldStop;
 
-    public StreamListener(InputStream in, InputStream err, IStreamListener listener) {
-        this.in = in;
-        this.err = err;
+    public StreamListener(Process process, IStreamListener listener) {
+        this.process = process;
+        this.in = process.getInputStream();
+        this.err = process.getErrorStream();
         this.listener = listener;
     }
 
@@ -27,12 +29,21 @@ public class StreamListener extends Thread {
         _shouldStop = true;
     }
 
+    private boolean isProcessAlive() {
+        try {
+            process.exitValue();
+            return false;
+        } catch (IllegalThreadStateException ex) {
+            return true;
+        }
+    }
+
     @Override
     public void run() {
         BufferedReader in = new BufferedReader(new InputStreamReader(this.in));
         BufferedReader err = new BufferedReader(new InputStreamReader(this.err));
 
-        while (!_shouldStop) {
+        while (!_shouldStop && isProcessAlive()) {
             try {
                 String inLine;
                 if ((inLine = in.readLine()) != null) {
@@ -57,8 +68,7 @@ public class StreamListener extends Thread {
                     if (BuildConfig.DEBUG) System.err.println("aria2c: " + errLine);
                 }
             } catch (IOException ex) {
-                if (BuildConfig.DEBUG)
-                    ex.printStackTrace(); // FIXME: "read failed" when terminating the process
+                if (BuildConfig.DEBUG) ex.printStackTrace();
                 listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Failed parsing the log: " + ex.getMessage()));
             }
         }

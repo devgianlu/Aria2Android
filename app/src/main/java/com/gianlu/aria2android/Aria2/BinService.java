@@ -53,7 +53,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     private void startBin(StartConfig config) {
         try {
             process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
-            streamListener = new StreamListener(process.getInputStream(), process.getErrorStream(), this);
+            streamListener = new StreamListener(process, this);
             streamListener.start();
         } catch (IOException ex) {
             ex(ex);

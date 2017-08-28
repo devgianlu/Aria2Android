@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
             serviceMessenger = null;
         }
     };
+    private ToggleButton toggleServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView version = findViewById(R.id.main_binVersion);
         final CheckBox saveSession = findViewById(R.id.options_saveSession);
         final CheckBox startAtBoot = findViewById(R.id.options_startAtBoot);
-        final ToggleButton toggleServer = findViewById(R.id.main_toggleServer);
+        toggleServer = findViewById(R.id.main_toggleServer);
         final Button openAria2App = findViewById(R.id.main_openAria2App);
         final SuperEditText outputPath = findViewById(R.id.options_outputPath);
         final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
@@ -310,6 +311,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean stopService() {
+        if (serviceMessenger == null) return true;
+
         try {
             serviceMessenger.send(Message.obtain(null, BinService.STOP, null));
         } catch (RemoteException ex) {
@@ -446,13 +449,12 @@ public class MainActivity extends AppCompatActivity {
                             case SERVER_START:
                                 noLogs.setVisibility(View.GONE);
                                 logs.setVisibility(View.VISIBLE);
-
-                                adapter.clear();
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                                 break;
-                            case SERVER_STOP: // FIXME: Should change button state
+                            case SERVER_STOP:
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
                                 LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
+                                toggleServer.setChecked(false);
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");
