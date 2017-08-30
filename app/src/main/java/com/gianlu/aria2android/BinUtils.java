@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.gianlu.aria2android.Aria2.StartConfig;
@@ -105,7 +106,7 @@ public class BinUtils {
         }
     }
 
-    public static String createCommandLine(Context context, StartConfig config) {
+    public static String createCommandLine(Context context, @NonNull StartConfig config) {
         String binPath = new File(context.getFilesDir(), "aria2c").getAbsolutePath();
         String sessionPath = new File(context.getFilesDir(), "session").getAbsolutePath();
 

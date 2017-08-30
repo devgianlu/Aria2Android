@@ -9,6 +9,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -50,7 +51,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
         return messenger.getBinder();
     }
 
-    private void startBin(StartConfig config) {
+    private void startBin(@NonNull StartConfig config) {
         try {
             process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
             streamListener = new StreamListener(process, this);

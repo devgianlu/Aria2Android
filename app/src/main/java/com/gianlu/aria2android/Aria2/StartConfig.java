@@ -2,6 +2,7 @@ package com.gianlu.aria2android.Aria2;
 
 import android.content.Context;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 
 import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.Utils;
@@ -30,6 +31,7 @@ public class StartConfig implements Serializable {
         this.allowOriginAll = allowOriginAll;
     }
 
+    @NonNull
     public static StartConfig fromPrefs(Context context) throws JSONException {
         HashMap<String, String> options = new HashMap<>();
         Utils.toMap(new JSONObject(Prefs.getBase64String(context, PKeys.CUSTOM_OPTIONS, "{}")), options);
