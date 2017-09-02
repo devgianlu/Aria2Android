@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public class StreamListener extends Thread {
     private static final Pattern UNRECOGNIZED_OPTION_PATTERN = Pattern.compile("aria2c: unrecognized option `(.*?)'");
+    private static final Pattern UNPROCESSABLE_OPTION_PATTERN = Pattern.compile("We encountered a problem while processing the option '(.*?)'");
     private final Process process;
     private final InputStream in;
     private final InputStream err;
@@ -60,6 +61,8 @@ public class StreamListener extends Thread {
                     } else {
                         if (errLine.contains("unrecognized option")) {
                             handleUnrecognizedOption(errLine);
+                        } else if (errLine.contains("We encountered a problem while processing the option")) {
+                            handleUnprocessableOption(errLine);
                         } else {
                             listener.unknownLogLine(errLine);
                         }
@@ -79,6 +82,16 @@ public class StreamListener extends Thread {
         if (matcher.find()) {
             String option = matcher.group(1);
             listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Unrecognized option: " + option));
+        }
+
+        listener.onTerminated();
+    }
+
+    private void handleUnprocessableOption(String line) {
+        Matcher matcher = UNPROCESSABLE_OPTION_PATTERN.matcher(line);
+        if (matcher.find()) {
+            String option = matcher.group(1);
+            listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Invalid option value: " + option));
         }
 
         listener.onTerminated();

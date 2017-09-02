@@ -177,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
                     throw new SuperEditText.InvalidInputException(R.string.invalidPort);
                 }
 
-                if (port > 0 && port < 65535) Prefs.putInt(MainActivity.this, PKeys.RPC_PORT, port);
+                if (port > 1024 && port < 65535)
+                    Prefs.putInt(MainActivity.this, PKeys.RPC_PORT, port);
                 else throw new SuperEditText.InvalidInputException(R.string.invalidPort);
             }
         });
