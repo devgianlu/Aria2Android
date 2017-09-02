@@ -305,8 +305,13 @@ public class MainActivity extends AppCompatActivity {
         receiver = new ServiceBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         try {
-            serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(this)));
-            return true;
+            if (serviceMessenger != null) {
+                serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(this)));
+                return true;
+            } else {
+                bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
+                return false;
+            }
         } catch (JSONException ex) {
             Toaster.show(this, Utils.Messages.FAILED_LOADING_OPTIONS, ex);
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);

@@ -26,7 +26,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             return;
 
         if (Prefs.getBoolean(context, PKeys.START_AT_BOOT, false)) {
-            context.bindService(new Intent(context, BinService.class), new ServiceConnection() {
+            context.getApplicationContext().bindService(new Intent(context, BinService.class), new ServiceConnection() {
 
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
