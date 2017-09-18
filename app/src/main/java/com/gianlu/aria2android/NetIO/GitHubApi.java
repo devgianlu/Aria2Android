@@ -1,7 +1,7 @@
 package com.gianlu.aria2android.NetIO;
 
-import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,12 +25,12 @@ public class GitHubApi {
     private final Handler handler;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    private GitHubApi(Context context) {
-        this.handler = new Handler(context.getMainLooper());
+    private GitHubApi() {
+        this.handler = new Handler(Looper.getMainLooper());
     }
 
-    public static GitHubApi get(Context context) {
-        if (instance == null) instance = new GitHubApi(context);
+    public static GitHubApi get() {
+        if (instance == null) instance = new GitHubApi();
         return instance;
     }
 

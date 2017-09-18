@@ -15,16 +15,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            lintOptions {
-                disable 'MissingTranslation'
-            }
         }
     }
 }
 
 dependencies {
     compile project(':CommonUtils')
-    compile 'com.google.android.gms:play-services-analytics:11.2.0'
+    compile 'com.google.android.gms:play-services-analytics:11.2.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

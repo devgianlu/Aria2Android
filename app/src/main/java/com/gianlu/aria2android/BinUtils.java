@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -24,7 +25,7 @@ import java.util.zip.ZipInputStream;
 
 public class BinUtils {
     public static void downloadAndExtractBin(final Context context, final GitHubApi.Release.Asset asset, final IDownloadAndExtractBin listener) {
-        final Handler handler = new Handler(context.getMainLooper());
+        final Handler handler = new Handler(Looper.getMainLooper());
         new Thread(new Runnable() {
             @Override
             public void run() {

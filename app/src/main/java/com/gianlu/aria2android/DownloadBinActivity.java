@@ -32,7 +32,7 @@ public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.
         list = findViewById(R.id.downloadBin_list);
 
         progress.setText(R.string.retrievingReleases);
-        GitHubApi.get(this).getReleases("aria2", "aria2", this);
+        GitHubApi.get().getReleases("aria2", "aria2", this);
     }
 
     @Override
