@@ -274,6 +274,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        unbindService(serviceConnection);
+        super.onDestroy();
+    }
+
     private boolean startService() {
         Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
         ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
@@ -328,12 +334,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        unbindService(serviceConnection);
-        super.onStop();
     }
 
     private boolean stopService() {

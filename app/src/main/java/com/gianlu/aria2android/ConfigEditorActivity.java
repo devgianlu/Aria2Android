@@ -134,7 +134,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == IMPORT_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK && data.getData() != null) {
                 try {
                     InputStream in = getContentResolver().openInputStream(data.getData());
                     if (in != null) importOptionsFromStream(in);

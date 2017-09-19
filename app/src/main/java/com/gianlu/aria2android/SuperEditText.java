@@ -63,7 +63,11 @@ public class SuperEditText extends TextInputLayout implements TextWatcher {
             try {
                 validator.validate(editable.toString());
             } catch (InvalidInputException ex) {
-                text.setError(getContext().getString(ex.messageId));
+                try {
+                    text.setError(getContext().getString(ex.messageId));
+                } catch (ClassCastException ignored) {
+                    // What?!
+                }
             }
         }
     }
