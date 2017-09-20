@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
@@ -62,6 +63,12 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
         @Override
         protected int getAppNameRes() {
             return R.string.app_name;
+        }
+
+        @NonNull
+        @Override
+        protected String getPackageName() {
+            return "com.gianlu.aria2android";
         }
 
         @Override
