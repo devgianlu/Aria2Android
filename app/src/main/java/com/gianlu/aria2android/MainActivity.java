@@ -276,7 +276,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unbindService(serviceConnection);
+        try {
+            unbindService(serviceConnection);
+        } catch (IllegalArgumentException ignored) {}
         super.onDestroy();
     }
 
