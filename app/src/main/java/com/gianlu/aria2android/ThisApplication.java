@@ -8,9 +8,4 @@ public class ThisApplication extends AnalyticsApplication {
     protected boolean isDebug() {
         return BuildConfig.DEBUG;
     }
-
-    @Override
-    protected int getTrackerConfiguration() {
-        return R.xml.tracking;
-    }
 }

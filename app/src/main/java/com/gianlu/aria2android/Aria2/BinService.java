@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -23,7 +24,6 @@ import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
-import com.google.android.gms.analytics.HitBuilders;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -144,10 +144,10 @@ public class BinService extends Service implements StreamListener.IStreamListene
     @Override
     public void unknownLogLine(String line) {
         if (BuildConfig.DEBUG) System.out.println("UNKNOWN LINE: " + line);
-        AnalyticsApplication.sendAnalytics(this, new HitBuilders.EventBuilder()
-                .setCategory(Utils.CATEGORY_UNKNOWN_LOG_LINE)
-                .setAction(Utils.ACTION_UNKNOWN_LOG_LINE)
-                .setLabel(line));
+
+        Bundle bundle = new Bundle();
+        bundle.putString(Utils.LABEL_LOG_LINE, line);
+        AnalyticsApplication.sendAnalytics(this, Utils.EVENT_UNKNOWN_LOG_LINE, bundle);
     }
 
     public enum Action {

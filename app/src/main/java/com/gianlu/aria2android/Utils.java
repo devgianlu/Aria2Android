@@ -12,15 +12,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Utils {
-    public static final String CATEGORY_USER_INPUT = "User input";
-    public static final String CATEGORY_TIMING = "Timings";
-    public static final String LABEL_SESSION_DURATION = "Session duration";
-    public static final String ACTION_TURN_ON = "aria2 turned on";
-    public static final String ACTION_TURN_OFF = "aria2 turned off";
-    public static final String ACTION_OPENED_ARIA2APP = "Opened Aria2App";
-    public static final String ACTION_DONATE_OPEN = "Opened donation dialog";
-    public static final String CATEGORY_UNKNOWN_LOG_LINE = "Unknown log line";
-    public static final String ACTION_UNKNOWN_LOG_LINE = "Unknown log line read";
+    public static final String LABEL_SESSION_DURATION = "session_duration";
+    public static final String ACTION_TURN_ON = "aria2_on";
+    public static final String ACTION_TURN_OFF = "aria2_off";
+    public static final String ACTION_OPENED_ARIA2APP = "opened_aria2app";
+    public static final String EVENT_UNKNOWN_LOG_LINE = "read_unknown_log_line";
+    public static final String LABEL_LOG_LINE = "log_line";
 
     public static String optionsBuilder(@Nullable Map<String, String> options) {
         if (options == null || options.isEmpty()) return "";

@@ -40,7 +40,6 @@ import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
 import com.gianlu.commonutils.Toaster;
-import com.google.android.gms.analytics.HitBuilders;
 
 import org.json.JSONException;
 
@@ -279,15 +278,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         try {
             unbindService(serviceConnection);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
         super.onDestroy();
     }
 
     private boolean startService() {
         Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
-        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(Utils.CATEGORY_USER_INPUT)
-                .setAction(Utils.ACTION_TURN_ON));
+        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_ON);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Toaster.show(MainActivity.this, Utils.Messages.WRITE_STORAGE_DENIED);
@@ -348,18 +346,15 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(Utils.CATEGORY_USER_INPUT)
-                .setAction(Utils.ACTION_TURN_OFF));
 
+        Bundle bundle = null;
         if (Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1) != -1) {
-            AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
-                    .setCategory(Utils.CATEGORY_TIMING)
-                    .setVariable(Utils.LABEL_SESSION_DURATION)
-                    .setValue(System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1)));
-
+            bundle = new Bundle();
+            bundle.putLong(Utils.LABEL_SESSION_DURATION, System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1));
             Prefs.putLong(this, PKeys.CURRENT_SESSION_START, -1);
         }
+
+        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_OFF, bundle);
 
         return true;
     }
@@ -418,9 +413,7 @@ public class MainActivity extends AppCompatActivity {
                     .putExtra("token", Prefs.getString(this, PKeys.RPC_TOKEN, "aria2")));
         }
 
-        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(Utils.CATEGORY_USER_INPUT)
-                .setAction(Utils.ACTION_OPENED_ARIA2APP));
+        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_OPENED_ARIA2APP);
     }
 
     @Override
