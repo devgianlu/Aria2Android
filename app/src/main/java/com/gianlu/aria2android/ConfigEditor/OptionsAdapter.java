@@ -90,13 +90,13 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         void onItemsCountChanged(int count);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         final TextView key;
         final TextView value;
         final ImageButton edit;
         final ImageButton delete;
 
-        public ViewHolder(ViewGroup parent) {
+        ViewHolder(ViewGroup parent) {
             super(inflater.inflate(R.layout.option_item, parent, false));
 
             key = itemView.findViewById(R.id.optionItem_key);

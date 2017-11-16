@@ -35,6 +35,7 @@ import android.widget.ToggleButton;
 
 import com.gianlu.aria2android.Aria2.BinService;
 import com.gianlu.aria2android.Aria2.StartConfig;
+import com.gianlu.commonutils.AnalyticsApplication;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
@@ -284,10 +285,9 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean startService() {
         Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
-        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                .setAction(ThisApplication.ACTION_TURN_ON)
-                .build());
+        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(Utils.CATEGORY_USER_INPUT)
+                .setAction(Utils.ACTION_TURN_ON));
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Toaster.show(MainActivity.this, Utils.Messages.WRITE_STORAGE_DENIED);
@@ -348,17 +348,15 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                .setAction(ThisApplication.ACTION_TURN_OFF)
-                .build());
+        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(Utils.CATEGORY_USER_INPUT)
+                .setAction(Utils.ACTION_TURN_OFF));
 
         if (Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1) != -1) {
-            ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
-                    .setCategory(ThisApplication.CATEGORY_TIMING)
-                    .setVariable(ThisApplication.LABEL_SESSION_DURATION)
-                    .setValue(System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1))
-                    .build());
+            AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.TimingBuilder()
+                    .setCategory(Utils.CATEGORY_TIMING)
+                    .setVariable(Utils.LABEL_SESSION_DURATION)
+                    .setValue(System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1)));
 
             Prefs.putLong(this, PKeys.CURRENT_SESSION_START, -1);
         }
@@ -388,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
         } catch (PackageManager.NameNotFoundException ex) {
-            Logging.logMe(this, ex);
+            Logging.logMe(ex);
             installAria2App();
             return;
         }
@@ -420,10 +418,9 @@ public class MainActivity extends AppCompatActivity {
                     .putExtra("token", Prefs.getString(this, PKeys.RPC_TOKEN, "aria2")));
         }
 
-        ThisApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
-                .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                .setAction(ThisApplication.ACTION_OPENED_ARIA2APP)
-                .build());
+        AnalyticsApplication.sendAnalytics(MainActivity.this, new HitBuilders.EventBuilder()
+                .setCategory(Utils.CATEGORY_USER_INPUT)
+                .setAction(Utils.ACTION_OPENED_ARIA2APP));
     }
 
     @Override
@@ -486,7 +483,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");
-                                Logging.logMe(MainActivity.this, ex);
+                                Logging.logMe(ex);
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
                                 break;
                             case SERVER_MSG:

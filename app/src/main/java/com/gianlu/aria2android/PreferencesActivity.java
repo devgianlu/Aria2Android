@@ -11,7 +11,6 @@ import com.gianlu.commonutils.AppCompatPreferenceActivity;
 import com.gianlu.commonutils.AppCompatPreferenceFragment;
 import com.gianlu.commonutils.BaseAboutFragment;
 import com.gianlu.commonutils.LogsActivity;
-import com.google.android.gms.analytics.HitBuilders;
 
 import java.util.List;
 
@@ -69,14 +68,6 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
         @Override
         protected String getPackageName() {
             return "com.gianlu.aria2android";
-        }
-
-        @Override
-        protected void sendAnalytics() {
-            ThisApplication.sendAnalytics(getActivity(), new HitBuilders.EventBuilder()
-                    .setCategory(ThisApplication.CATEGORY_USER_INPUT)
-                    .setAction(ThisApplication.ACTION_DONATE_OPEN)
-                    .build());
         }
 
         @Override

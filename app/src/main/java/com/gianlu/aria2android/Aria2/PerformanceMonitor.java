@@ -50,7 +50,7 @@ public class PerformanceMonitor extends Thread {
             }
         } catch (IOException ex) {
             stopSafe();
-            Logging.logMe(context, ex);
+            Logging.logMe(ex);
             builder.setCustomContentView(null);
             manager.notify(BinService.NOTIFICATION_ID, builder.build());
         }

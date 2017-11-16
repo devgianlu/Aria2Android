@@ -19,7 +19,8 @@ import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.MainActivity;
 import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.R;
-import com.gianlu.aria2android.ThisApplication;
+import com.gianlu.aria2android.Utils;
+import com.gianlu.commonutils.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
 import com.google.android.gms.analytics.HitBuilders;
@@ -79,7 +80,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     }
 
     private void ex(Exception ex) {
-        Logging.logMe(this, ex);
+        Logging.logMe(ex);
         dispatchBroadcast(Action.SERVER_EX, null, ex);
     }
 
@@ -143,11 +144,10 @@ public class BinService extends Service implements StreamListener.IStreamListene
     @Override
     public void unknownLogLine(String line) {
         if (BuildConfig.DEBUG) System.out.println("UNKNOWN LINE: " + line);
-        ThisApplication.sendAnalytics(this, new HitBuilders.EventBuilder()
-                .setCategory(ThisApplication.CATEGORY_UNKNOWN_LOG_LINE)
-                .setAction(ThisApplication.ACTION_UNKNOWN_LOG_LINE)
-                .setLabel(line)
-                .build());
+        AnalyticsApplication.sendAnalytics(this, new HitBuilders.EventBuilder()
+                .setCategory(Utils.CATEGORY_UNKNOWN_LOG_LINE)
+                .setAction(Utils.ACTION_UNKNOWN_LOG_LINE)
+                .setLabel(line));
     }
 
     public enum Action {

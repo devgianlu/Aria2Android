@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    compileSdkVersion 27
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 18
         versionName "1.5.5"
     }
@@ -20,8 +20,5 @@ android {
 }
 
 dependencies {
-    compile project(':CommonUtils')
-    compile 'com.google.android.gms:play-services-analytics:11.4.0'
+    api project(':CommonUtils')
 }
-
-apply plugin: 'com.google.gms.google-services'

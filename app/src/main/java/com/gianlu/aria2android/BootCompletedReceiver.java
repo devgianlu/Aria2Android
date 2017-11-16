@@ -34,7 +34,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     try {
                         messenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(context)));
                     } catch (RemoteException | JSONException ex) {
-                        Logging.logMe(context, ex);
+                        Logging.logMe(ex);
                     }
                 }
 
