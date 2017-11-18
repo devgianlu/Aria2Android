@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -49,6 +51,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private final static int WRITE_PERMISSION_CODE = 6745;
+    private static final int STORAGE_ACCESS_CODE = 454;
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Logging.LogLineAdapter adapter;
@@ -67,6 +70,23 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private ToggleButton toggleServer;
+    private SuperEditText outputPath;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == STORAGE_ACCESS_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Uri uri = data.getData();
+                if (uri != null) {
+                    outputPath.setText(FileUtil.getFullPathFromTreeUri(uri, this));
+                    final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    getContentResolver().takePersistableUriPermission(uri, takeFlags);
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        // TODO: Check if device is ARM
 
         setContentView(R.layout.activity_main);
 
@@ -110,7 +132,15 @@ public class MainActivity extends AppCompatActivity {
         final CheckBox startAtBoot = findViewById(R.id.options_startAtBoot);
         toggleServer = findViewById(R.id.main_toggleServer);
         final Button openAria2App = findViewById(R.id.main_openAria2App);
-        final SuperEditText outputPath = findViewById(R.id.options_outputPath);
+        outputPath = findViewById(R.id.options_outputPath);
+        ImageButton pickOutputPath = findViewById(R.id.options_outputPath_pick);
+        pickOutputPath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                startActivityForResult(intent, STORAGE_ACCESS_CODE);
+            }
+        });
         final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
         final SuperEditText rpcToken = findViewById(R.id.options_rpcToken);
         final CheckBox allowOriginAll = findViewById(R.id.options_allowOriginAll);
