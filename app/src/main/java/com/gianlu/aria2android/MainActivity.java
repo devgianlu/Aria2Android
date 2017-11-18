@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -72,6 +73,14 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton toggleServer;
     private SuperEditText outputPath;
 
+    private static boolean isARM() {
+        for (String abi : Build.SUPPORTED_ABIS)
+            if (abi.contains("arm"))
+                return true;
+
+        return false;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == STORAGE_ACCESS_CODE) {
@@ -98,7 +107,32 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // TODO: Check if device is ARM
+        if (!isARM()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.archNotSupported)
+                    .setMessage(R.string.archNotSupported_message)
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            finish();
+                        }
+                    })
+                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            finish();
+                        }
+                    })
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    });
+
+            CommonUtils.showDialog(this, builder);
+            return;
+        }
 
         setContentView(R.layout.activity_main);
 

@@ -74,4 +74,6 @@
     <string name="accessControlAllowOriginAll">Access Control Allow Origin all</string>
     <string name="accessControlAllowOriginAll_disclaimer">Enabling the option above you\'ll set the <b>Access-Control-Allow-Origin</b> header to <b>*</b>. You should enable this only if you\'re trying to connect from an external device. Please consider reading this post: http://gianlu.xyz/apps/docs/aria2android/about-cors.html</string>
     <string name="noCustomOptions">You have no custom options.</string>
+    <string name="archNotSupported">Device architecture not supported</string>
+    <string name="archNotSupported_message">The aria2 executable is compiled to run on arm devices only.</string>
 </resources>
