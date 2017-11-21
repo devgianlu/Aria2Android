@@ -25,6 +25,7 @@ public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_bin);
+        setTitle(getString(R.string.downloadBin) + " - " + getString(R.string.app_name));
 
         layout = findViewById(R.id.downloadBin);
         loading = findViewById(R.id.downloadBin_loading);

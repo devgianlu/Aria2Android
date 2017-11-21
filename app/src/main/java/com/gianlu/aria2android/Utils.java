@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class Utils {
+public final class Utils {
     public static final String LABEL_SESSION_DURATION = "session_duration";
     public static final String ACTION_TURN_ON = "aria2_on";
     public static final String ACTION_TURN_OFF = "aria2_off";
@@ -57,7 +57,7 @@ public class Utils {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static class Messages {
+    public static final class Messages {
         public static final Toaster.Message FAILED_CREATING_SESSION_FILE = new Toaster.Message(R.string.failedCreatingSessionFile, true);
         public static final Toaster.Message WRITE_STORAGE_DENIED = new Toaster.Message(R.string.writePermissionDenied, true);
         public static final Toaster.Message CANT_DELETE_BIN = new Toaster.Message(R.string.cannotDeleteBin, true);

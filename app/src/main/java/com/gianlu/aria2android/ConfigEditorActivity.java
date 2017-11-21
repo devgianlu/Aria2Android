@@ -10,17 +10,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.gianlu.aria2android.ConfigEditor.OptionsAdapter;
 import com.gianlu.commonutils.CommonUtils;
-import com.gianlu.commonutils.MessageLayout;
 import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
 import com.gianlu.commonutils.Toaster;
 
@@ -41,20 +39,20 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
     private final Map<String, String> options = new HashMap<>();
     private boolean hasChanges = false;
     private OptionsAdapter adapter;
-    private FrameLayout layout;
+    private RecyclerViewLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_config_editor);
+
+        layout = new RecyclerViewLayout(this);
+        setContentView(layout);
         setTitle(R.string.customOptions);
 
-        layout = findViewById(R.id.configEditor);
-        RecyclerView list = findViewById(R.id.configEditor_list);
-        list.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        layout.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        layout.getList().addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         adapter = new OptionsAdapter(this, options, this);
-        list.setAdapter(adapter);
+        layout.loadListData(adapter);
 
         try {
             load();
@@ -116,6 +114,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
         options.putAll(newOptions);
         hasChanges = true;
         adapter.notifyItemRangeInserted(options.size() - newOptions.size(), newOptions.size());
+        onItemsCountChanged(options.size());
     }
 
     private void importOptionsFromStream(@NonNull InputStream in) {
@@ -261,10 +260,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
 
     @Override
     public void onItemsCountChanged(int count) {
-        if (count == 0) {
-            MessageLayout.show(layout, R.string.noCustomOptions, R.drawable.ic_info_outline_black_48dp);
-        } else {
-            MessageLayout.hide(layout);
-        }
+        if (count <= 0) layout.showMessage(R.string.noCustomOptions, false);
+        else layout.showList();
     }
 }
