@@ -77,4 +77,5 @@
     <string name="archNotSupported">Device architecture not supported</string>
     <string name="archNotSupported_message">The aria2 executable is compiled to run on arm devices only.</string>
     <string name="downloadBin">Download bin</string>
+    <string name="noOpenTree">No application found to handle this operation. Please enter the path manually.</string>
 </resources>

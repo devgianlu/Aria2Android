@@ -67,5 +67,6 @@ public final class Utils {
         public static final Toaster.Message FAILED_SAVING_CUSTOM_OPTIONS = new Toaster.Message(R.string.failedSavingCustomOptions, true);
         public static final Toaster.Message FAILED_STARTING = new Toaster.Message(R.string.failedStarting, true);
         public static final Toaster.Message FAILED_STOPPING = new Toaster.Message(R.string.failedStopping, true);
+        public static final Toaster.Message NO_OPEN_TREE = new Toaster.Message(R.string.noOpenTree, false);
     }
 }

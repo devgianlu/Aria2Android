@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -172,7 +173,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                startActivityForResult(intent, STORAGE_ACCESS_CODE);
+
+                try {
+                    startActivityForResult(intent, STORAGE_ACCESS_CODE);
+                } catch (ActivityNotFoundException ex) {
+                    Toaster.show(MainActivity.this, Utils.Messages.NO_OPEN_TREE, ex);
+                }
             }
         });
         final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
