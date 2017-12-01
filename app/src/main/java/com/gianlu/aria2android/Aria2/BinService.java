@@ -1,9 +1,15 @@
 package com.gianlu.aria2android.Aria2;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -33,7 +39,8 @@ public class BinService extends Service implements StreamListener.IStreamListene
     public static final int STOP = 1;
     public static final int NOTIFICATION_ID = 4534532;
     private static final String CHANNEL_ID = "aria2android";
-    private final HandlerThread serviceThread = new HandlerThread("aria2c service");
+    private static final String SERVICE_NAME = "aria2 service";
+    private final HandlerThread serviceThread = new HandlerThread(SERVICE_NAME);
     private Messenger messenger;
     private Process process;
     private LocalBroadcastManager broadcastManager;
@@ -52,6 +59,15 @@ public class BinService extends Service implements StreamListener.IStreamListene
         return messenger.getBinder();
     }
 
+    @TargetApi(Build.VERSION_CODES.O)
+    private void createChannel() {
+        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_HIGH);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        chan.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (service != null) service.createNotificationChannel(chan);
+    }
+
     private void startBin(@NonNull StartConfig config) {
         try {
             process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
@@ -61,8 +77,10 @@ public class BinService extends Service implements StreamListener.IStreamListene
             ex(ex);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createChannel();
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                .setContentTitle("aria2c service")
+                .setContentTitle(SERVICE_NAME)
                 .setShowWhen(false)
                 .setAutoCancel(false)
                 .setOngoing(true)
