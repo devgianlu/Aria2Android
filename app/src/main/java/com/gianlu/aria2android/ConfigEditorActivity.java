@@ -20,6 +20,7 @@ import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
+import com.gianlu.commonutils.SuppressingLinearLayoutManager;
 import com.gianlu.commonutils.Toaster;
 
 import org.json.JSONException;
@@ -49,7 +50,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
         setContentView(layout);
         setTitle(R.string.customOptions);
 
-        layout.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        layout.setLayoutManager(new SuppressingLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         layout.getList().addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         adapter = new OptionsAdapter(this, options, this);
         layout.loadListData(adapter);
