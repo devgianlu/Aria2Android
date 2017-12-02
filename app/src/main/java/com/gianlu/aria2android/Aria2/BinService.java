@@ -9,6 +9,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,12 +35,15 @@ import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Prefs;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 
 public class BinService extends Service implements StreamListener.IStreamListener {
     public static final int START = 0;
     public static final int STOP = 1;
     public static final int NOTIFICATION_ID = 4534532;
+    public static final String ACTION_START_SERVICE = "com.gianlu.aria2android.START_SERVICE";
+    public static final String ACTION_STOP_SERVICE = "com.gianlu.aria2android.STOP_SERVICE";
     private static final String CHANNEL_ID = "aria2android";
     private static final String SERVICE_NAME = "aria2 service";
     private final HandlerThread serviceThread = new HandlerThread(SERVICE_NAME);
@@ -46,6 +52,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     private LocalBroadcastManager broadcastManager;
     private StreamListener streamListener;
     private PerformanceMonitor performanceMonitor;
+    private ShortcutManager shortcutManager;
 
     @Nullable
     @Override
@@ -54,6 +61,8 @@ public class BinService extends Service implements StreamListener.IStreamListene
             serviceThread.start();
             broadcastManager = LocalBroadcastManager.getInstance(this);
             messenger = new Messenger(new LocalHandler());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1)
+                shortcutManager = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
         }
 
         return messenger.getBinder();
@@ -61,9 +70,8 @@ public class BinService extends Service implements StreamListener.IStreamListene
 
     @TargetApi(Build.VERSION_CODES.O)
     private void createChannel() {
-        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        chan.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (service != null) service.createNotificationChannel(chan);
     }
@@ -92,6 +100,16 @@ public class BinService extends Service implements StreamListener.IStreamListene
         if (Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true)) {
             performanceMonitor = new PerformanceMonitor(this, builder);
             performanceMonitor.start();
+        }
+
+        if (shortcutManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "stopService")
+                    .setShortLabel(getString(R.string.stopService))
+                    .setIcon(Icon.createWithResource(this, R.drawable.ic_stop_black_48dp))
+                    .setIntent(new Intent(ACTION_STOP_SERVICE))
+                    .build();
+
+            shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
         }
 
         dispatchBroadcast(Action.SERVER_START, null, null);
@@ -127,6 +145,16 @@ public class BinService extends Service implements StreamListener.IStreamListene
         if (performanceMonitor != null) {
             performanceMonitor.stopSafe();
             streamListener = null;
+        }
+
+        if (shortcutManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "startService")
+                    .setShortLabel(getString(R.string.startService))
+                    .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_48dp))
+                    .setIntent(new Intent(ACTION_START_SERVICE))
+                    .build();
+
+            shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
         }
 
         stopForeground(true);

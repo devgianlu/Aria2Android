@@ -50,6 +50,7 @@ import org.json.JSONException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private final static int WRITE_PERMISSION_CODE = 6745;
@@ -132,6 +133,18 @@ public class MainActivity extends AppCompatActivity {
                     });
 
             CommonUtils.showDialog(this, builder);
+            return;
+        }
+
+        if (Objects.equals(getIntent().getAction(), BinService.ACTION_START_SERVICE)) {
+            startService();
+            finish();
+            return;
+        }
+
+        if (Objects.equals(getIntent().getAction(), BinService.ACTION_STOP_SERVICE)) {
+            stopService();
+            finish();
             return;
         }
 

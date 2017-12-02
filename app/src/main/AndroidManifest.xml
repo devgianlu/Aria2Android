@@ -31,6 +31,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.gianlu.aria2android.START_SERVICE" />
+                <action android:name="com.gianlu.aria2android.STOP_SERVICE" />
+            </intent-filter>
         </activity>
 
         <!-- aria2 service -->
