@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         toggleServer = findViewById(R.id.main_toggleServer);
         final Button openAria2App = findViewById(R.id.main_openAria2App);
         outputPath = findViewById(R.id.options_outputPath);
-        ImageButton pickOutputPath = findViewById(R.id.options_outputPath_pick);
+        final ImageButton pickOutputPath = findViewById(R.id.options_outputPath_pick);
         pickOutputPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -326,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (successful) {
                     outputPath.setEnabled(!isChecked);
+                    pickOutputPath.setEnabled(!isChecked);
                     customOptions.setEnabled(!isChecked);
                     saveSession.setEnabled(!isChecked);
                     startAtBoot.setEnabled(!isChecked);
