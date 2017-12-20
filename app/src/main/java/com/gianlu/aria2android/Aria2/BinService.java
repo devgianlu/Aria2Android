@@ -178,7 +178,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
         if (process != null) {
             try {
                 process.waitFor();
-                int exit = process.exitValue(); // TODO: Create map of exit codes
+                int exit = process.exitValue();
                 if (exit > 0) ex(new Exception("aria2c terminated with exit code " + exit));
                 stopBin();
             } catch (InterruptedException | IllegalThreadStateException ex) {
