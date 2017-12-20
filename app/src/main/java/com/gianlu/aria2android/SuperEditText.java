@@ -68,7 +68,11 @@ public class SuperEditText extends TextInputLayout implements TextWatcher {
                 } catch (ClassCastException ignored) {
                     // What?!
                 }
+
+                return;
             }
+
+            setErrorEnabled(false);
         }
     }
 

@@ -18,6 +18,7 @@ public final class Utils {
     public static final String ACTION_OPENED_ARIA2APP = "opened_aria2app";
     public static final String EVENT_UNKNOWN_LOG_LINE = "read_unknown_log_line";
     public static final String LABEL_LOG_LINE = "log_line";
+    public static final String ACTION_IMPORT_BIN = "imported_bin";
 
     public static String optionsBuilder(@Nullable Map<String, String> options) {
         if (options == null || options.isEmpty()) return "";
@@ -68,5 +69,6 @@ public final class Utils {
         public static final Toaster.Message FAILED_STARTING = new Toaster.Message(R.string.failedStarting, true);
         public static final Toaster.Message FAILED_STOPPING = new Toaster.Message(R.string.failedStopping, true);
         public static final Toaster.Message NO_OPEN_TREE = new Toaster.Message(R.string.noOpenTree, false);
+        public static final Toaster.Message FAILED_IMPORTING_BIN = new Toaster.Message(R.string.failedImportingBin, true);
     }
 }

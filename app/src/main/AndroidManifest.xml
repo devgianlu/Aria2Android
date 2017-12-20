@@ -4,6 +4,8 @@
 
     <!-- You know... -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Import bin -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Save downloads -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- Google Analytics -->

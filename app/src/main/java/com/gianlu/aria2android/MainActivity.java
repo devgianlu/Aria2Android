@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (!isARM()) {
+        if (!isARM() && !Prefs.getBoolean(this, PKeys.CUSTOM_BIN, false)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
@@ -123,6 +123,14 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onCancel(DialogInterface dialog) {
                             finish();
+                        }
+                    })
+                    .setNeutralButton(R.string.importBin, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                                    .putExtra("importBin", true)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                         }
                     })
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

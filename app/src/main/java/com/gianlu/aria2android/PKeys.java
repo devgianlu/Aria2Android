@@ -4,6 +4,7 @@ import com.gianlu.commonutils.Prefs;
 
 public enum PKeys implements Prefs.PrefKey {
     SHOW_PERFORMANCE("showPerformance"),
+    CUSTOM_BIN("hasCustomBin"),
     OUTPUT_DIRECTORY("outputPath"),
     RPC_PORT("rpcPort"),
     RPC_TOKEN("rpcToken"),

@@ -51,7 +51,7 @@ public class BinUtils {
                                     try (FileOutputStream out = context.openFileOutput("aria2c", Context.MODE_PRIVATE)) {
                                         while ((count = zis.read(buffer)) != -1)
                                             out.write(buffer, 0, count);
-                                        out.close();
+                                        out.flush();
 
                                         Runtime.getRuntime().exec("chmod 711 " + new File(context.getFilesDir(), "aria2c").getAbsolutePath());
                                     }
@@ -81,6 +81,19 @@ public class BinUtils {
                 }
             }
         }).start();
+    }
+
+    public static void writeStreamAsBin(Context context, InputStream in) throws IOException {
+        if (in == null) throw new IOException(new NullPointerException("InputStream is null!"));
+
+        int count;
+        byte[] buffer = new byte[8192];
+        try (FileOutputStream out = context.openFileOutput("aria2c", Context.MODE_PRIVATE)) {
+            while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+            out.flush();
+
+            Runtime.getRuntime().exec("chmod 711 " + new File(context.getFilesDir(), "aria2c").getAbsolutePath());
+        }
     }
 
     public static boolean binAvailable(Context context) {
