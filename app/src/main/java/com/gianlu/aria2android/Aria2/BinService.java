@@ -30,9 +30,9 @@ import com.gianlu.aria2android.MainActivity;
 import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
-import com.gianlu.commonutils.AnalyticsApplication;
+import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -116,7 +116,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     }
 
     private void ex(Exception ex) {
-        Logging.logMe(ex);
+        Logging.log(ex);
         dispatchBroadcast(Action.SERVER_EX, null, ex);
     }
 

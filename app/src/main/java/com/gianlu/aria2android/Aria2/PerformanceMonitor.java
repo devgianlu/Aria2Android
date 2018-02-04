@@ -9,7 +9,7 @@ import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.R;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class PerformanceMonitor extends Thread {
             }
         } catch (IOException ex) {
             stopSafe();
-            Logging.logMe(ex);
+            Logging.log(ex);
             builder.setCustomContentView(null);
             manager.notify(BinService.NOTIFICATION_ID, builder.build());
         }

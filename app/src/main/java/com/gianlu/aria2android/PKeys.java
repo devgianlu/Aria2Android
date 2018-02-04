@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
-import com.gianlu.commonutils.Prefs;
+
+import com.gianlu.commonutils.Preferences.Prefs;
 
 public enum PKeys implements Prefs.PrefKey {
     SHOW_PERFORMANCE("showPerformance"),

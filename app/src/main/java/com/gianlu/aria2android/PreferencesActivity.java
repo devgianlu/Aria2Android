@@ -3,9 +3,9 @@ package com.gianlu.aria2android;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import com.gianlu.commonutils.AppCompatPreferenceActivity;
-import com.gianlu.commonutils.BaseAboutFragment;
 import com.gianlu.commonutils.LogsActivity;
+import com.gianlu.commonutils.Preferences.AppCompatPreferenceActivity;
+import com.gianlu.commonutils.Preferences.BaseAboutFragment;
 
 import java.util.List;
 

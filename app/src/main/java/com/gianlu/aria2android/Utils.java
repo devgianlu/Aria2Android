@@ -39,7 +39,7 @@ public final class Utils {
             line = line.trim();
             if (line.startsWith("#")) continue;
             String[] split = line.split("=");
-            map.put(split[0], split.length == 1 ? null : split[1]);
+            if (split.length > 0) map.put(split[0], split.length == 1 ? null : split[1]);
         }
         return map;
     }

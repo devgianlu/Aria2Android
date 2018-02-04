@@ -39,10 +39,10 @@ import android.widget.ToggleButton;
 
 import com.gianlu.aria2android.Aria2.BinService;
 import com.gianlu.aria2android.Aria2.StartConfig;
-import com.gianlu.commonutils.AnalyticsApplication;
+import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
 
 import org.json.JSONException;
@@ -473,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
         } catch (PackageManager.NameNotFoundException ex) {
-            Logging.logMe(ex);
+            Logging.log(ex);
             installAria2App();
             return;
         }
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");
-                                Logging.logMe(ex);
+                                Logging.log(ex);
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
                                 break;
                             case SERVER_MSG:

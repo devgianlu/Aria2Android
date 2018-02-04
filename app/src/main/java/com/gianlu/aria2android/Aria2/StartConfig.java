@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.gianlu.aria2android.PKeys;
 import com.gianlu.aria2android.Utils;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import org.json.JSONException;
 import org.json.JSONObject;

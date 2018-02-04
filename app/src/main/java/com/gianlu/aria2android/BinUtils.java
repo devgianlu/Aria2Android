@@ -115,7 +115,7 @@ public class BinUtils {
                                     .getInputStream()))
                     .readLine();
         } catch (IOException ex) {
-            Logging.logMe(ex);
+            Logging.log(ex);
             return null;
         }
     }

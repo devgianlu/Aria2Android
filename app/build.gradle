@@ -8,13 +8,13 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 25
-        versionName "1.7.0"
+        versionCode 26
+        versionName "1.7.1"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

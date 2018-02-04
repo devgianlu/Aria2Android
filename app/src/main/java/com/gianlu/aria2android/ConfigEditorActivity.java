@@ -17,7 +17,7 @@ import android.widget.LinearLayout;
 
 import com.gianlu.aria2android.ConfigEditor.OptionsAdapter;
 import com.gianlu.commonutils.CommonUtils;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
 import com.gianlu.commonutils.SuppressingLinearLayoutManager;

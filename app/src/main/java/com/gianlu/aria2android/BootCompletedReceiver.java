@@ -13,7 +13,7 @@ import android.os.RemoteException;
 import com.gianlu.aria2android.Aria2.BinService;
 import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import org.json.JSONException;
 
@@ -34,7 +34,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     try {
                         messenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(context)));
                     } catch (RemoteException | JSONException ex) {
-                        Logging.logMe(ex);
+                        Logging.log(ex);
                     }
                 }
 

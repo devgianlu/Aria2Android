@@ -20,10 +20,10 @@ import android.widget.TextView;
 
 import com.gianlu.aria2android.DownloadBin.ReleasesAdapter;
 import com.gianlu.aria2android.NetIO.GitHubApi;
-import com.gianlu.commonutils.AnalyticsApplication;
+import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.MessageLayout;
-import com.gianlu.commonutils.Prefs;
+import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
 
 import java.io.IOException;

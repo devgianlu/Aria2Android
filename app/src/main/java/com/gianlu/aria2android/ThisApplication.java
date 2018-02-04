@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
-import com.gianlu.commonutils.AnalyticsApplication;
+
+import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 
 public class ThisApplication extends AnalyticsApplication {
 
