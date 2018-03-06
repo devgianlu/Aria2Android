@@ -17,12 +17,10 @@ import com.gianlu.commonutils.Preferences.Prefs;
 
 import org.json.JSONException;
 
-import java.util.Objects;
-
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
-        if (!Objects.equals(intent.getAction(), Intent.ACTION_BOOT_COMPLETED))
+        if (!Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
             return;
 
         if (Prefs.getBoolean(context, PKeys.START_AT_BOOT, false)) {
