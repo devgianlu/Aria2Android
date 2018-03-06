@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.gianlu.aria2android.DownloadBin.ReleasesAdapter;
 import com.gianlu.aria2android.NetIO.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
-import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.MessageLayout;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
@@ -29,7 +29,7 @@ import com.gianlu.commonutils.Toaster;
 import java.io.IOException;
 import java.util.List;
 
-public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.IResult<List<GitHubApi.Release>>, ReleasesAdapter.IAdapter, BinUtils.IDownloadAndExtractBin {
+public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.IResult<List<GitHubApi.Release>>, ReleasesAdapter.IAdapter, BinUtils.IDownloadAndExtractBin {
     private static final int READ_PERMISSION_CODE = 5;
     private static final int IMPORT_BIN_CODE = 8;
     private ListView list;
@@ -75,7 +75,11 @@ public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.
     }
 
     private void importBin() {
-        startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), getString(R.string.customBin)), IMPORT_BIN_CODE);
+        try {
+            startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), getString(R.string.customBin)), IMPORT_BIN_CODE);
+        } catch (ActivityNotFoundException ex) {
+            Toaster.show(this, Utils.Messages.FAILED_IMPORTING_BIN, ex);
+        }
     }
 
     @Override
@@ -127,7 +131,7 @@ public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.
                                             }
                                         });
 
-                                CommonUtils.showDialog(DownloadBinActivity.this, builder);
+                                showDialog(builder);
                             } else {
                                 ActivityCompat.requestPermissions(DownloadBinActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, READ_PERMISSION_CODE);
                             }
@@ -138,7 +142,7 @@ public class DownloadBinActivity extends AppCompatActivity implements GitHubApi.
                 })
                 .setNegativeButton(R.string.no, null);
 
-        CommonUtils.showDialog(this, builder);
+        showDialog(builder);
     }
 
     @Override

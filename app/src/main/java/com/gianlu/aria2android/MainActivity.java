@@ -23,7 +23,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,7 +39,7 @@ import android.widget.ToggleButton;
 import com.gianlu.aria2android.Aria2.BinService;
 import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
-import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
@@ -52,7 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ActivityWithDialog {
     private final static int WRITE_PERMISSION_CODE = 6745;
     private static final int STORAGE_ACCESS_CODE = 454;
     private boolean isRunning;
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-            CommonUtils.showDialog(this, builder);
+            showDialog(builder);
             return;
         }
 
@@ -170,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                CommonUtils.showDialog(this, builder);
+                showDialog(builder);
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
             }
@@ -458,15 +457,19 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
-                        } catch (android.content.ActivityNotFoundException ex) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
+                            }
+                        } catch (ActivityNotFoundException ex) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://gianlu.xyz/apps/?id=aria2app")));
                         }
                     }
                 })
                 .setNegativeButton(android.R.string.no, null);
 
-        CommonUtils.showDialog(this, builder);
+        showDialog(builder);
     }
 
     private void openAria2App() {
@@ -492,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-            CommonUtils.showDialog(MainActivity.this, builder);
+            showDialog(builder);
         }
     }
 
@@ -538,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .setNegativeButton(android.R.string.no, null);
 
-                CommonUtils.showDialog(this, builder);
+                showDialog(builder);
                 return true;
         }
 

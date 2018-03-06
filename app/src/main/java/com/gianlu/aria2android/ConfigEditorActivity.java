@@ -2,12 +2,12 @@ package com.gianlu.aria2android;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 
 import com.gianlu.aria2android.ConfigEditor.OptionsAdapter;
 import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
@@ -35,7 +36,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigEditorActivity extends AppCompatActivity implements OptionsAdapter.IAdapter {
+public class ConfigEditorActivity extends ActivityWithDialog implements OptionsAdapter.IAdapter {
     private static final int IMPORT_CODE = 4543;
     private final Map<String, String> options = new HashMap<>();
     private boolean hasChanges = false;
@@ -81,7 +82,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
                     .setMessage(R.string.updatedApp_importedConfig_message)
                     .setNeutralButton(android.R.string.ok, null);
 
-            CommonUtils.showDialog(this, builder);
+            showDialog(builder);
         }
     }
 
@@ -172,7 +173,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
                 })
                 .setNegativeButton(android.R.string.cancel, null);
 
-        CommonUtils.showDialog(this, builder);
+        showDialog(builder);
     }
 
     @SuppressLint("InflateParams")
@@ -196,7 +197,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
                 })
                 .setNegativeButton(android.R.string.cancel, null);
 
-        CommonUtils.showDialog(this, builder);
+        showDialog(builder);
     }
 
     @Override
@@ -225,7 +226,7 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
                             })
                             .setNeutralButton(android.R.string.cancel, null);
 
-                    CommonUtils.showDialog(this, builder);
+                    showDialog(builder);
                 } else {
                     onBackPressed();
                 }
@@ -233,7 +234,11 @@ public class ConfigEditorActivity extends AppCompatActivity implements OptionsAd
             case R.id.configEditor_import:
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
-                startActivityForResult(Intent.createChooser(intent, "Import from another configuration file..."), IMPORT_CODE);
+                try {
+                    startActivityForResult(Intent.createChooser(intent, "Import from another configuration file..."), IMPORT_CODE);
+                } catch (ActivityNotFoundException ex) {
+                    Toaster.show(this, Utils.Messages.CANNOT_IMPORT, ex);
+                }
                 return true;
             case R.id.configEditor_done:
                 save();
