@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.NetworkOnMainThreadException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -96,7 +97,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         if (requestCode == IMPORT_BIN_CODE && resultCode == RESULT_OK && data.getData() != null) {
             try {
                 BinUtils.writeStreamAsBin(this, getContentResolver().openInputStream(data.getData()));
-            } catch (IOException ex) {
+            } catch (IOException | NetworkOnMainThreadException ex) {
                 Toaster.show(this, Utils.Messages.FAILED_IMPORTING_BIN, ex);
                 return;
             }

@@ -1,7 +1,9 @@
 package com.gianlu.aria2android;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.gianlu.commonutils.LogsActivity;
 import com.gianlu.commonutils.Preferences.AppCompatPreferenceActivity;
@@ -36,6 +38,12 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
         @Override
         protected String getPackageName() {
             return "com.gianlu.aria2android";
+        }
+
+        @Nullable
+        @Override
+        protected Uri getOpenSourceUrl() {
+            return null;
         }
 
         @Override

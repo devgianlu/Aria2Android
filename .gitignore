@@ -1,6 +1,10 @@
 *.iml
 *.apk
 .gradle
+gradlew
+gradlew.bat
+/gradle
+/.idea
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
@@ -9,6 +13,4 @@
 /captures
 settings.gradle
 Thumbs.db
-/.idea/markdown-navigator
-/.idea/markdown-*
 /app/release
