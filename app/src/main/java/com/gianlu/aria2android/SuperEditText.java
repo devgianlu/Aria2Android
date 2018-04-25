@@ -8,6 +8,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 
+import com.gianlu.commonutils.Logging;
+
 public class SuperEditText extends TextInputLayout implements TextWatcher {
     private TextInputEditText text;
     private Validator validator;
@@ -65,8 +67,8 @@ public class SuperEditText extends TextInputLayout implements TextWatcher {
             } catch (InvalidInputException ex) {
                 try {
                     text.setError(getContext().getString(ex.messageId));
-                } catch (ClassCastException ignored) {
-                    // What?!
+                } catch (ClassCastException exx) {
+                    Logging.log(exx);
                 }
 
                 return;

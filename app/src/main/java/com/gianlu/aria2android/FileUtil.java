@@ -45,6 +45,7 @@ public final class FileUtil {
     }
 
     @Nullable
+    @SuppressWarnings({"ConstantConditions", "JavaReflectionMemberAccess"})
     private static String getVolumePath(final String volumeId, Context con) {
         try {
             StorageManager mStorageManager = (StorageManager) con.getSystemService(Context.STORAGE_SERVICE);
