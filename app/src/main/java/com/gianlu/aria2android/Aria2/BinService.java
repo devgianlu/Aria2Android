@@ -77,8 +77,9 @@ public class BinService extends Service implements StreamListener.IStreamListene
     }
 
     private void startBin(@NonNull StartConfig config) {
+        String cmd = BinUtils.createCommandLine(this, config);
         try {
-            process = Runtime.getRuntime().exec(BinUtils.createCommandLine(this, config));
+            process = Runtime.getRuntime().exec(cmd);
             streamListener = new StreamListener(process, this);
             streamListener.start();
         } catch (IOException ex) {
@@ -112,6 +113,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
             shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
         }
 
+        dispatchBroadcast(Action.SERVER_MSG, new Logging.LogLine(Logging.LogLine.Type.INFO, cmd), null);
         dispatchBroadcast(Action.SERVER_START, null, null);
     }
 

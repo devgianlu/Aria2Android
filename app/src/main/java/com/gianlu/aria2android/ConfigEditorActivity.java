@@ -16,8 +16,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.gianlu.aria2android.ConfigEditor.OptionsAdapter;
-import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
+import com.gianlu.commonutils.NameValuePair;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
@@ -33,13 +33,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ConfigEditorActivity extends ActivityWithDialog implements OptionsAdapter.IAdapter {
     private static final int IMPORT_CODE = 4543;
-    private final Map<String, String> options = new HashMap<>();
-    private boolean hasChanges = false;
     private OptionsAdapter adapter;
     private RecyclerViewLayout layout;
 
@@ -51,9 +47,10 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
         setContentView(layout);
         setTitle(R.string.customOptions);
 
+        layout.disableSwipeRefresh();
         layout.setLayoutManager(new SuppressingLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         layout.getList().addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        adapter = new OptionsAdapter(this, options, this);
+        adapter = new OptionsAdapter(this, this);
         layout.loadListData(adapter);
 
         try {
@@ -93,30 +90,16 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
     }
 
     private void load() throws JSONException {
-        options.clear();
-        JSONObject obj = new JSONObject(Prefs.getBase64String(this, PKeys.CUSTOM_OPTIONS, "{}"));
-        Utils.toMap(obj, options);
-        adapter.notifyDataSetChanged();
+        adapter.load(new JSONObject(Prefs.getBase64String(this, PKeys.CUSTOM_OPTIONS, "{}")));
     }
 
     private void save() {
         try {
-            JSONObject obj = new JSONObject();
-            Utils.toJSONObject(obj, options);
-            Prefs.putBase64String(this, PKeys.CUSTOM_OPTIONS, obj.toString());
-            hasChanges = false;
+            Prefs.putBase64String(this, PKeys.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()).toString());
             adapter.saved();
         } catch (JSONException ex) {
             Toaster.show(this, Utils.Messages.FAILED_SAVING_CUSTOM_OPTIONS, ex);
         }
-    }
-
-    private void importOptions(String str) {
-        Map<String, String> newOptions = Utils.optionsParser(str);
-        options.putAll(newOptions);
-        hasChanges = true;
-        adapter.notifyItemRangeInserted(options.size() - newOptions.size(), newOptions.size());
-        onItemsCountChanged(options.size());
     }
 
     private void importOptionsFromStream(@NonNull InputStream in) {
@@ -129,7 +112,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             return;
         }
 
-        importOptions(builder.toString());
+        adapter.parseAndAdd(builder.toString());
     }
 
     @Override
@@ -138,7 +121,8 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             if (resultCode == Activity.RESULT_OK && data.getData() != null) {
                 try {
                     InputStream in = getContentResolver().openInputStream(data.getData());
-                    if (in != null) importOptionsFromStream(in);
+                    if (in != null)
+                        importOptionsFromStream(in);
                     else
                         Toaster.show(this, Utils.Messages.CANNOT_IMPORT, new Exception("in is null!"));
                 } catch (FileNotFoundException ex) {
@@ -164,35 +148,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String keyStr = key.getText().toString();
                         if (keyStr.startsWith("--")) keyStr = keyStr.substring(2);
-                        options.put(keyStr, value.getText().toString());
-                        int pos = options.size() - 1;
-                        adapter.notifyItemInserted(pos);
-                        adapter.notifyOptionEdited(pos);
-                        hasChanges = true;
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null);
-
-        showDialog(builder);
-    }
-
-    @SuppressLint("InflateParams")
-    private void showEditDialog(final String key) {
-        LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.edit_option_dialog, null, false);
-        SuperTextView value = layout.findViewById(R.id.editOptionDialog_value);
-        value.setHtml(R.string.currentValue, options.get(key));
-        final EditText newValue = layout.findViewById(R.id.editOptionDialog_newValue);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(key)
-                .setView(layout)
-                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        options.put(key, newValue.getText().toString());
-                        int pos = CommonUtils.indexOf(options.keySet(), key);
-                        if (pos != -1) adapter.notifyOptionEdited(pos);
-                        hasChanges = true;
+                        adapter.add(new NameValuePair(keyStr, value.getText().toString()));
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null);
@@ -207,7 +163,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
                 showAddDialog();
                 return true;
             case android.R.id.home:
-                if (hasChanges) {
+                if (adapter.hasChanged()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.unsavedChanges)
                             .setMessage(R.string.unsavedChanges_message)
@@ -250,18 +206,27 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
     }
 
     @Override
-    public void onEditOption(String key) {
-        showEditDialog(key);
-    }
+    @SuppressLint("InflateParams")
+    public void onEditOption(final NameValuePair option) {
+        LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.edit_option_dialog, null, false);
+        SuperTextView value = layout.findViewById(R.id.editOptionDialog_value);
+        value.setHtml(R.string.currentValue, option.value());
+        final EditText newValue = layout.findViewById(R.id.editOptionDialog_newValue);
 
-    @Override
-    public void onRemoveOption(String key) {
-        int pos = CommonUtils.indexOf(options.keySet(), key);
-        if (pos != -1) {
-            hasChanges = true;
-            options.remove(key);
-            adapter.notifyItemRemoved(pos);
-        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(option.key())
+                .setView(layout)
+                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String newValueStr = newValue.getText().toString();
+                        if (!newValueStr.equals(option.value()))
+                            adapter.set(new NameValuePair(option.key(), newValueStr));
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+
+        showDialog(builder);
     }
 
     @Override

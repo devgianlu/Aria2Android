@@ -2,13 +2,14 @@ package com.gianlu.aria2android;
 
 import android.support.annotation.Nullable;
 
+import com.gianlu.commonutils.NameValuePair;
 import com.gianlu.commonutils.Toaster;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public final class Utils {
@@ -32,29 +33,26 @@ public final class Utils {
         return extended.toString();
     }
 
-    public static Map<String, String> optionsParser(String options) {
-        Map<String, String> map = new HashMap<>();
-        String[] lines = options.split("\n");
+    public static List<NameValuePair> parseOptions(String str) {
+        List<NameValuePair> list = new ArrayList<>();
+        String[] lines = str.split("\n");
         for (String line : lines) {
             line = line.trim();
             if (line.startsWith("#")) continue;
             String[] split = line.split("=");
-            if (split.length > 0) map.put(split[0], split.length == 1 ? null : split[1]);
+            if (split.length > 0)
+                list.add(new NameValuePair(split[0], split.length == 1 ? null : split[1]));
         }
-        return map;
+
+        return list;
     }
 
-    public static void toMap(JSONObject obj, Map<String, String> map) throws JSONException {
+    public static void toMap(JSONObject obj, Map<String, String> map) {
         Iterator<String> iterator = obj.keys();
         while (iterator.hasNext()) {
             String key = iterator.next();
             map.put(key, obj.optString(key, null));
         }
-    }
-
-    public static void toJSONObject(JSONObject obj, Map<String, String> map) throws JSONException {
-        for (Map.Entry<String, String> entry : map.entrySet())
-            obj.put(entry.getKey(), entry.getValue());
     }
 
     @SuppressWarnings("WeakerAccess")
