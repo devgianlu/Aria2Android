@@ -20,10 +20,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class BinUtils {
+    private static final int SAVE_SESSION_INTERVAL = 10; // sec
+
     public static void downloadAndExtractBin(final Context context, final GitHubApi.Release.Asset asset, final IDownloadAndExtractBin listener) {
         final Handler handler = new Handler(Looper.getMainLooper());
         new Thread(new Runnable() {
@@ -124,27 +128,25 @@ public class BinUtils {
         String binPath = new File(context.getFilesDir(), "aria2c").getAbsolutePath();
         String sessionPath = new File(context.getFilesDir(), "session").getAbsolutePath();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(binPath)
-                .append(" --daemon")
-                .append(" --check-certificate=false")
-                .append(" --input-file=").append(sessionPath)
-                .append(" --dir=").append(config.outputDirectory)
-                .append(" --enable-rpc")
-                .append(" --rpc-listen-all=true")
-                .append(" --rpc-listen-port=").append(config.rpcPort)
-                .append(" --rpc-secret=").append(config.rpcToken);
+        Map<String, String> options = new HashMap<>(config.options);
+        options.put("daemon", "true");
+        options.put("check-certificate", "false");
+        options.put("input-file", sessionPath);
+        options.put("dir", config.outputDirectory);
+        options.put("enable-rpc", "true");
+        options.put("rpc-listen-all", "true");
+        options.put("rpc-listen-port", String.valueOf(config.rpcPort));
+        options.put("rpc-secret", config.rpcToken);
 
-        if (config.saveSession)
-            builder.append(" --save-session=").append(sessionPath).append(" --save-session-interval=10");
-        else builder.append(" ");
+        if (config.saveSession) {
+            options.put("save-session", sessionPath);
+            if (options.get("save-session-interval") == null)
+                options.put("save-session-interval", String.valueOf(SAVE_SESSION_INTERVAL));
+        }
 
-        if (config.allowOriginAll) builder.append(" --rpc-allow-origin-all=true");
-        else builder.append(" ");
+        if (config.allowOriginAll) options.put("rpc-allow-origin-all", "true");
 
-        builder.append(Utils.optionsBuilder(config.options));
-
-        return builder.toString();
+        return binPath + Utils.optionsBuilder(options);
     }
 
     public interface IDownloadAndExtractBin {
