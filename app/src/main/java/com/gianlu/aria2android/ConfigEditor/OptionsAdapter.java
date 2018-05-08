@@ -92,6 +92,8 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
     }
 
     private void remove(int pos) {
+        if (pos == -1) return;
+
         edited.remove(pos);
         options.remove(pos);
         changed();

@@ -107,7 +107,8 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) builder.append(line).append('\n');
-        } catch (IOException ex) {
+        } catch (IOException | OutOfMemoryError ex) {
+            System.gc();
             Toaster.show(this, Utils.Messages.CANNOT_IMPORT, ex);
             return;
         }
