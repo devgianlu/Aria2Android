@@ -2,14 +2,10 @@ package com.gianlu.aria2android;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +18,7 @@ import android.widget.TextView;
 import com.gianlu.aria2android.DownloadBin.ReleasesAdapter;
 import com.gianlu.aria2android.NetIO.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
+import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.MessageLayout;
 import com.gianlu.commonutils.Preferences.Prefs;
@@ -30,8 +27,7 @@ import com.gianlu.commonutils.Toaster;
 import java.io.IOException;
 import java.util.List;
 
-public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.IResult<List<GitHubApi.Release>>, ReleasesAdapter.IAdapter, BinUtils.IDownloadAndExtractBin {
-    private static final int READ_PERMISSION_CODE = 5;
+public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.OnResult<List<GitHubApi.Release>>, ReleasesAdapter.IAdapter, BinUtils.IDownloadAndExtractBin {
     private static final int IMPORT_BIN_CODE = 8;
     private ListView list;
     private TextView progress;
@@ -53,7 +49,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         GitHubApi.get().getReleases("aria2", "aria2", this);
 
         if (getIntent().getBooleanExtra("importBin", false)) {
-            showCustomBinDialog();
+            importBin();
             getIntent().removeExtra("importBin");
         }
     }
@@ -68,7 +64,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.downloadBin_custom:
-                showCustomBinDialog();
+                importBin();
                 return true;
         }
 
@@ -76,20 +72,28 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     }
 
     private void importBin() {
-        try {
-            startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), getString(R.string.customBin)), IMPORT_BIN_CODE);
-        } catch (ActivityNotFoundException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_IMPORTING_BIN, ex);
-        }
-    }
+        AskPermission.ask(this, Manifest.permission.READ_EXTERNAL_STORAGE, new AskPermission.Listener() {
+            @Override
+            public void permissionGranted(@NonNull String permission) {
+                try {
+                    startActivityForResult(Intent.createChooser(new Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), getString(R.string.customBin)), IMPORT_BIN_CODE);
+                } catch (ActivityNotFoundException ex) {
+                    Toaster.with(DownloadBinActivity.this).message(R.string.failedImportingBin).ex(ex).show();
+                }
+            }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == READ_PERMISSION_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            importBin();
-        }
+            @Override
+            public void permissionDenied(@NonNull String permission) {
+                Toaster.with(DownloadBinActivity.this).message(R.string.readPermissionDenied).error(true).show();
+            }
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            @Override
+            public void askRationale(@NonNull AlertDialog.Builder builder) {
+                builder.setTitle(R.string.readPermission)
+                        .setMessage(R.string.readStorage_message);
+            }
+        });
+
     }
 
     @Override
@@ -98,7 +102,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
             try {
                 BinUtils.writeStreamAsBin(this, getContentResolver().openInputStream(data.getData()));
             } catch (IOException | NetworkOnMainThreadException ex) {
-                Toaster.show(this, Utils.Messages.FAILED_IMPORTING_BIN, ex);
+                Toaster.with(this).message(R.string.failedImportingBin).ex(ex).show();
                 return;
             }
 
@@ -113,41 +117,8 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void showCustomBinDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.customBin)
-                .setMessage(R.string.customBin_message)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (ContextCompat.checkSelfPermission(DownloadBinActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            if (ActivityCompat.shouldShowRequestPermissionRationale(DownloadBinActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(DownloadBinActivity.this)
-                                        .setTitle(R.string.readPermission)
-                                        .setMessage(R.string.readStorage_message)
-                                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                ActivityCompat.requestPermissions(DownloadBinActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, READ_PERMISSION_CODE);
-                                            }
-                                        });
-
-                                showDialog(builder);
-                            } else {
-                                ActivityCompat.requestPermissions(DownloadBinActivity.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, READ_PERMISSION_CODE);
-                            }
-                        } else {
-                            importBin();
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.no, null);
-
-        showDialog(builder);
-    }
-
     @Override
-    public void onResult(List<GitHubApi.Release> result) {
+    public void onResult(@NonNull List<GitHubApi.Release> result) {
         loading.setVisibility(View.GONE);
         MessageLayout.hide(layout);
         list.setVisibility(View.VISIBLE);
@@ -170,7 +141,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     }
 
     @Override
-    public void onException(Exception ex) {
+    public void onException(@NonNull Exception ex) {
         loading.setVisibility(View.GONE);
         list.setVisibility(View.GONE);
         MessageLayout.show(layout, getString(R.string.failedRetrievingReleases_reason, ex.getMessage()), R.drawable.ic_error_outline_black_48dp);

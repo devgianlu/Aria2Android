@@ -19,7 +19,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -39,6 +39,7 @@ import android.widget.ToggleButton;
 import com.gianlu.aria2android.Aria2.BinService;
 import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
+import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
@@ -157,23 +158,22 @@ public class MainActivity extends ActivityWithDialog {
 
         setContentView(R.layout.activity_main);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                        .setTitle(R.string.permissionRequest)
-                        .setMessage(R.string.writeStorageMessage)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
-                            }
-                        });
-
-                showDialog(builder);
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_CODE);
+        AskPermission.ask(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
+            @Override
+            public void permissionGranted(@NonNull String permission) {
             }
-        }
+
+            @Override
+            public void permissionDenied(@NonNull String permission) {
+                Toaster.with(MainActivity.this).message(R.string.writePermissionDenied).error(true).show();
+            }
+
+            @Override
+            public void askRationale(@NonNull AlertDialog.Builder builder) {
+                builder.setTitle(R.string.permissionRequest)
+                        .setMessage(R.string.writeStorageMessage);
+            }
+        });
 
         adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>(), null);
         logs = findViewById(R.id.main_logs);
@@ -192,12 +192,11 @@ public class MainActivity extends ActivityWithDialog {
         pickOutputPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-
                 try {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                     startActivityForResult(intent, STORAGE_ACCESS_CODE);
                 } catch (ActivityNotFoundException ex) {
-                    Toaster.show(MainActivity.this, Utils.Messages.NO_OPEN_TREE, ex);
+                    Toaster.with(MainActivity.this).message(R.string.noOpenTree).ex(ex).show();
                 }
             }
         });
@@ -369,8 +368,10 @@ public class MainActivity extends ActivityWithDialog {
     protected void onDestroy() {
         try {
             unbindService(serviceConnection);
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException ex) {
+            Logging.log(ex);
         }
+
         super.onDestroy();
     }
 
@@ -379,7 +380,23 @@ public class MainActivity extends ActivityWithDialog {
         AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_ON);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            Toaster.show(MainActivity.this, Utils.Messages.WRITE_STORAGE_DENIED);
+            AskPermission.ask(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
+                @Override
+                public void permissionGranted(@NonNull String permission) {
+                    startService();
+                }
+
+                @Override
+                public void permissionDenied(@NonNull String permission) {
+                    Toaster.with(MainActivity.this).message(R.string.writePermissionDenied).error(true).show();
+                }
+
+                @Override
+                public void askRationale(@NonNull AlertDialog.Builder builder) {
+                    builder.setTitle(R.string.permissionRequest)
+                            .setMessage(R.string.writeStorageMessage);
+                }
+            });
             return false;
         }
 
@@ -387,11 +404,11 @@ public class MainActivity extends ActivityWithDialog {
         if (Prefs.getBoolean(this, PKeys.SAVE_SESSION, true) && !sessionFile.exists()) {
             try {
                 if (!sessionFile.createNewFile()) {
-                    Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE);
+                    Toaster.with(this).message(R.string.failedCreatingSessionFile).error(true).show();
                     return false;
                 }
             } catch (IOException ex) {
-                Toaster.show(MainActivity.this, Utils.Messages.FAILED_CREATING_SESSION_FILE, ex);
+                Toaster.with(this).message(R.string.failedCreatingSessionFile).ex(ex).show();
                 return false;
             }
         }
@@ -411,11 +428,11 @@ public class MainActivity extends ActivityWithDialog {
                 return false;
             }
         } catch (JSONException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_LOADING_OPTIONS, ex);
+            Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             return false;
         } catch (RemoteException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_STARTING, ex);
+            Toaster.with(this).message(R.string.failedStarting).ex(ex).show();
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             return false;
         }
@@ -433,7 +450,7 @@ public class MainActivity extends ActivityWithDialog {
         try {
             serviceMessenger.send(Message.obtain(null, BinService.STOP, null));
         } catch (RemoteException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_STOPPING, ex);
+            Toaster.with(this).message(R.string.failedStopping).ex(ex).show();
             return false;
         }
 
@@ -535,7 +552,7 @@ public class MainActivity extends ActivityWithDialog {
                                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                     finish();
                                 } else {
-                                    Toaster.show(MainActivity.this, Utils.Messages.CANT_DELETE_BIN);
+                                    Toaster.with(MainActivity.this).message(R.string.cannotDeleteBin).error(true).show();
                                 }
                             }
                         })

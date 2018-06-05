@@ -3,7 +3,6 @@ package com.gianlu.aria2android;
 import android.support.annotation.Nullable;
 
 import com.gianlu.commonutils.NameValuePair;
-import com.gianlu.commonutils.Toaster;
 
 import org.json.JSONObject;
 
@@ -53,20 +52,5 @@ public final class Utils {
             String key = iterator.next();
             map.put(key, obj.optString(key, null));
         }
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static final class Messages {
-        public static final Toaster.Message FAILED_CREATING_SESSION_FILE = new Toaster.Message(R.string.failedCreatingSessionFile, true);
-        public static final Toaster.Message WRITE_STORAGE_DENIED = new Toaster.Message(R.string.writePermissionDenied, true);
-        public static final Toaster.Message CANT_DELETE_BIN = new Toaster.Message(R.string.cannotDeleteBin, true);
-        public static final Toaster.Message CANNOT_IMPORT = new Toaster.Message(R.string.cannotImport, true);
-        public static final Toaster.Message FILE_NOT_FOUND = new Toaster.Message(R.string.fileNotFound, false);
-        public static final Toaster.Message FAILED_LOADING_OPTIONS = new Toaster.Message(R.string.failedLoadingOptions, true);
-        public static final Toaster.Message FAILED_SAVING_CUSTOM_OPTIONS = new Toaster.Message(R.string.failedSavingCustomOptions, true);
-        public static final Toaster.Message FAILED_STARTING = new Toaster.Message(R.string.failedStarting, true);
-        public static final Toaster.Message FAILED_STOPPING = new Toaster.Message(R.string.failedStopping, true);
-        public static final Toaster.Message NO_OPEN_TREE = new Toaster.Message(R.string.noOpenTree, false);
-        public static final Toaster.Message FAILED_IMPORTING_BIN = new Toaster.Message(R.string.failedImportingBin, true);
     }
 }

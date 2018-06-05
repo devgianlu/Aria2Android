@@ -88,4 +88,5 @@
     <string name="readStorage_message">The application needs the read permission in order to import the bin file.</string>
     <string name="failedImportingBin">Failed importing the bin file!</string>
     <string name="importBin">Import bin</string>
+    <string name="readPermissionDenied">You denied the read permission!</string>
 </resources>

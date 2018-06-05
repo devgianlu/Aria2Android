@@ -2,6 +2,9 @@ package com.gianlu.aria2android.NetIO;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,15 +32,18 @@ public class GitHubApi {
         this.handler = new Handler(Looper.getMainLooper());
     }
 
+    @NonNull
     public static GitHubApi get() {
         if (instance == null) instance = new GitHubApi();
         return instance;
     }
 
+    @NonNull
     private static SimpleDateFormat getDateParser() {
         return new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.getDefault());
     }
 
+    @WorkerThread
     private HttpURLConnection basicRequestSync(String url) throws IOException, StatusCodeException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.connect();
@@ -46,7 +52,7 @@ public class GitHubApi {
         else throw new StatusCodeException(conn.getResponseCode(), conn.getResponseMessage());
     }
 
-    public void getReleases(final String author, final String repo, final IResult<List<Release>> listener) {
+    public void getReleases(final String author, final String repo, final OnResult<List<Release>> listener) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -83,10 +89,12 @@ public class GitHubApi {
         });
     }
 
-    public interface IResult<E> {
-        void onResult(E result);
+    public interface OnResult<E> {
+        @UiThread
+        void onResult(@NonNull E result);
 
-        void onException(Exception ex);
+        @UiThread
+        void onException(@NonNull Exception ex);
     }
 
     public static class Release {
@@ -96,7 +104,7 @@ public class GitHubApi {
         public final long publishedAt;
         public Asset androidAsset;
 
-        public Release(JSONObject obj) throws JSONException, ParseException {
+        Release(JSONObject obj) throws JSONException, ParseException {
             id = obj.getInt("id");
             name = obj.getString("name");
             htmlUrl = obj.getString("html_url");
@@ -118,7 +126,7 @@ public class GitHubApi {
             public final String downloadUrl;
             public final long size;
 
-            public Asset(JSONObject obj) throws JSONException {
+            Asset(JSONObject obj) throws JSONException {
                 id = obj.getInt("id");
                 name = obj.getString("name");
                 downloadUrl = obj.getString("browser_download_url");

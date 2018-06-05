@@ -56,7 +56,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
         try {
             load();
         } catch (JSONException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_LOADING_OPTIONS, ex);
+            Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
             onBackPressed();
             return;
         }
@@ -66,7 +66,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             try {
                 importOptionsFromStream(new FileInputStream(importOptions));
             } catch (FileNotFoundException ex) {
-                Toaster.show(this, Utils.Messages.FILE_NOT_FOUND, ex);
+                Toaster.with(this).message(R.string.fileNotFound).ex(ex).show();
             }
 
             save();
@@ -98,7 +98,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             Prefs.putBase64String(this, PKeys.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()).toString());
             adapter.saved();
         } catch (JSONException ex) {
-            Toaster.show(this, Utils.Messages.FAILED_SAVING_CUSTOM_OPTIONS, ex);
+            Toaster.with(this).message(R.string.failedSavingCustomOptions).ex(ex).show();
         }
     }
 
@@ -109,7 +109,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             while ((line = reader.readLine()) != null) builder.append(line).append('\n');
         } catch (IOException | OutOfMemoryError ex) {
             System.gc();
-            Toaster.show(this, Utils.Messages.CANNOT_IMPORT, ex);
+            Toaster.with(this).message(R.string.cannotImport).ex(ex).show();
             return;
         }
 
@@ -125,9 +125,9 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
                     if (in != null)
                         importOptionsFromStream(in);
                     else
-                        Toaster.show(this, Utils.Messages.CANNOT_IMPORT, new Exception("in is null!"));
+                        Toaster.with(this).message(R.string.cannotImport).ex(new Exception("InputStream null!")).show();
                 } catch (FileNotFoundException ex) {
-                    Toaster.show(this, Utils.Messages.FILE_NOT_FOUND, ex);
+                    Toaster.with(this).message(R.string.fileNotFound).ex(ex).show();
                 }
             }
         } else {
@@ -189,12 +189,12 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
                 }
                 return true;
             case R.id.configEditor_import:
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*");
                 try {
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
                     startActivityForResult(Intent.createChooser(intent, "Import from another configuration file..."), IMPORT_CODE);
                 } catch (ActivityNotFoundException ex) {
-                    Toaster.show(this, Utils.Messages.CANNOT_IMPORT, ex);
+                    Toaster.with(this).message(R.string.cannotImport).ex(ex).show();
                 }
                 return true;
             case R.id.configEditor_done:
