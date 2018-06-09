@@ -232,7 +232,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
 
     @Override
     public void onItemsCountChanged(int count) {
-        if (count <= 0) layout.showMessage(R.string.noCustomOptions, false);
+        if (count <= 0) layout.showInfo(R.string.noCustomOptions);
         else layout.showList();
     }
 }

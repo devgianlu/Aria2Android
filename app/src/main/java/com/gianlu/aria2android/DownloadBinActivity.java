@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,7 +19,7 @@ import com.gianlu.aria2android.NetIO.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
-import com.gianlu.commonutils.MessageLayout;
+import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
 
@@ -32,7 +31,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     private ListView list;
     private TextView progress;
     private LinearLayout loading;
-    private FrameLayout layout;
+    private MessageView message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         setContentView(R.layout.activity_download_bin);
         setTitle(getString(R.string.downloadBin) + " - " + getString(R.string.app_name));
 
-        layout = findViewById(R.id.downloadBin);
+        message = findViewById(R.id.downloadBin_message);
         loading = findViewById(R.id.downloadBin_loading);
         progress = findViewById(R.id.downloadBin_progress);
         list = findViewById(R.id.downloadBin_list);
@@ -120,7 +119,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     @Override
     public void onResult(@NonNull List<GitHubApi.Release> result) {
         loading.setVisibility(View.GONE);
-        MessageLayout.hide(layout);
+        message.hide();
         list.setVisibility(View.VISIBLE);
         list.setAdapter(new ReleasesAdapter(this, result, this));
     }
@@ -144,7 +143,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     public void onException(@NonNull Exception ex) {
         loading.setVisibility(View.GONE);
         list.setVisibility(View.GONE);
-        MessageLayout.show(layout, getString(R.string.failedRetrievingReleases_reason, ex.getMessage()), R.drawable.ic_error_outline_black_48dp);
+        message.setError(R.string.failedRetrievingReleases_reason, ex.getMessage());
     }
 
     @Override
@@ -152,7 +151,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         progress.setText(R.string.downloadingBin);
         loading.setVisibility(View.VISIBLE);
         list.setVisibility(View.GONE);
-        MessageLayout.hide(layout);
+        message.hide();
 
         BinUtils.downloadAndExtractBin(this, release.androidAsset, this);
     }

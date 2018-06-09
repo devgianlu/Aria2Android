@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- Main Activity -->
+        <!-- Main activity -->
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
@@ -45,20 +45,20 @@
             android:name=".Aria2.BinService"
             android:enabled="true" />
 
-        <!-- Preferences Activity -->
+        <!-- Preferences activity -->
         <activity
             android:name=".PreferencesActivity"
             android:parentActivityName=".MainActivity" />
 
-        <!-- Logs Activity -->
+        <!-- Logs activity -->
         <activity
             android:name="com.gianlu.commonutils.LogsActivity"
             android:parentActivityName=".PreferencesActivity" />
 
-        <!-- Download bin Activity -->
+        <!-- Download bin activity -->
         <activity android:name=".DownloadBinActivity" />
 
-        <!-- Custom options editor Activity -->
+        <!-- Custom options editor activity -->
         <activity
             android:name=".ConfigEditorActivity"
             android:parentActivityName=".MainActivity" />
@@ -72,6 +72,16 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-    </application>
 
+        <!-- Logs provider -->
+        <provider
+            android:name="com.gianlu.commonutils.LogsProvider"
+            android:authorities="com.gianlu.aria2android.logs"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/logs_paths" />
+        </provider>
+    </application>
 </manifest>
