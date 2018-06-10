@@ -480,7 +480,7 @@ public class MainActivity extends ActivityWithDialog {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
                             }
                         } catch (ActivityNotFoundException ex) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://gianlu.xyz/apps/?id=aria2app")));
+                            Logging.log(ex);
                         }
                     }
                 })
