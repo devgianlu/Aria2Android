@@ -41,7 +41,7 @@ import java.util.Objects;
 public class BinService extends Service implements StreamListener.IStreamListener {
     public static final int START = 0;
     public static final int STOP = 1;
-    public static final int NOTIFICATION_ID = 4534532;
+    public static final int NOTIFICATION_ID = 1;
     public static final String ACTION_START_SERVICE = "com.gianlu.aria2android.START_SERVICE";
     public static final String ACTION_STOP_SERVICE = "com.gianlu.aria2android.STOP_SERVICE";
     private static final String CHANNEL_ID = "aria2android";

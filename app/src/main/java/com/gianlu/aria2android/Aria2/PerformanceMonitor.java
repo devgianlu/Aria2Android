@@ -1,8 +1,8 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.widget.RemoteViews;
 
 import com.gianlu.aria2android.PKeys;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class PerformanceMonitor extends Thread {
     private static final Pattern pattern = Pattern.compile("(\\d*?)\\s+(\\d*?)\\s+(\\d*?)%\\s(.)\\s+(\\d*?)\\s+(\\d*?)K\\s+(\\d*?)K\\s+(..)\\s(.*?)\\s+(.*)$");
-    private final NotificationManager manager;
+    private final NotificationManagerCompat manager;
     private final Context context;
     private final int delay;
     private final NotificationCompat.Builder builder;
@@ -27,7 +27,7 @@ public class PerformanceMonitor extends Thread {
     private volatile boolean _stop = false;
 
     public PerformanceMonitor(Context context, NotificationCompat.Builder builder) {
-        this.manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        this.manager = NotificationManagerCompat.from(context);
         this.context = context;
         this.delay = Prefs.getInt(context, PKeys.NOTIFICATION_UPDATE_DELAY, 1);
         this.builder = builder;
@@ -65,11 +65,7 @@ public class PerformanceMonitor extends Thread {
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
 
-        try {
-            manager.notify(BinService.NOTIFICATION_ID, builder.build());
-        } catch (NullPointerException ex) {
-            Logging.log(ex);
-        }
+        manager.notify(BinService.NOTIFICATION_ID, builder.build());
     }
 
     public void stopSafe() {
