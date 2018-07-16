@@ -29,19 +29,19 @@
         android:id="@+id/optionItem_edit"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:alpha="0.54"
+
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:padding="4dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_mode_edit_black_48dp" />
+        android:src="@drawable/baseline_edit_24" />
 
     <ImageButton
         android:id="@+id/optionItem_delete"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:alpha="0.54"
+
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:padding="4dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_delete_black_48dp" />
+        android:src="@drawable/baseline_delete_24" />
 </LinearLayout>

@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/downloadBin_custom"
-        android:icon="@drawable/ic_extension_white_48dp"
+        android:icon="@drawable/baseline_extension_24"
         android:title="@string/customBin"
         app:showAsAction="always" />
 </menu>

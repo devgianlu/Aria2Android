@@ -20,7 +20,7 @@ public class PreferencesActivity extends AppCompatPreferenceActivity {
 
     @Override
     public void onHeaderClick(Header header, int position) {
-        if (header.iconRes == R.drawable.ic_announcement_black_24dp) {
+        if (header.iconRes == R.drawable.baseline_announcement_24) {
             startActivity(new Intent(this, LogsActivity.class));
             return;
         }

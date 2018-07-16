@@ -106,7 +106,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
         if (shortcutManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "stopService")
                     .setShortLabel(getString(R.string.stopService))
-                    .setIcon(Icon.createWithResource(this, R.drawable.ic_stop_black_48dp))
+                    .setIcon(Icon.createWithResource(this, R.drawable.baseline_stop_24))
                     .setIntent(new Intent(ACTION_STOP_SERVICE))
                     .build();
 
@@ -152,7 +152,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
         if (shortcutManager != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "startService")
                     .setShortLabel(getString(R.string.startService))
-                    .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_48dp))
+                    .setIcon(Icon.createWithResource(this, R.drawable.baseline_play_arrow_24))
                     .setIntent(new Intent(ACTION_START_SERVICE))
                     .build();
 
