@@ -538,7 +538,7 @@ public class MainActivity extends ActivityWithDialog {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mainMenu_preferences:
-                startActivity(new Intent(this, PreferencesActivity.class));
+                startActivity(new Intent(this, PreferenceActivity.class));
                 return true;
             case R.id.mainMenu_changeBin:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);

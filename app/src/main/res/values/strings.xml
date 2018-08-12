@@ -15,7 +15,6 @@
     <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
     <string name="about_app">About application</string>
     <string name="app_version">App version</string>
-    <string name="developer">Developer: Gianlu (Report bugs or any suggestion)</string>
     <string name="email" translatable="false">altomanigianluca@gmail.com</string>
     <string name="unknown">Unknown</string>
     <string name="preferences">Preferences</string>
