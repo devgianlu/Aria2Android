@@ -8,8 +8,8 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 32
-        versionName "1.7.7"
+        versionCode 33
+        versionName "1.8.0"
     }
 
     buildTypes {
@@ -22,7 +22,9 @@ android {
 }
 
 dependencies {
-    api project(':CommonUtils')
+    api(project(':CommonUtils')) {
+        exclude group: 'com.getkeepsafe.taptargetview'
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
