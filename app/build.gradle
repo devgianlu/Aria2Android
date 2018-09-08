@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
+if (getGradle().getStartParameter().getTaskRequests().toString().contains("standard")) {
+    apply plugin: 'io.fabric'
+}
 
 android {
     compileSdkVersion 27
@@ -25,14 +27,28 @@ android {
         standard {
             dimension 'main'
         }
+
+        foss {
+            dimension 'main'
+        }
     }
 }
 
 dependencies {
     api project(':LovelyMaterialPreferences')
-    api(project(':CommonUtils')) {
+
+    standardApi(project(':CommonUtils')) {
+        exclude group: 'com.getkeepsafe.taptargetview'
+    }
+
+    fossApi(project(':CommonUtils')) {
+        exclude group: 'com.android.billingclient'
+        exclude group: 'com.google.firebase'
+        exclude group: 'com.crashlytics.sdk.android'
         exclude group: 'com.getkeepsafe.taptargetview'
     }
 }
 
-apply plugin: 'com.google.gms.google-services'
+if (getGradle().getStartParameter().getTaskRequests().toString().contains("standard")) {
+    apply plugin: 'com.google.gms.google-services'
+}

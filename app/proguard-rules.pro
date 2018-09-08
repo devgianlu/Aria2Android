@@ -9,3 +9,5 @@
 -dontwarn com.mikepenz.aboutlibraries.ui.item.HeaderItem
 -dontwarn com.pavelsikun.vintagechroma.ChromaPreferenceCompat
 
+-dontwarn com.gianlu.commonutils.Preferences.PreferencesBillingHelper
+-dontwarn com.gianlu.commonutils.Preferences.PreferencesBillingHelper$*
