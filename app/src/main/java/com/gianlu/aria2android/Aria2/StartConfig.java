@@ -1,10 +1,9 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.content.Context;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 
-import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.Preferences.Prefs;
 
@@ -32,14 +31,14 @@ public class StartConfig implements Serializable {
     }
 
     @NonNull
-    public static StartConfig fromPrefs(Context context) throws JSONException {
+    public static StartConfig fromPrefs() throws JSONException {
         HashMap<String, String> options = new HashMap<>();
-        Utils.toMap(new JSONObject(Prefs.getBase64String(context, PKeys.CUSTOM_OPTIONS, "{}")), options);
-        return new StartConfig(Prefs.getString(context, PKeys.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()),
+        Utils.toMap(new JSONObject(Prefs.getBase64String(PK.CUSTOM_OPTIONS, "{}")), options);
+        return new StartConfig(Prefs.getString(PK.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()),
                 options,
-                Prefs.getBoolean(context, PKeys.SAVE_SESSION, true),
-                Prefs.getInt(context, PKeys.RPC_PORT, 6800),
-                Prefs.getString(context, PKeys.RPC_TOKEN, "aria2"),
-                Prefs.getBoolean(context, PKeys.RPC_ALLOW_ORIGIN_ALL, false));
+                Prefs.getBoolean(PK.SAVE_SESSION),
+                Prefs.getInt(PK.RPC_PORT),
+                Prefs.getString(PK.RPC_TOKEN),
+                Prefs.getBoolean(PK.RPC_ALLOW_ORIGIN_ALL));
     }
 }

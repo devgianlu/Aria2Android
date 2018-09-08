@@ -71,8 +71,8 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
 
             save();
 
-            Prefs.remove(this, PKeys.DEPRECATED_USE_CONFIG);
-            Prefs.remove(this, PKeys.DEPRECATED_CONFIG_FILE);
+            Prefs.remove(PK.DEPRECATED_USE_CONFIG);
+            Prefs.remove(PK.DEPRECATED_CONFIG_FILE);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.updatedApp_importedConfig)
@@ -90,12 +90,12 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
     }
 
     private void load() throws JSONException {
-        adapter.load(new JSONObject(Prefs.getBase64String(this, PKeys.CUSTOM_OPTIONS, "{}")));
+        adapter.load(new JSONObject(Prefs.getBase64String(PK.CUSTOM_OPTIONS, "{}")));
     }
 
     private void save() {
         try {
-            Prefs.putBase64String(this, PKeys.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()).toString());
+            Prefs.putBase64String(PK.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()).toString());
             adapter.saved();
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedSavingCustomOptions).ex(ex).show();

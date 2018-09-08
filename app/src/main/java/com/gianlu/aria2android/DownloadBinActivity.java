@@ -106,7 +106,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
             }
 
             AnalyticsApplication.sendAnalytics(this, Utils.ACTION_IMPORT_BIN);
-            Prefs.putBoolean(this, PKeys.CUSTOM_BIN, true);
+            Prefs.putBoolean(PK.CUSTOM_BIN, true);
 
             startActivity(new Intent(this, MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
@@ -133,7 +133,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     public void onBinExtracted() {
         progress.setText(R.string.binExtracted);
 
-        Prefs.putBoolean(this, PKeys.CUSTOM_BIN, false);
+        Prefs.putBoolean(PK.CUSTOM_BIN, false);
         startActivity(new Intent(this, MainActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finish();

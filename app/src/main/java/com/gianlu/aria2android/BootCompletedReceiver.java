@@ -23,14 +23,14 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         if (!Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
             return;
 
-        if (Prefs.getBoolean(context, PKeys.START_AT_BOOT, false)) {
+        if (Prefs.getBoolean(PK.START_AT_BOOT)) {
             context.getApplicationContext().bindService(new Intent(context, BinService.class), new ServiceConnection() {
 
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                     Messenger messenger = new Messenger(iBinder);
                     try {
-                        messenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(context)));
+                        messenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs()));
                     } catch (RemoteException | JSONException ex) {
                         Logging.log(ex);
                     }

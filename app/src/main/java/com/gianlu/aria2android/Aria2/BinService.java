@@ -27,7 +27,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.gianlu.aria2android.BinUtils;
 import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.MainActivity;
-import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.R;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
@@ -98,7 +98,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
                 .setContentText("aria2c is currently running");
 
         startForeground(NOTIFICATION_ID, builder.build());
-        if (Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true)) {
+        if (Prefs.getBoolean(PK.SHOW_PERFORMANCE)) {
             performanceMonitor = new PerformanceMonitor(this, builder);
             performanceMonitor.start();
         }

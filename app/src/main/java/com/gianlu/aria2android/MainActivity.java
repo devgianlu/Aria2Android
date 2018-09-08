@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainActivity extends ActivityWithDialog {
-    private final static int WRITE_PERMISSION_CODE = 6745;
     private static final int STORAGE_ACCESS_CODE = 454;
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
@@ -109,7 +108,7 @@ public class MainActivity extends ActivityWithDialog {
             return;
         }
 
-        if (!isARM() && !Prefs.getBoolean(this, PKeys.CUSTOM_BIN, false)) {
+        if (!isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
@@ -229,14 +228,14 @@ public class MainActivity extends ActivityWithDialog {
         saveSession.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Prefs.putBoolean(MainActivity.this, PKeys.SAVE_SESSION, b);
+                Prefs.putBoolean(PK.SAVE_SESSION, b);
             }
         });
 
         startAtBoot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                Prefs.putBoolean(MainActivity.this, PKeys.START_AT_BOOT, b);
+                Prefs.putBoolean(PK.START_AT_BOOT, b);
             }
         });
 
@@ -246,7 +245,7 @@ public class MainActivity extends ActivityWithDialog {
                 File path = new File(text);
                 if (path.exists()) {
                     if (path.canWrite()) {
-                        Prefs.putString(MainActivity.this, PKeys.OUTPUT_DIRECTORY, path.getAbsolutePath());
+                        Prefs.putString(PK.OUTPUT_DIRECTORY, path.getAbsolutePath());
                     } else {
                         throw new SuperEditText.InvalidInputException(R.string.cannotWriteOutputDirectory);
                     }
@@ -267,7 +266,7 @@ public class MainActivity extends ActivityWithDialog {
                 }
 
                 if (port > 1024 && port < 65535)
-                    Prefs.putInt(MainActivity.this, PKeys.RPC_PORT, port);
+                    Prefs.putInt(PK.RPC_PORT, port);
                 else throw new SuperEditText.InvalidInputException(R.string.invalidPort);
             }
         });
@@ -277,21 +276,21 @@ public class MainActivity extends ActivityWithDialog {
             public void validate(String text) throws SuperEditText.InvalidInputException {
                 if (text.isEmpty())
                     throw new SuperEditText.InvalidInputException(R.string.invalidToken);
-                else Prefs.putString(MainActivity.this, PKeys.RPC_TOKEN, text);
+                else Prefs.putString(PK.RPC_TOKEN, text);
             }
         });
 
         allowOriginAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Prefs.putBoolean(MainActivity.this, PKeys.RPC_ALLOW_ORIGIN_ALL, b);
+                Prefs.putBoolean(PK.RPC_ALLOW_ORIGIN_ALL, b);
             }
         });
 
         showPerformance.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                Prefs.putBoolean(MainActivity.this, PKeys.SHOW_PERFORMANCE, b);
+                Prefs.putBoolean(PK.SHOW_PERFORMANCE, b);
                 updateDelay.setEnabled(b);
             }
         });
@@ -307,19 +306,19 @@ public class MainActivity extends ActivityWithDialog {
                 }
 
                 if (delay > 0)
-                    Prefs.putInt(MainActivity.this, PKeys.NOTIFICATION_UPDATE_DELAY, delay);
+                    Prefs.putInt(PK.NOTIFICATION_UPDATE_DELAY, delay);
                 else throw new SuperEditText.InvalidInputException(R.string.invalidUpdateDelay);
             }
         });
 
-        outputPath.setText(Prefs.getString(this, PKeys.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
-        saveSession.setChecked(Prefs.getBoolean(this, PKeys.SAVE_SESSION, true));
-        startAtBoot.setChecked(Prefs.getBoolean(this, PKeys.START_AT_BOOT, false));
-        rpcPort.setText(String.valueOf(Prefs.getInt(this, PKeys.RPC_PORT, 6800)));
-        rpcToken.setText(Prefs.getString(this, PKeys.RPC_TOKEN, "aria2"));
-        allowOriginAll.setChecked(Prefs.getBoolean(this, PKeys.RPC_ALLOW_ORIGIN_ALL, false));
-        showPerformance.setChecked(Prefs.getBoolean(this, PKeys.SHOW_PERFORMANCE, true));
-        updateDelay.setText(String.valueOf(Prefs.getInt(this, PKeys.NOTIFICATION_UPDATE_DELAY, 1)));
+        outputPath.setText(Prefs.getString(PK.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
+        saveSession.setChecked(Prefs.getBoolean(PK.SAVE_SESSION));
+        startAtBoot.setChecked(Prefs.getBoolean(PK.START_AT_BOOT));
+        rpcPort.setText(String.valueOf(Prefs.getInt(PK.RPC_PORT)));
+        rpcToken.setText(Prefs.getString(PK.RPC_TOKEN));
+        allowOriginAll.setChecked(Prefs.getBoolean(PK.RPC_ALLOW_ORIGIN_ALL));
+        showPerformance.setChecked(Prefs.getBoolean(PK.SHOW_PERFORMANCE));
+        updateDelay.setText(String.valueOf(Prefs.getInt(PK.NOTIFICATION_UPDATE_DELAY)));
 
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -355,8 +354,8 @@ public class MainActivity extends ActivityWithDialog {
         });
 
         // Backward compatibility
-        if (Prefs.getBoolean(this, PKeys.DEPRECATED_USE_CONFIG, false)) {
-            File file = new File(Prefs.getString(this, PKeys.DEPRECATED_CONFIG_FILE, ""));
+        if (Prefs.getBoolean(PK.DEPRECATED_USE_CONFIG, false)) {
+            File file = new File(Prefs.getString(PK.DEPRECATED_CONFIG_FILE, ""));
             if (file.exists() && file.isFile() && file.canRead()) {
                 startActivity(new Intent(this, ConfigEditorActivity.class)
                         .putExtra("import", file.getAbsolutePath()));
@@ -376,7 +375,7 @@ public class MainActivity extends ActivityWithDialog {
     }
 
     private boolean startService() {
-        Prefs.putLong(MainActivity.this, PKeys.CURRENT_SESSION_START, System.currentTimeMillis());
+        Prefs.putLong(PK.CURRENT_SESSION_START, System.currentTimeMillis());
         AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_ON);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -401,7 +400,7 @@ public class MainActivity extends ActivityWithDialog {
         }
 
         File sessionFile = new File(getFilesDir(), "session");
-        if (Prefs.getBoolean(this, PKeys.SAVE_SESSION, true) && !sessionFile.exists()) {
+        if (Prefs.getBoolean(PK.SAVE_SESSION) && !sessionFile.exists()) {
             try {
                 if (!sessionFile.createNewFile()) {
                     Toaster.with(this).message(R.string.failedCreatingSessionFile).error(true).show();
@@ -421,7 +420,7 @@ public class MainActivity extends ActivityWithDialog {
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         try {
             if (serviceMessenger != null) {
-                serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs(this)));
+                serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs()));
                 return true;
             } else {
                 bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
@@ -456,10 +455,10 @@ public class MainActivity extends ActivityWithDialog {
 
 
         Bundle bundle = null;
-        if (Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1) != -1) {
+        if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
             bundle = new Bundle();
-            bundle.putLong(Utils.LABEL_SESSION_DURATION, System.currentTimeMillis() - Prefs.getLong(MainActivity.this, PKeys.CURRENT_SESSION_START, -1));
-            Prefs.putLong(this, PKeys.CURRENT_SESSION_START, -1);
+            bundle.putLong(Utils.LABEL_SESSION_DURATION, System.currentTimeMillis() - Prefs.getLong(PK.CURRENT_SESSION_START, -1));
+            Prefs.putLong(PK.CURRENT_SESSION_START, -1);
         }
 
         AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_OFF, bundle);
@@ -521,8 +520,8 @@ public class MainActivity extends ActivityWithDialog {
         if (intent != null) {
             startActivity(intent
                     .putExtra("external", true)
-                    .putExtra("port", Prefs.getInt(this, PKeys.RPC_PORT, 6800))
-                    .putExtra("token", Prefs.getString(this, PKeys.RPC_TOKEN, "aria2")));
+                    .putExtra("port", Prefs.getInt(PK.RPC_PORT))
+                    .putExtra("token", Prefs.getString(PK.RPC_TOKEN)));
         }
 
         AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_OPENED_ARIA2APP);

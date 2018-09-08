@@ -5,7 +5,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.widget.RemoteViews;
 
-import com.gianlu.aria2android.PKeys;
+import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.R;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
@@ -29,7 +29,7 @@ public class PerformanceMonitor extends Thread {
     public PerformanceMonitor(Context context, NotificationCompat.Builder builder) {
         this.manager = NotificationManagerCompat.from(context);
         this.context = context;
-        this.delay = Prefs.getInt(context, PKeys.NOTIFICATION_UPDATE_DELAY, 1);
+        this.delay = Prefs.getInt(PK.NOTIFICATION_UPDATE_DELAY);
         this.builder = builder;
         this.startTime = System.currentTimeMillis();
     }
