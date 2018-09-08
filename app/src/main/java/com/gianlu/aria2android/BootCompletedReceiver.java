@@ -25,7 +25,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         if (Prefs.getBoolean(PK.START_AT_BOOT)) {
             context.getApplicationContext().bindService(new Intent(context, BinService.class), new ServiceConnection() {
-
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                     Messenger messenger = new Messenger(iBinder);
@@ -38,7 +37,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
                 @Override
                 public void onServiceDisconnected(ComponentName componentName) {
-
                 }
             }, Context.BIND_AUTO_CREATE);
         }

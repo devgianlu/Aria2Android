@@ -7,8 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.gianlu.aria2android.Aria2.StartConfig;
-import com.gianlu.aria2android.NetIO.GitHubApi;
-import com.gianlu.aria2android.NetIO.StatusCodeException;
+import com.gianlu.aria2android.DownloadBin.GitHubApi;
 import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedInputStream;

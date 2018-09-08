@@ -14,8 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gianlu.aria2android.DownloadBin.GitHubApi;
 import com.gianlu.aria2android.DownloadBin.ReleasesAdapter;
-import com.gianlu.aria2android.NetIO.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
@@ -92,7 +92,6 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
                         .setMessage(R.string.readStorage_message);
             }
         });
-
     }
 
     @Override

@@ -26,11 +26,11 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
     private final Context context;
     private final List<NameValuePair> options;
     private final LayoutInflater inflater;
-    private final IAdapter listener;
+    private final Listener listener;
     private final Set<Integer> edited;
     private boolean changed = false;
 
-    public OptionsAdapter(Context context, IAdapter listener) {
+    public OptionsAdapter(Context context, Listener listener) {
         this.context = context;
         this.options = new ArrayList<>();
         this.inflater = LayoutInflater.from(context);
@@ -150,8 +150,8 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         if (listener != null) listener.onItemsCountChanged(options.size());
     }
 
-    public interface IAdapter {
-        void onEditOption(NameValuePair option);
+    public interface Listener {
+        void onEditOption(@NonNull NameValuePair option);
 
         void onItemsCountChanged(int count);
     }

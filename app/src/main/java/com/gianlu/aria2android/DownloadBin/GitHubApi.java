@@ -1,4 +1,4 @@
-package com.gianlu.aria2android.NetIO;
+package com.gianlu.aria2android.DownloadBin;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -44,12 +44,13 @@ public class GitHubApi {
     }
 
     @WorkerThread
-    private HttpURLConnection basicRequestSync(String url) throws IOException, StatusCodeException {
+    private HttpURLConnection basicRequestSync(String url) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.connect();
 
         if (conn.getResponseCode() == 200) return conn;
-        else throw new StatusCodeException(conn.getResponseCode(), conn.getResponseMessage());
+        else
+            throw new IOException(String.format("%d: %s", conn.getResponseCode(), conn.getResponseMessage()));
     }
 
     public void getReleases(final String author, final String repo, final OnResult<List<Release>> listener) {
@@ -77,7 +78,7 @@ public class GitHubApi {
                             listener.onResult(releases);
                         }
                     });
-                } catch (IOException | StatusCodeException | JSONException | ParseException ex) {
+                } catch (IOException | JSONException | ParseException ex) {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

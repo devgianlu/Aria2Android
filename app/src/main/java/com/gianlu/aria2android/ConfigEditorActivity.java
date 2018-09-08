@@ -34,8 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ConfigEditorActivity extends ActivityWithDialog implements OptionsAdapter.IAdapter {
-    private static final int IMPORT_CODE = 4543;
+public class ConfigEditorActivity extends ActivityWithDialog implements OptionsAdapter.Listener {
+    private static final int IMPORT_CODE = 3;
     private OptionsAdapter adapter;
     private RecyclerViewLayout layout;
 
@@ -71,7 +71,9 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
 
             save();
 
+            // noinspection deprecation
             Prefs.remove(PK.DEPRECATED_USE_CONFIG);
+            // noinspection deprecation
             Prefs.remove(PK.DEPRECATED_CONFIG_FILE);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -90,12 +92,12 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
     }
 
     private void load() throws JSONException {
-        adapter.load(new JSONObject(Prefs.getBase64String(PK.CUSTOM_OPTIONS, "{}")));
+        adapter.load(Prefs.getJSONObject(PK.CUSTOM_OPTIONS, new JSONObject()));
     }
 
     private void save() {
         try {
-            Prefs.putBase64String(PK.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()).toString());
+            Prefs.putJSONObject(PK.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()));
             adapter.saved();
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedSavingCustomOptions).ex(ex).show();
@@ -208,7 +210,7 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
 
     @Override
     @SuppressLint("InflateParams")
-    public void onEditOption(final NameValuePair option) {
+    public void onEditOption(@NonNull final NameValuePair option) {
         LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.edit_option_dialog, null, false);
         SuperTextView value = layout.findViewById(R.id.editOptionDialog_value);
         value.setHtml(R.string.currentValue, option.value());
