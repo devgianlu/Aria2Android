@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Save downloads -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Google Analytics -->
+    <!-- Firebase -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Start service on boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

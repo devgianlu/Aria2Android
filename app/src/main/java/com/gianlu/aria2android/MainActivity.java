@@ -251,6 +251,22 @@ public class MainActivity extends ActivityWithDialog {
         customOptions.setTitle(R.string.customOptions);
         generalCategory.addView(customOptions);
 
+        // UI
+        MaterialPreferenceCategory uiCategory = new MaterialPreferenceCategory(this);
+        uiCategory.setTitle(R.string.ui);
+        screen.addView(uiCategory);
+
+        MaterialStandardPreference openAria2App = new MaterialStandardPreference(this);
+        openAria2App.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAria2App();
+            }
+        });
+        openAria2App.setTitle(R.string.openAria2App);
+        openAria2App.setSummary(R.string.openAria2App_summary);
+        uiCategory.addView(openAria2App);
+
         // RPC
         rpcCategory = new MaterialPreferenceCategory(this);
         rpcCategory.setTitle(R.string.rpc);
@@ -279,17 +295,6 @@ public class MainActivity extends ActivityWithDialog {
         allowOriginAll.setTitle(R.string.accessControlAllowOriginAll);
         allowOriginAll.setSummary(R.string.accessControlAllowOriginAll_summary);
         rpcCategory.addView(allowOriginAll);
-
-        MaterialStandardPreference openAria2App = new MaterialStandardPreference(this);
-        openAria2App.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAria2App();
-            }
-        });
-        openAria2App.setTitle(R.string.openAria2App);
-        openAria2App.setSummary(R.string.openAria2App_summary);
-        rpcCategory.addView(openAria2App);
 
         // Notifications
         notificationsCategory = new MaterialPreferenceCategory(this);
