@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Aria2Android</string>
     <string name="rpc">RPC</string>
-    <string name="rpcDisclaimer">To control the server you need to setup some other options.</string>
-    <string name="aria2app_disclaimer">To manage aria2 you can use any UI interface, such as Aria2App.</string>
     <string name="openAria2App">Open Aria2App</string>
+    <string name="openAria2App_summary">Open or install Aria2App to control the aria2 service.</string>
     <string name="aria2AppNotInstalled">Aria2App isn\'t installed</string>
     <string name="aria2AppNotInstalled_message">Aria2App isn\'t installed. Would you like to install it now?</string>
     <string name="options">Options</string>

@@ -61,7 +61,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainActivity extends ActivityWithDialog {
-    private static final int STORAGE_ACCESS_CODE = 454;
+    private static final int STORAGE_ACCESS_CODE = 1;
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Logging.LogLineAdapter adapter;
@@ -80,6 +80,9 @@ public class MainActivity extends ActivityWithDialog {
     private ToggleButton toggleServer;
     private RecyclerViewLayout logs;
     private MaterialEditTextPreference outputPath;
+    private MaterialPreferenceCategory generalCategory;
+    private MaterialPreferenceCategory rpcCategory;
+    private MaterialPreferenceCategory notificationsCategory;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -96,7 +99,7 @@ public class MainActivity extends ActivityWithDialog {
                 Uri uri = data.getData();
                 if (uri != null) {
                     outputPath.setValue(FileUtil.getFullPathFromTreeUri(uri, this));
-                    final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     getContentResolver().takePersistableUriPermission(uri, takeFlags);
                 }
             }
@@ -124,22 +127,19 @@ public class MainActivity extends ActivityWithDialog {
                         public void onDismiss(DialogInterface dialog) {
                             finish();
                         }
-                    })
-                    .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override
                         public void onCancel(DialogInterface dialog) {
                             finish();
                         }
-                    })
-                    .setNeutralButton(R.string.importBin, new DialogInterface.OnClickListener() {
+            }).setNeutralButton(R.string.importBin, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
                                     .putExtra("importBin", true)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                         }
-                    })
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             finish();
@@ -151,13 +151,13 @@ public class MainActivity extends ActivityWithDialog {
         }
 
         if (Objects.equals(getIntent().getAction(), BinService.ACTION_START_SERVICE)) {
-            startService();
+            toggleService(true);
             finish();
             return;
         }
 
         if (Objects.equals(getIntent().getAction(), BinService.ACTION_STOP_SERVICE)) {
-            stopService();
+            toggleService(false);
             finish();
             return;
         }
@@ -197,10 +197,10 @@ public class MainActivity extends ActivityWithDialog {
                 .setTopColor(ContextCompat.getColor(this, R.color.colorPrimary))
                 .build());
 
-        final MaterialPreferenceScreen screen = findViewById(R.id.main_preferences);
+        MaterialPreferenceScreen screen = findViewById(R.id.main_preferences);
 
         // General
-        MaterialPreferenceCategory generalCategory = new MaterialPreferenceCategory(this);
+        generalCategory = new MaterialPreferenceCategory(this);
         generalCategory.setTitle(R.string.general);
         screen.addView(generalCategory);
 
@@ -252,7 +252,7 @@ public class MainActivity extends ActivityWithDialog {
         generalCategory.addView(customOptions);
 
         // RPC
-        MaterialPreferenceCategory rpcCategory = new MaterialPreferenceCategory(this);
+        rpcCategory = new MaterialPreferenceCategory(this);
         rpcCategory.setTitle(R.string.rpc);
         screen.addView(rpcCategory);
 
@@ -280,8 +280,19 @@ public class MainActivity extends ActivityWithDialog {
         allowOriginAll.setSummary(R.string.accessControlAllowOriginAll_summary);
         rpcCategory.addView(allowOriginAll);
 
+        MaterialStandardPreference openAria2App = new MaterialStandardPreference(this);
+        openAria2App.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAria2App();
+            }
+        });
+        openAria2App.setTitle(R.string.openAria2App);
+        openAria2App.setSummary(R.string.openAria2App_summary);
+        rpcCategory.addView(openAria2App);
+
         // Notifications
-        MaterialPreferenceCategory notificationsCategory = new MaterialPreferenceCategory(this);
+        notificationsCategory = new MaterialPreferenceCategory(this);
         notificationsCategory.setTitle(R.string.notification);
         screen.addView(notificationsCategory);
 
@@ -335,13 +346,7 @@ public class MainActivity extends ActivityWithDialog {
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isRunning = isChecked;
-
-                boolean successful;
-                if (isChecked) successful = startService();
-                else successful = stopService();
-
-                if (successful) screen.setEnabled(!isChecked); // FIXME
+                toggleService(isChecked);
             }
         });
 
@@ -349,6 +354,22 @@ public class MainActivity extends ActivityWithDialog {
         version.setText(BinUtils.binVersion(this));
 
         backwardCompatibility();
+    }
+
+    private void toggleService(boolean on) {
+        boolean successful;
+        if (on) successful = startService();
+        else successful = stopService();
+
+        if (successful) {
+            int visibility = on ? View.GONE : View.VISIBLE;
+            generalCategory.setVisibility(visibility);
+            rpcCategory.setVisibility(visibility);
+            notificationsCategory.setVisibility(visibility);
+
+            isRunning = on;
+            toggleServer.setChecked(on);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -373,15 +394,15 @@ public class MainActivity extends ActivityWithDialog {
         super.onDestroy();
     }
 
-    private boolean startService() { // FIXME
+    private boolean startService() {
         Prefs.putLong(PK.CURRENT_SESSION_START, System.currentTimeMillis());
-        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_ON);
+        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_TURN_ON);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             AskPermission.ask(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
                 @Override
                 public void permissionGranted(@NonNull String permission) {
-                    startService();
+                    toggleService(true);
                 }
 
                 @Override
@@ -422,7 +443,7 @@ public class MainActivity extends ActivityWithDialog {
                 serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs()));
                 return true;
             } else {
-                bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
+                bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
                 return false;
             }
         } catch (JSONException ex) {
@@ -439,7 +460,7 @@ public class MainActivity extends ActivityWithDialog {
     @Override
     protected void onStart() {
         super.onStart();
-        bindService(new Intent(MainActivity.this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
+        bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
     }
 
     private boolean stopService() {
@@ -452,7 +473,6 @@ public class MainActivity extends ActivityWithDialog {
             return false;
         }
 
-
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
             bundle = new Bundle();
@@ -460,7 +480,7 @@ public class MainActivity extends ActivityWithDialog {
             Prefs.putLong(PK.CURRENT_SESSION_START, -1);
         }
 
-        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_OFF, bundle);
+        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_TURN_OFF, bundle);
 
         return true;
     }
@@ -482,13 +502,12 @@ public class MainActivity extends ActivityWithDialog {
                             Logging.log(ex);
                         }
                     }
-                })
-                .setNegativeButton(android.R.string.no, null);
+                }).setNegativeButton(android.R.string.no, null);
 
         showDialog(builder);
     }
 
-    private void openAria2App() { // TODO
+    private void openAria2App() {
         try {
             getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
         } catch (PackageManager.NameNotFoundException ex) {
@@ -500,7 +519,7 @@ public class MainActivity extends ActivityWithDialog {
         if (isRunning) {
             startAria2App();
         } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
                     .setTitle(R.string.aria2NotRunning)
                     .setMessage(R.string.aria2NotRunning_message)
                     .setPositiveButton(android.R.string.no, null)
@@ -524,7 +543,7 @@ public class MainActivity extends ActivityWithDialog {
                     .putExtra("token", Prefs.getString(PK.RPC_TOKEN)));
         }
 
-        AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_OPENED_ARIA2APP);
+        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_OPENED_ARIA2APP);
     }
 
     @Override
@@ -554,8 +573,7 @@ public class MainActivity extends ActivityWithDialog {
                                     Toaster.with(MainActivity.this).message(R.string.cannotDeleteBin).error(true).show();
                                 }
                             }
-                        })
-                        .setNegativeButton(android.R.string.no, null);
+                        }).setNegativeButton(android.R.string.no, null);
 
                 showDialog(builder);
                 return true;
@@ -582,7 +600,7 @@ public class MainActivity extends ActivityWithDialog {
                             case SERVER_STOP:
                                 adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
                                 LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
-                                toggleServer.setChecked(false);
+                                toggleService(false);
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");
