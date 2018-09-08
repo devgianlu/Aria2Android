@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 
-public class BinService extends Service implements StreamListener.IStreamListener {
+public class BinService extends Service implements StreamListener.Listener {
     public static final int START = 0;
     public static final int STOP = 1;
     public static final int NOTIFICATION_ID = 1;
@@ -171,7 +171,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     }
 
     @Override
-    public void onNewLogLine(Logging.LogLine line) {
+    public void onNewLogLine(@NonNull Logging.LogLine line) {
         dispatchBroadcast(Action.SERVER_MSG, line, null);
     }
 
@@ -190,7 +190,7 @@ public class BinService extends Service implements StreamListener.IStreamListene
     }
 
     @Override
-    public void unknownLogLine(String line) {
+    public void unknownLogLine(@NonNull String line) {
         if (BuildConfig.DEBUG) System.out.println("UNKNOWN LINE: " + line);
 
         Bundle bundle = new Bundle();

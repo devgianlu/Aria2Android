@@ -1,6 +1,5 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.gianlu.aria2android.PK;
@@ -33,12 +32,9 @@ public class StartConfig implements Serializable {
     @NonNull
     public static StartConfig fromPrefs() throws JSONException {
         HashMap<String, String> options = new HashMap<>();
-        Utils.toMap(new JSONObject(Prefs.getBase64String(PK.CUSTOM_OPTIONS, "{}")), options);
-        return new StartConfig(Prefs.getString(PK.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()),
-                options,
-                Prefs.getBoolean(PK.SAVE_SESSION),
-                Prefs.getInt(PK.RPC_PORT),
-                Prefs.getString(PK.RPC_TOKEN),
-                Prefs.getBoolean(PK.RPC_ALLOW_ORIGIN_ALL));
+        Utils.toMap(Prefs.getJSONObject(PK.CUSTOM_OPTIONS, new JSONObject()), options);
+        return new StartConfig(Prefs.getString(PK.OUTPUT_DIRECTORY), options,
+                Prefs.getBoolean(PK.SAVE_SESSION), Prefs.getInt(PK.RPC_PORT),
+                Prefs.getString(PK.RPC_TOKEN), Prefs.getBoolean(PK.RPC_ALLOW_ORIGIN_ALL));
     }
 }

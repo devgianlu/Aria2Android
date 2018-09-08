@@ -24,7 +24,7 @@ public class PerformanceMonitor extends Thread {
     private final int delay;
     private final NotificationCompat.Builder builder;
     private final long startTime;
-    private volatile boolean _stop = false;
+    private volatile boolean shouldStop = false;
 
     public PerformanceMonitor(Context context, NotificationCompat.Builder builder) {
         this.manager = NotificationManagerCompat.from(context);
@@ -41,7 +41,7 @@ public class PerformanceMonitor extends Thread {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
             String line;
-            while ((line = reader.readLine()) != null && !_stop) {
+            while ((line = reader.readLine()) != null && !shouldStop) {
                 if (line.contains("aria2c")) {
                     Matcher matcher = pattern.matcher(line);
                     if (matcher.find())
@@ -57,7 +57,7 @@ public class PerformanceMonitor extends Thread {
     }
 
     private void sendNotification(String pid, String cpuUsage, String rss) {
-        if (_stop) return;
+        if (shouldStop) return;
         RemoteViews layout = new RemoteViews(context.getPackageName(), R.layout.custom_notification);
         layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + CommonUtils.timeFormatter((System.currentTimeMillis() - startTime) / 1000));
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + pid);
@@ -69,6 +69,6 @@ public class PerformanceMonitor extends Thread {
     }
 
     public void stopSafe() {
-        _stop = true;
+        shouldStop = true;
     }
 }

@@ -1,5 +1,7 @@
 package com.gianlu.aria2android.Aria2;
 
+import android.support.annotation.NonNull;
+
 import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.commonutils.Logging;
 
@@ -16,10 +18,10 @@ public class StreamListener extends Thread {
     private final Process process;
     private final InputStream in;
     private final InputStream err;
-    private final IStreamListener listener;
-    private volatile boolean _shouldStop;
+    private final Listener listener;
+    private volatile boolean shouldStop;
 
-    public StreamListener(Process process, IStreamListener listener) {
+    public StreamListener(Process process, Listener listener) {
         this.process = process;
         this.in = process.getInputStream();
         this.err = process.getErrorStream();
@@ -27,7 +29,7 @@ public class StreamListener extends Thread {
     }
 
     public void stopSafe() {
-        _shouldStop = true;
+        shouldStop = true;
     }
 
     private boolean isProcessAlive() {
@@ -44,7 +46,7 @@ public class StreamListener extends Thread {
         BufferedReader in = new BufferedReader(new InputStreamReader(this.in));
         BufferedReader err = new BufferedReader(new InputStreamReader(this.err));
 
-        while (!_shouldStop && isProcessAlive()) {
+        while (!shouldStop && isProcessAlive()) {
             try {
                 String inLine;
                 if ((inLine = in.readLine()) != null) {
@@ -97,11 +99,11 @@ public class StreamListener extends Thread {
         listener.onTerminated();
     }
 
-    public interface IStreamListener {
-        void onNewLogLine(Logging.LogLine line);
+    public interface Listener {
+        void onNewLogLine(@NonNull Logging.LogLine line);
 
         void onTerminated();
 
-        void unknownLogLine(String line);
+        void unknownLogLine(@NonNull String line);
     }
 }
