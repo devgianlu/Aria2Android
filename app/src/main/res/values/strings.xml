@@ -8,6 +8,7 @@
     <string name="aria2AppNotInstalled_message">Aria2App isn\'t installed. Would you like to install it now?</string>
     <string name="options">Options</string>
     <string name="saveSession">Save session</string>
+    <string name="saveSession_summary">Save the downloads periodically so that you don\'t lose them when the service is stopped.</string>
     <string name="aria2NotRunning">aria2 is not running!</string>
     <string name="aria2NotRunning_message">Opening Aria2App will probably result in a connection error.\nDo you want to start it anyway?</string>
     <string name="logs">Logs</string>
@@ -17,17 +18,15 @@
     <string name="app_version">App version</string>
     <string name="email" translatable="false">altomanigianluca@gmail.com</string>
     <string name="unknown">Unknown</string>
-    <string name="preferences">Preferences</string>
-    <string name="tracking">Disable anonymous statistics</string>
-    <string name="trackingOn">No statistics will be sent to the developer.</string>
-    <string name="trackingOff">Statistics about the application behavior will be sent to the developer. (No personal data will be sent)</string>
     <string name="serverStopped">Server stopped!</string>
     <string name="serverException">Server exception! %s</string>
     <string name="serverStarted">Server started!</string>
     <string name="changeBinVersion">Change bin version</string>
-    <string name="startServiceAtBoot">Start service on system boot</string>
+    <string name="startServiceAtBoot">Start service when the system boots</string>
+    <string name="startServiceAtBoot_summary">The service will start when the device turns on.</string>
     <string name="notification">Notification</string>
     <string name="showPerformance">Show performance</string>
+    <string name="showPerformance_summary">Show a persistent notification when the service is running.</string>
     <string name="noLogs">The log is empty.</string>
     <string name="retrievingReleases">Retrieving releases. Please wait…</string>
     <string name="failedRetrievingReleases_reason">Failed retrieving releases: %s</string>
@@ -36,15 +35,14 @@
     <string name="downloadingBin">Downloading the bin files…</string>
     <string name="binExtracted">Bin extracted successfully!</string>
     <string name="extractingBin">Extracting the bin files…</string>
-    <string name="cannotWriteOutputDirectory">Cannot write to the output directory!</string>
-    <string name="outputDirectoryDoesNotExist">The output directory doesn\'t exist!</string>
+    <string name="invalidOutputPath">The output path is either missing or not writable!</string>
     <string name="invalidPort">The port is invalid!</string>
     <string name="invalidToken">The token is invalid!</string>
-    <string name="invalidUpdateDelay">The update delay is invalid!</string>
     <string name="failedCreatingSessionFile">Failed creating an empty session file!</string>
     <string name="writePermissionDenied">You denied the write permission! Can\'t start aria2!</string>
     <string name="cannotDeleteBin">Can\'t delete the bin file! Please clear application data.</string>
     <string name="outputPath">Output path</string>
+    <string name="outputPath_summary">Your downloads will end up there.</string>
     <string name="rpcPort">RPC port</string>
     <string name="rpcToken">RPC token</string>
     <string name="updateInterval">Update interval (sec)</string>
@@ -69,9 +67,8 @@
     <string name="newOption">New option</string>
     <string name="failedStarting">Failed starting the server!</string>
     <string name="failedStopping">Failed stopping the server!</string>
-    <string name="clear">Clear</string>
     <string name="accessControlAllowOriginAll">Access Control Allow Origin all</string>
-    <string name="accessControlAllowOriginAll_disclaimer">Enabling the option above you\'ll set the <b>Access-Control-Allow-Origin</b> header to <b>*</b>. You should enable this only if you\'re trying to connect from an external device. Please consider reading this post: https://gianlu.xyz/documents/Aria2Android/about-cors/</string>
+    <string name="accessControlAllowOriginAll_summary">Set <b>Access-Control-Allow-Origin</b> header to <b>*</b>. You should enable this only if you\'re trying to connect from an external device.</string>
     <string name="noCustomOptions">You have no custom options.</string>
     <string name="archNotSupported">Device architecture not supported</string>
     <string name="archNotSupported_message">The aria2 executable is compiled to run on arm devices only. If you compiled your own binary select the option below.</string>
@@ -88,4 +85,6 @@
     <string name="failedImportingBin">Failed importing the bin file!</string>
     <string name="importBin">Import bin</string>
     <string name="readPermissionDenied">You denied the read permission!</string>
+    <string name="general">General</string>
+    <string name="clearLogs">Clear logs</string>
 </resources>

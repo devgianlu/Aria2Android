@@ -29,6 +29,7 @@ android {
 }
 
 dependencies {
+    api project(':LovelyMaterialPreferences')
     api(project(':CommonUtils')) {
         exclude group: 'com.getkeepsafe.taptargetview'
     }

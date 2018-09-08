@@ -25,14 +25,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -43,7 +39,19 @@ import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
+import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.Toaster;
+import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
+import com.yarolegovich.lovelyuserinput.LovelyInput;
+import com.yarolegovich.mp.AbsMaterialPreference;
+import com.yarolegovich.mp.AbsMaterialTextValuePreference;
+import com.yarolegovich.mp.MaterialCheckboxPreference;
+import com.yarolegovich.mp.MaterialEditTextPreference;
+import com.yarolegovich.mp.MaterialPreferenceCategory;
+import com.yarolegovich.mp.MaterialPreferenceScreen;
+import com.yarolegovich.mp.MaterialSeekBarPreference;
+import com.yarolegovich.mp.MaterialStandardPreference;
+import com.yarolegovich.mp.io.MaterialPreferences;
 
 import org.json.JSONException;
 
@@ -57,8 +65,6 @@ public class MainActivity extends ActivityWithDialog {
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Logging.LogLineAdapter adapter;
-    private RecyclerView logs;
-    private TextView noLogs;
     private Messenger serviceMessenger;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -72,7 +78,8 @@ public class MainActivity extends ActivityWithDialog {
         }
     };
     private ToggleButton toggleServer;
-    private SuperEditText outputPath;
+    private RecyclerViewLayout logs;
+    private MaterialEditTextPreference outputPath;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -88,7 +95,7 @@ public class MainActivity extends ActivityWithDialog {
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 if (uri != null) {
-                    outputPath.setText(FileUtil.getFullPathFromTreeUri(uri, this));
+                    outputPath.setValue(FileUtil.getFullPathFromTreeUri(uri, this));
                     final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     getContentResolver().takePersistableUriPermission(uri, takeFlags);
                 }
@@ -157,169 +164,174 @@ public class MainActivity extends ActivityWithDialog {
 
         setContentView(R.layout.activity_main);
 
-        AskPermission.ask(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
-            @Override
-            public void permissionGranted(@NonNull String permission) {
-            }
+        MaterialPreferences.instance().setUserInputModule(new LovelyInput.Builder()
+                .addIcon(PK.OUTPUT_DIRECTORY.key(), R.drawable.baseline_folder_24)
+                .addTextFilter(PK.OUTPUT_DIRECTORY.key(), R.string.invalidOutputPath, new LovelyTextInputDialog.TextFilter() {
+                    @Override
+                    public boolean check(String text) {
+                        File path = new File(text);
+                        return path.exists() && path.canWrite();
+                    }
+                })
+                .addIcon(PK.RPC_PORT.key(), R.drawable.baseline_import_export_24)
+                .addTextFilter(PK.RPC_PORT.key(), R.string.invalidPort, new LovelyTextInputDialog.TextFilter() {
+                    @Override
+                    public boolean check(String text) {
+                        try {
+                            int port = Integer.parseInt(text);
+                            return port > 0 && port < 65536;
+                        } catch (Exception ex) {
+                            Logging.log(ex);
+                            return false;
+                        }
+                    }
+                })
+                .addIcon(PK.RPC_TOKEN.key(), R.drawable.baseline_vpn_key_24)
+                .addTextFilter(PK.RPC_TOKEN.key(), R.string.invalidToken, new LovelyTextInputDialog.TextFilter() {
+                    @Override
+                    public boolean check(String text) {
+                        return !text.isEmpty();
+                    }
+                })
+                .addIcon(PK.NOTIFICATION_UPDATE_DELAY.key(), R.drawable.baseline_notifications_24)
+                .setTopColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .build());
 
-            @Override
-            public void permissionDenied(@NonNull String permission) {
-                Toaster.with(MainActivity.this).message(R.string.writePermissionDenied).error(true).show();
-            }
+        final MaterialPreferenceScreen screen = findViewById(R.id.main_preferences);
 
-            @Override
-            public void askRationale(@NonNull AlertDialog.Builder builder) {
-                builder.setTitle(R.string.permissionRequest)
-                        .setMessage(R.string.writeStorageMessage);
-            }
-        });
+        // General
+        MaterialPreferenceCategory generalCategory = new MaterialPreferenceCategory(this);
+        generalCategory.setTitle(R.string.general);
+        screen.addView(generalCategory);
 
-        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>(), null);
-        logs = findViewById(R.id.main_logs);
-        logs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        logs.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        noLogs = findViewById(R.id.main_noLogs);
-        logs.setAdapter(adapter);
-
-        final TextView version = findViewById(R.id.main_binVersion);
-        final CheckBox saveSession = findViewById(R.id.options_saveSession);
-        final CheckBox startAtBoot = findViewById(R.id.options_startAtBoot);
-        toggleServer = findViewById(R.id.main_toggleServer);
-        final Button openAria2App = findViewById(R.id.main_openAria2App);
-        outputPath = findViewById(R.id.options_outputPath);
-        final ImageButton pickOutputPath = findViewById(R.id.options_outputPath_pick);
-        pickOutputPath.setOnClickListener(new View.OnClickListener() {
+        outputPath = new MaterialEditTextPreference.Builder(this)
+                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_BOTTOM)
+                .key(PK.OUTPUT_DIRECTORY.key())
+                .defaultValue(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath())
+                .build();
+        outputPath.setTitle(R.string.outputPath);
+        outputPath.setOverrideClickListener(new AbsMaterialPreference.OverrideOnClickListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onClick(View v) {
                 try {
                     Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                     startActivityForResult(intent, STORAGE_ACCESS_CODE);
+                    return true;
                 } catch (ActivityNotFoundException ex) {
                     Toaster.with(MainActivity.this).message(R.string.noOpenTree).ex(ex).show();
+                    return false;
                 }
             }
         });
-        final SuperEditText rpcPort = findViewById(R.id.options_rpcPort);
-        final SuperEditText rpcToken = findViewById(R.id.options_rpcToken);
-        final CheckBox allowOriginAll = findViewById(R.id.options_allowOriginAll);
-        final CheckBox showPerformance = findViewById(R.id.main_showPerformance);
-        final SuperEditText updateDelay = findViewById(R.id.main_updateDelay);
-        final Button customOptions = findViewById(R.id.main_customOptions);
+        generalCategory.addView(outputPath);
+
+        MaterialCheckboxPreference saveSession = new MaterialCheckboxPreference.Builder(this)
+                .key(PK.SAVE_SESSION.key())
+                .defaultValue(PK.SAVE_SESSION.fallback())
+                .build();
+        saveSession.setTitle(R.string.saveSession);
+        saveSession.setSummary(R.string.saveSession_summary);
+        generalCategory.addView(saveSession);
+
+        MaterialCheckboxPreference startAtBoot = new MaterialCheckboxPreference.Builder(this)
+                .key(PK.START_AT_BOOT.key())
+                .defaultValue(PK.START_AT_BOOT.fallback())
+                .build();
+        startAtBoot.setTitle(R.string.startServiceAtBoot);
+        startAtBoot.setSummary(R.string.startServiceAtBoot_summary);
+        generalCategory.addView(startAtBoot);
+
+        MaterialStandardPreference customOptions = new MaterialStandardPreference(this);
         customOptions.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class));
             }
         });
-        final Button clear = findViewById(R.id.main_clear);
-        clear.setOnClickListener(new View.OnClickListener() {
+        customOptions.setTitle(R.string.customOptions);
+        generalCategory.addView(customOptions);
+
+        // RPC
+        MaterialPreferenceCategory rpcCategory = new MaterialPreferenceCategory(this);
+        rpcCategory.setTitle(R.string.rpc);
+        screen.addView(rpcCategory);
+
+        MaterialEditTextPreference rpcPort = new MaterialEditTextPreference.Builder(this)
+                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_RIGHT)
+                .key(PK.RPC_PORT.key())
+                .defaultValue(String.valueOf(PK.RPC_PORT.fallback()))
+                .build();
+        rpcPort.setTitle(R.string.rpcPort);
+        rpcCategory.addView(rpcPort);
+
+        MaterialEditTextPreference rpcToken = new MaterialEditTextPreference.Builder(this)
+                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_RIGHT)
+                .key(PK.RPC_TOKEN.key())
+                .defaultValue(String.valueOf(PK.RPC_TOKEN.fallback()))
+                .build();
+        rpcToken.setTitle(R.string.rpcToken);
+        rpcCategory.addView(rpcToken);
+
+        MaterialCheckboxPreference allowOriginAll = new MaterialCheckboxPreference.Builder(this)
+                .key(PK.RPC_ALLOW_ORIGIN_ALL.key())
+                .defaultValue(PK.RPC_ALLOW_ORIGIN_ALL.fallback())
+                .build();
+        allowOriginAll.setTitle(R.string.accessControlAllowOriginAll);
+        allowOriginAll.setSummary(R.string.accessControlAllowOriginAll_summary);
+        rpcCategory.addView(allowOriginAll);
+
+        // Notifications
+        MaterialPreferenceCategory notificationsCategory = new MaterialPreferenceCategory(this);
+        notificationsCategory.setTitle(R.string.notification);
+        screen.addView(notificationsCategory);
+
+        MaterialCheckboxPreference showPerformance = new MaterialCheckboxPreference.Builder(this)
+                .key(PK.SHOW_PERFORMANCE.key())
+                .defaultValue(PK.SHOW_PERFORMANCE.fallback())
+                .build();
+        showPerformance.setTitle(R.string.showPerformance);
+        showPerformance.setSummary(R.string.showPerformance_summary);
+        notificationsCategory.addView(showPerformance);
+
+        MaterialSeekBarPreference updateDelay = new MaterialSeekBarPreference.Builder(this)
+                .showValue(true).minValue(1).maxValue(5)
+                .key(PK.NOTIFICATION_UPDATE_DELAY.key())
+                .defaultValue(PK.NOTIFICATION_UPDATE_DELAY.fallback())
+                .build();
+        updateDelay.setTitle(R.string.updateInterval);
+        notificationsCategory.addView(updateDelay);
+
+        screen.setVisibilityController(showPerformance, new AbsMaterialPreference[]{updateDelay}, true);
+
+        // Logs
+        MaterialPreferenceCategory logsCategory = new MaterialPreferenceCategory(this);
+        logsCategory.setTitle(R.string.logs);
+        screen.addView(logsCategory);
+
+        logs = new RecyclerViewLayout(this); // FIXME
+        logsCategory.addView(logs);
+
+        MaterialStandardPreference clearLogs = new MaterialStandardPreference(this);
+        clearLogs.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if (adapter != null) {
                     adapter.clear();
-                    noLogs.setVisibility(View.VISIBLE);
-                    logs.setVisibility(View.GONE);
+                    logs.showInfo(R.string.noLogs);
                 }
             }
         });
+        clearLogs.setTitle(R.string.clearLogs);
+        logsCategory.addView(clearLogs);
 
-        version.setText(BinUtils.binVersion(this));
 
-        saveSession.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Prefs.putBoolean(PK.SAVE_SESSION, b);
-            }
-        });
+        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>(), null);
+        logs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        logs.getList().addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        logs.loadListData(adapter, false);
+        logs.showInfo(R.string.noLogs);
 
-        startAtBoot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                Prefs.putBoolean(PK.START_AT_BOOT, b);
-            }
-        });
-
-        outputPath.setValidator(new SuperEditText.Validator() {
-            @Override
-            public void validate(String text) throws SuperEditText.InvalidInputException {
-                File path = new File(text);
-                if (path.exists()) {
-                    if (path.canWrite()) {
-                        Prefs.putString(PK.OUTPUT_DIRECTORY, path.getAbsolutePath());
-                    } else {
-                        throw new SuperEditText.InvalidInputException(R.string.cannotWriteOutputDirectory);
-                    }
-                } else {
-                    throw new SuperEditText.InvalidInputException(R.string.outputDirectoryDoesNotExist);
-                }
-            }
-        });
-
-        rpcPort.setValidator(new SuperEditText.Validator() {
-            @Override
-            public void validate(String text) throws SuperEditText.InvalidInputException {
-                int port;
-                try {
-                    port = Integer.parseInt(text);
-                } catch (Exception ex) {
-                    throw new SuperEditText.InvalidInputException(R.string.invalidPort);
-                }
-
-                if (port > 1024 && port < 65535)
-                    Prefs.putInt(PK.RPC_PORT, port);
-                else throw new SuperEditText.InvalidInputException(R.string.invalidPort);
-            }
-        });
-
-        rpcToken.setValidator(new SuperEditText.Validator() {
-            @Override
-            public void validate(String text) throws SuperEditText.InvalidInputException {
-                if (text.isEmpty())
-                    throw new SuperEditText.InvalidInputException(R.string.invalidToken);
-                else Prefs.putString(PK.RPC_TOKEN, text);
-            }
-        });
-
-        allowOriginAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Prefs.putBoolean(PK.RPC_ALLOW_ORIGIN_ALL, b);
-            }
-        });
-
-        showPerformance.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                Prefs.putBoolean(PK.SHOW_PERFORMANCE, b);
-                updateDelay.setEnabled(b);
-            }
-        });
-
-        updateDelay.setValidator(new SuperEditText.Validator() {
-            @Override
-            public void validate(String text) throws SuperEditText.InvalidInputException {
-                int delay;
-                try {
-                    delay = Integer.parseInt(text);
-                } catch (Exception ex) {
-                    throw new SuperEditText.InvalidInputException(R.string.invalidUpdateDelay);
-                }
-
-                if (delay > 0)
-                    Prefs.putInt(PK.NOTIFICATION_UPDATE_DELAY, delay);
-                else throw new SuperEditText.InvalidInputException(R.string.invalidUpdateDelay);
-            }
-        });
-
-        outputPath.setText(Prefs.getString(PK.OUTPUT_DIRECTORY, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()));
-        saveSession.setChecked(Prefs.getBoolean(PK.SAVE_SESSION));
-        startAtBoot.setChecked(Prefs.getBoolean(PK.START_AT_BOOT));
-        rpcPort.setText(String.valueOf(Prefs.getInt(PK.RPC_PORT)));
-        rpcToken.setText(Prefs.getString(PK.RPC_TOKEN));
-        allowOriginAll.setChecked(Prefs.getBoolean(PK.RPC_ALLOW_ORIGIN_ALL));
-        showPerformance.setChecked(Prefs.getBoolean(PK.SHOW_PERFORMANCE));
-        updateDelay.setText(String.valueOf(Prefs.getInt(PK.NOTIFICATION_UPDATE_DELAY)));
-
+        toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -329,31 +341,18 @@ public class MainActivity extends ActivityWithDialog {
                 if (isChecked) successful = startService();
                 else successful = stopService();
 
-                if (successful) {
-                    outputPath.setEnabled(!isChecked);
-                    pickOutputPath.setEnabled(!isChecked);
-                    customOptions.setEnabled(!isChecked);
-                    saveSession.setEnabled(!isChecked);
-                    startAtBoot.setEnabled(!isChecked);
-                    rpcToken.setEnabled(!isChecked);
-                    rpcPort.setEnabled(!isChecked);
-                    allowOriginAll.setEnabled(!isChecked);
-                    showPerformance.setEnabled(!isChecked);
-                    clear.setEnabled(!isChecked);
-                    if (isChecked) updateDelay.setEnabled(false);
-                    else updateDelay.setEnabled(showPerformance.isChecked());
-                }
+                if (successful) screen.setEnabled(!isChecked); // FIXME
             }
         });
 
-        openAria2App.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAria2App();
-            }
-        });
+        TextView version = findViewById(R.id.main_binVersion);
+        version.setText(BinUtils.binVersion(this));
 
-        // Backward compatibility
+        backwardCompatibility();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void backwardCompatibility() {
         if (Prefs.getBoolean(PK.DEPRECATED_USE_CONFIG, false)) {
             File file = new File(Prefs.getString(PK.DEPRECATED_CONFIG_FILE, ""));
             if (file.exists() && file.isFile() && file.canRead()) {
@@ -374,7 +373,7 @@ public class MainActivity extends ActivityWithDialog {
         super.onDestroy();
     }
 
-    private boolean startService() {
+    private boolean startService() { // FIXME
         Prefs.putLong(PK.CURRENT_SESSION_START, System.currentTimeMillis());
         AnalyticsApplication.sendAnalytics(MainActivity.this, Utils.ACTION_TURN_ON);
 
@@ -467,7 +466,8 @@ public class MainActivity extends ActivityWithDialog {
     }
 
     private void installAria2App() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this).setTitle(R.string.aria2AppNotInstalled)
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.aria2AppNotInstalled)
                 .setMessage(R.string.aria2AppNotInstalled_message)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -488,7 +488,7 @@ public class MainActivity extends ActivityWithDialog {
         showDialog(builder);
     }
 
-    private void openAria2App() {
+    private void openAria2App() { // TODO
         try {
             getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
         } catch (PackageManager.NameNotFoundException ex) {
@@ -573,8 +573,7 @@ public class MainActivity extends ActivityWithDialog {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        noLogs.setVisibility(View.GONE);
-                        logs.setVisibility(View.VISIBLE);
+                        logs.showList();
 
                         switch (action) {
                             case SERVER_START:
