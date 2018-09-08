@@ -72,9 +72,9 @@ public class BinUtils {
                         conn.disconnect();
                     } else {
                         conn.disconnect();
-                        throw new StatusCodeException(conn.getResponseCode(), conn.getResponseMessage());
+                        throw new IOException(String.format("%d: %s", conn.getResponseCode(), conn.getResponseMessage()));
                     }
-                } catch (StatusCodeException | IOException ex) {
+                } catch (final IOException ex) {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
