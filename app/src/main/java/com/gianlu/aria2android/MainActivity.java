@@ -23,12 +23,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -38,8 +38,8 @@ import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
-import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.Toaster;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 import com.yarolegovich.lovelyuserinput.LovelyInput;
@@ -57,14 +57,12 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainActivity extends ActivityWithDialog {
     private static final int STORAGE_ACCESS_CODE = 1;
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
-    private Logging.LogLineAdapter adapter;
     private Messenger serviceMessenger;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -78,11 +76,12 @@ public class MainActivity extends ActivityWithDialog {
         }
     };
     private ToggleButton toggleServer;
-    private RecyclerViewLayout logs;
     private MaterialEditTextPreference outputPath;
     private MaterialPreferenceCategory generalCategory;
     private MaterialPreferenceCategory rpcCategory;
     private MaterialPreferenceCategory notificationsCategory;
+    private LinearLayout logsContainer;
+    private MessageView logsMessage;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -128,23 +127,23 @@ public class MainActivity extends ActivityWithDialog {
                             finish();
                         }
                     }).setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            finish();
-                        }
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    finish();
+                }
             }).setNeutralButton(R.string.importBin, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
-                                    .putExtra("importBin", true)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                        }
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                            .putExtra("importBin", true)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                }
             }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    });
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    finish();
+                }
+            });
 
             showDialog(builder);
             return;
@@ -324,28 +323,29 @@ public class MainActivity extends ActivityWithDialog {
         logsCategory.setTitle(R.string.logs);
         screen.addView(logsCategory);
 
-        logs = new RecyclerViewLayout(this); // FIXME
-        logsCategory.addView(logs);
+        logsMessage = new MessageView(this);
+        logsMessage.setInfo(R.string.noLogs);
+        logsCategory.addView(logsMessage);
+        logsMessage.setVisibility(View.VISIBLE);
+
+        logsContainer = new LinearLayout(this);
+        logsContainer.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+        logsContainer.setPaddingRelative(pad, 0, pad, 0);
+        logsCategory.addView(logsContainer);
+        logsContainer.setVisibility(View.GONE);
 
         MaterialStandardPreference clearLogs = new MaterialStandardPreference(this);
         clearLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (adapter != null) {
-                    adapter.clear();
-                    logs.showInfo(R.string.noLogs);
-                }
+                logsContainer.removeAllViews();
+                logsContainer.setVisibility(View.GONE);
+                logsMessage.setVisibility(View.VISIBLE);
             }
         });
         clearLogs.setTitle(R.string.clearLogs);
         logsCategory.addView(clearLogs);
-
-
-        adapter = new Logging.LogLineAdapter(this, new ArrayList<Logging.LogLine>(), null);
-        logs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        logs.getList().addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        logs.loadListData(adapter, false);
-        logs.showInfo(R.string.noLogs);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -587,6 +587,12 @@ public class MainActivity extends ActivityWithDialog {
         return super.onOptionsItemSelected(item);
     }
 
+    private void addLog(@NonNull Logging.LogLine line) {
+        logsContainer.setVisibility(View.VISIBLE);
+        logsMessage.setVisibility(View.GONE);
+        logsContainer.addView(Logging.LogLineAdapter.createLogLineView(getLayoutInflater(), logsContainer, line), logsContainer.getChildCount());
+    }
+
     private class ServiceBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -596,24 +602,22 @@ public class MainActivity extends ActivityWithDialog {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        logs.showList();
-
                         switch (action) {
                             case SERVER_START:
-                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
+                                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                                 break;
                             case SERVER_STOP:
-                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
+                                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
                                 LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
                                 toggleService(false);
                                 break;
                             case SERVER_EX:
                                 Exception ex = (Exception) intent.getSerializableExtra("ex");
                                 Logging.log(ex);
-                                adapter.add(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
+                                addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
                                 break;
                             case SERVER_MSG:
-                                adapter.add((Logging.LogLine) intent.getSerializableExtra("msg"));
+                                addLog((Logging.LogLine) intent.getSerializableExtra("msg"));
                                 break;
                         }
                     }
