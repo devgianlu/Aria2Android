@@ -34,6 +34,6 @@ public class PreferenceActivity extends BasePreferenceActivity {
 
     @Override
     protected boolean disablePayPalOnGooglePlay() {
-        return true;
+        return false;
     }
 }
