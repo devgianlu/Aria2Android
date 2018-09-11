@@ -11,6 +11,5 @@ gradlew.bat
 .DS_Store
 /build
 /captures
-settings.gradle
 Thumbs.db
 app/*/release
