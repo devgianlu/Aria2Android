@@ -1,0 +1,8 @@
+With Aria2Android you can run a real aria2, an open source download manager, executable on your device.
+
+You can easily save session to pause downloads and continue them later and control your server through the JSON-RPC interface.
+
+Aria2Android works only on ARM devices.
+--------------------------------
+
+aria2 is developed by Tatsuhiro Tsujikawa (https://github.com/tatsuhiro-t).
