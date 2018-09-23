@@ -4,12 +4,12 @@ if (getGradle().getStartParameter().getTaskRequests().toString().contains("stand
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 35
         versionName "1.9.1"
     }
