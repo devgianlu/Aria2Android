@@ -2,7 +2,6 @@ package com.gianlu.aria2android.Aria2;
 
 import android.support.annotation.NonNull;
 
-import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
@@ -21,12 +20,7 @@ public class StreamListener extends Thread {
     private final Listener listener;
     private volatile boolean shouldStop;
 
-    public StreamListener(Process process, Listener listener) {
-        this.process = process;
-        this.in = process.getInputStream();
-        this.err = process.getErrorStream();
-        this.listener = listener;
-    }
+    private final String ariaVersion;
 
     public void stopSafe() {
         shouldStop = true;
@@ -41,6 +35,14 @@ public class StreamListener extends Thread {
         }
     }
 
+    public StreamListener(Process process, String ariaVersion, Listener listener) {
+        this.process = process;
+        this.in = process.getInputStream();
+        this.err = process.getErrorStream();
+        this.listener = listener;
+        this.ariaVersion = ariaVersion;
+    }
+
     @Override
     public void run() {
         BufferedReader in = new BufferedReader(new InputStreamReader(this.in));
@@ -50,16 +52,16 @@ public class StreamListener extends Thread {
             try {
                 String inLine;
                 if ((inLine = in.readLine()) != null) {
-                    listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.INFO, inLine));
-                    if (BuildConfig.DEBUG) System.out.println("aria2c: " + inLine);
+                    publishLogLine(Logging.LogLine.Type.INFO, inLine);
+                    continue;
                 }
 
                 String errLine;
                 if ((errLine = err.readLine()) != null) {
                     if (errLine.startsWith("WARNING:")) {
-                        listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.WARNING, errLine.replace("WARNING:", "")));
+                        publishLogLine(Logging.LogLine.Type.WARNING, errLine.replace("WARNING:", ""));
                     } else if (errLine.startsWith("ERROR:")) {
-                        listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, errLine.replace("ERROR:", "")));
+                        publishLogLine(Logging.LogLine.Type.ERROR, errLine.replace("ERROR:", ""));
                     } else {
                         if (errLine.contains("unrecognized option")) {
                             handleUnrecognizedOption(errLine);
@@ -69,14 +71,17 @@ public class StreamListener extends Thread {
                             listener.unknownLogLine(errLine);
                         }
                     }
-
-                    if (BuildConfig.DEBUG) System.err.println("aria2c: " + errLine);
                 }
             } catch (IOException ex) {
-                if (BuildConfig.DEBUG) ex.printStackTrace();
-                listener.onNewLogLine(new Logging.LogLine(Logging.LogLine.Type.ERROR, "Failed parsing the log: " + ex.getMessage()));
+                publishLogLine(Logging.LogLine.Type.ERROR, "Failed parsing the log: " + ex.getMessage());
             }
         }
+    }
+
+    private void publishLogLine(Logging.LogLine.Type type, String msg) {
+        Logging.LogLine line = new Logging.LogLine(System.currentTimeMillis(), ariaVersion, type, msg);
+        listener.onNewLogLine(line);
+        Logging.log(line);
     }
 
     private void handleUnrecognizedOption(String line) {

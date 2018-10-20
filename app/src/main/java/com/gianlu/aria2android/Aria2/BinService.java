@@ -80,7 +80,7 @@ public class BinService extends Service implements StreamListener.Listener {
         String cmd = BinUtils.createCommandLine(this, config);
         try {
             process = Runtime.getRuntime().exec(cmd);
-            streamListener = new StreamListener(process, this);
+            streamListener = new StreamListener(process, BinUtils.binVersion(this), this);
             streamListener.start();
         } catch (IOException ex) {
             ex(ex);
