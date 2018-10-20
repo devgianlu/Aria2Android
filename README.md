@@ -1,4 +1,9 @@
 # Aria2Android
+
+<h1 align=center>
+<img src="Graphics/logo/horizontal.png" width=50%>
+</h1>
+
 An Android app that lets you run [aria2](https://github.com/aria2/aria2) on your device. If you like this project you can donate some money with [PayPal](https://www.paypal.me/devgianlu) or with [Liberapay](https://liberapay.com/devgianlu/donate).
 
 [![Translate - with Stringlate](https://img.shields.io/badge/translate%20with-stringlate-green.svg)](https://lonamiwebs.github.io/stringlate/translate?git=https%3A%2F%2Fgithub.com%2Fdevgianlu%2FAria2Android)
