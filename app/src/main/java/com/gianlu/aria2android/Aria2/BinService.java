@@ -195,7 +195,7 @@ public class BinService extends Service implements StreamListener.Listener {
 
         Bundle bundle = new Bundle();
         bundle.putString(Utils.LABEL_LOG_LINE, line);
-        AnalyticsApplication.sendAnalytics(this, Utils.EVENT_UNKNOWN_LOG_LINE, bundle);
+        AnalyticsApplication.sendAnalytics(Utils.EVENT_UNKNOWN_LOG_LINE, bundle);
     }
 
     public enum Action {

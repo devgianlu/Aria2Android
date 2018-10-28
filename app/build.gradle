@@ -48,7 +48,3 @@ dependencies {
         exclude group: 'com.getkeepsafe.taptargetview'
     }
 }
-
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("standard")) {
-    apply plugin: 'com.google.gms.google-services'
-}

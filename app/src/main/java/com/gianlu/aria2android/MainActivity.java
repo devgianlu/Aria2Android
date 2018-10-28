@@ -401,7 +401,7 @@ public class MainActivity extends ActivityWithDialog {
 
     private boolean startService() {
         Prefs.putLong(PK.CURRENT_SESSION_START, System.currentTimeMillis());
-        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_TURN_ON);
+        AnalyticsApplication.sendAnalytics(Utils.ACTION_TURN_ON);
 
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             AskPermission.ask(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
@@ -485,7 +485,7 @@ public class MainActivity extends ActivityWithDialog {
             Prefs.putLong(PK.CURRENT_SESSION_START, -1);
         }
 
-        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_TURN_OFF, bundle);
+        AnalyticsApplication.sendAnalytics(Utils.ACTION_TURN_OFF, bundle);
 
         return true;
     }
@@ -548,7 +548,7 @@ public class MainActivity extends ActivityWithDialog {
                     .putExtra("token", Prefs.getString(PK.RPC_TOKEN)));
         }
 
-        AnalyticsApplication.sendAnalytics(this, Utils.ACTION_OPENED_ARIA2APP);
+        AnalyticsApplication.sendAnalytics(Utils.ACTION_OPENED_ARIA2APP);
     }
 
     @Override

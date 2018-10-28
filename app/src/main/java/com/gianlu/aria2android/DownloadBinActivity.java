@@ -104,7 +104,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
                 return;
             }
 
-            AnalyticsApplication.sendAnalytics(this, Utils.ACTION_IMPORT_BIN);
+            AnalyticsApplication.sendAnalytics(Utils.ACTION_IMPORT_BIN);
             Prefs.putBoolean(PK.CUSTOM_BIN, true);
 
             startActivity(new Intent(this, MainActivity.class)
