@@ -1,5 +1,3 @@
-# Aria2Android
-
 <h1 align=center>
 <img src="Graphics/logo/horizontal.png" width=50%>
 </h1>
