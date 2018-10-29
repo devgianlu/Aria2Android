@@ -1,7 +1,5 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.support.annotation.NonNull;
-
 import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.Preferences.Prefs;
@@ -11,6 +9,8 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.HashMap;
+
+import androidx.annotation.NonNull;
 
 public class StartConfig implements Serializable {
     public final String outputDirectory;

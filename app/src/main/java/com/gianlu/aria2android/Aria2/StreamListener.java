@@ -1,7 +1,5 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.support.annotation.NonNull;
-
 import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
@@ -10,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import androidx.annotation.NonNull;
 
 public class StreamListener extends Thread {
     private static final Pattern UNRECOGNIZED_OPTION_PATTERN = Pattern.compile("aria2c: unrecognized option `(.*?)'");

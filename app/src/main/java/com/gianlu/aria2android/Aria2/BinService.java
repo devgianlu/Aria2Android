@@ -19,10 +19,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.gianlu.aria2android.BinUtils;
 import com.gianlu.aria2android.BuildConfig;
@@ -37,6 +33,11 @@ import com.gianlu.commonutils.Preferences.Prefs;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class BinService extends Service implements StreamListener.Listener {
     public static final int START = 0;

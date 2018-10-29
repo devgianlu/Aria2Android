@@ -3,8 +3,6 @@ package com.gianlu.aria2android;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.aria2android.DownloadBin.GitHubApi;
@@ -23,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class BinUtils {
     private static final int SAVE_SESSION_INTERVAL = 10; // sec

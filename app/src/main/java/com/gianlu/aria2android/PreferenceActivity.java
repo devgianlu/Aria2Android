@@ -1,13 +1,13 @@
 package com.gianlu.aria2android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.gianlu.commonutils.Preferences.BasePreferenceActivity;
 import com.gianlu.commonutils.Preferences.MaterialAboutPreferenceItem;
 
 import java.util.Collections;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class PreferenceActivity extends BasePreferenceActivity {
     @NonNull

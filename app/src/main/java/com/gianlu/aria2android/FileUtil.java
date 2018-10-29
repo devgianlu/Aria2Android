@@ -6,11 +6,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
-import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+
+import androidx.annotation.Nullable;
 
 public final class FileUtil {
     private static final String PRIMARY_VOLUME_NAME = "primary";

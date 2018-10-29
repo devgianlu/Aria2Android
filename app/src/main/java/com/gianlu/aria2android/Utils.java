@@ -1,7 +1,5 @@
 package com.gianlu.aria2android;
 
-import android.support.annotation.Nullable;
-
 import com.gianlu.commonutils.NameValuePair;
 
 import org.json.JSONObject;
@@ -10,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.Nullable;
 
 public final class Utils {
     public static final String LABEL_SESSION_DURATION = "session_duration";

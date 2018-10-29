@@ -2,9 +2,6 @@ package com.gianlu.aria2android.DownloadBin;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
-import android.support.annotation.WorkerThread;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +19,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import androidx.annotation.WorkerThread;
 
 public class GitHubApi {
     private static GitHubApi instance;
