@@ -11,7 +11,8 @@ An Android app that lets you run [aria2](https://github.com/aria2/aria2) on your
 <a href='https://f-droid.org/app/com.gianlu.aria2android'><img src='https://f-droid.org/badge/get-it-on.png' alt='Get it on F-Droid' width='25%' /></a>
 </div>
 
-
-
 ## Setup
 This project uses [devgianlu/CommonUtils](https://github.com/devgianlu/CommonUtils), please go figure how to setup your environment properly.
+
+## Logo design
+The logo has been renewed by [@zularizal](https://github.com/zularizal), see [#7](https://github.com/devgianlu/Aria2Android/issues/7).
