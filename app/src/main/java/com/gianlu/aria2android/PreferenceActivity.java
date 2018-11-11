@@ -1,7 +1,11 @@
 package com.gianlu.aria2android;
 
+import android.content.Context;
+
 import com.gianlu.commonutils.Preferences.BasePreferenceActivity;
+import com.gianlu.commonutils.Preferences.BasePreferenceFragment;
 import com.gianlu.commonutils.Preferences.MaterialAboutPreferenceItem;
+import com.yarolegovich.mp.MaterialCheckboxPreference;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +17,7 @@ public class PreferenceActivity extends BasePreferenceActivity {
     @NonNull
     @Override
     protected List<MaterialAboutPreferenceItem> getPreferencesItems() {
-        return Collections.emptyList();
+        return Collections.singletonList(new MaterialAboutPreferenceItem(R.string.general, R.drawable.baseline_settings_24, GeneralFragment.class));
     }
 
     @Override
@@ -35,5 +39,24 @@ public class PreferenceActivity extends BasePreferenceActivity {
     @Override
     protected boolean disablePayPalOnGooglePlay() {
         return false;
+    }
+
+    public static class GeneralFragment extends BasePreferenceFragment {
+
+        @Override
+        protected void buildPreferences(@NonNull Context context) {
+            MaterialCheckboxPreference nightMode = new MaterialCheckboxPreference.Builder(context)
+                    .defaultValue(PK.NIGHT_MODE.fallback())
+                    .key(PK.NIGHT_MODE.key())
+                    .build();
+            nightMode.setTitle(R.string.prefs_nightMode);
+            nightMode.setSummary(R.string.prefs_nightMode_summary);
+            addPreference(nightMode);
+        }
+
+        @Override
+        public int getTitleRes() {
+            return R.string.general;
+        }
     }
 }
