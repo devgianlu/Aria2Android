@@ -19,7 +19,6 @@ public class StreamListener extends Thread {
     private final InputStream err;
     private final Listener listener;
     private volatile boolean shouldStop;
-
     private final String ariaVersion;
 
     public void stopSafe() {

@@ -15,12 +15,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+
 public class ReleasesAdapter extends BaseAdapter {
     private final List<GitHubApi.Release> releases;
     private final LayoutInflater inflater;
-    private final IAdapter listener;
+    private final Listener listener;
 
-    public ReleasesAdapter(Context context, List<GitHubApi.Release> releases, IAdapter listener) {
+    public ReleasesAdapter(@NonNull Context context, List<GitHubApi.Release> releases, Listener listener) {
         this.inflater = LayoutInflater.from(context);
         this.listener = listener;
         this.releases = new ArrayList<>();
@@ -54,16 +56,13 @@ public class ReleasesAdapter extends BaseAdapter {
         uploadedAt.setHtml(R.string.publishedAt, CommonUtils.getFullDateFormatter().format(new Date(release.publishedAt)));
         SuperTextView size = view.findViewById(R.id.releaseItem_size);
         size.setHtml(R.string.size, CommonUtils.dimensionFormatter(release.androidAsset.size, false));
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) listener.onReleaseSelected(release);
-            }
+        view.setOnClickListener(view1 -> {
+            if (listener != null) listener.onReleaseSelected(release);
         });
         return view;
     }
 
-    public interface IAdapter {
-        void onReleaseSelected(GitHubApi.Release release);
+    public interface Listener {
+        void onReleaseSelected(@NonNull GitHubApi.Release release);
     }
 }

@@ -55,38 +55,25 @@ public class GitHubApi {
     }
 
     public void getReleases(final String author, final String repo, final OnResult<List<Release>> listener) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    HttpURLConnection conn = basicRequestSync("https://api.github.com/repos/" + author + "/" + repo + "/releases");
+        executorService.execute(() -> {
+            try {
+                HttpURLConnection conn = basicRequestSync("https://api.github.com/repos/" + author + "/" + repo + "/releases");
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder builder = new StringBuilder();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder builder = new StringBuilder();
 
-                    String line;
-                    while ((line = reader.readLine()) != null)
-                        builder.append(line);
+                String line;
+                while ((line = reader.readLine()) != null)
+                    builder.append(line);
 
-                    JSONArray array = new JSONArray(builder.toString());
-                    final List<Release> releases = new ArrayList<>();
-                    for (int i = 0; i < array.length(); i++)
-                        releases.add(new Release(array.getJSONObject(i)));
+                JSONArray array = new JSONArray(builder.toString());
+                final List<Release> releases = new ArrayList<>();
+                for (int i = 0; i < array.length(); i++)
+                    releases.add(new Release(array.getJSONObject(i)));
 
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onResult(releases);
-                        }
-                    });
-                } catch (IOException | JSONException | ParseException ex) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onException(ex);
-                        }
-                    });
-                }
+                handler.post(() -> listener.onResult(releases));
+            } catch (IOException | JSONException | ParseException ex) {
+                handler.post(() -> listener.onException(ex));
             }
         });
     }

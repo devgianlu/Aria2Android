@@ -3,7 +3,6 @@ package com.gianlu.aria2android;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -147,13 +146,10 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.newOption)
                 .setView(layout)
-                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String keyStr = key.getText().toString();
-                        if (keyStr.startsWith("--")) keyStr = keyStr.substring(2);
-                        adapter.add(new NameValuePair(keyStr, value.getText().toString()));
-                    }
+                .setPositiveButton(R.string.apply, (dialogInterface, i) -> {
+                    String keyStr = key.getText().toString();
+                    if (keyStr.startsWith("--")) keyStr = keyStr.substring(2);
+                    adapter.add(new NameValuePair(keyStr, value.getText().toString()));
                 })
                 .setNegativeButton(android.R.string.cancel, null);
 
@@ -171,19 +167,11 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle(R.string.unsavedChanges)
                             .setMessage(R.string.unsavedChanges_message)
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    save();
-                                    onBackPressed();
-                                }
+                            .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                                save();
+                                onBackPressed();
                             })
-                            .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    onBackPressed();
-                                }
-                            })
+                            .setNegativeButton(android.R.string.no, (dialogInterface, i) -> onBackPressed())
                             .setNeutralButton(android.R.string.cancel, null);
 
                     showDialog(builder);
@@ -220,13 +208,10 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(option.key())
                 .setView(layout)
-                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String newValueStr = newValue.getText().toString();
-                        if (!newValueStr.equals(option.value()))
-                            adapter.set(new NameValuePair(option.key(), newValueStr));
-                    }
+                .setPositiveButton(R.string.apply, (dialogInterface, i) -> {
+                    String newValueStr = newValue.getText().toString();
+                    if (!newValueStr.equals(option.value()))
+                        adapter.set(new NameValuePair(option.key(), newValueStr));
                 })
                 .setNegativeButton(android.R.string.cancel, null);
 

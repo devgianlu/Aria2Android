@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -23,7 +22,6 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -37,7 +35,6 @@ import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
-import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 import com.yarolegovich.lovelyuserinput.LovelyInput;
 import com.yarolegovich.mp.AbsMaterialPreference;
 import com.yarolegovich.mp.AbsMaterialTextValuePreference;
@@ -122,29 +119,11 @@ public class MainActivity extends ActivityWithDialog {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
-                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            finish();
-                        }
-                    }).setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    finish();
-                }
-            }).setNeutralButton(R.string.importBin, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                    .setOnDismissListener(dialog -> finish())
+                    .setOnCancelListener(dialog -> finish())
+                    .setNeutralButton(R.string.importBin, (dialog, which) -> startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
                             .putExtra("importBin", true)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                }
-            }).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))).setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
 
             showDialog(builder);
             return;
@@ -166,33 +145,22 @@ public class MainActivity extends ActivityWithDialog {
 
         MaterialPreferences.instance().setUserInputModule(new LovelyInput.Builder()
                 .addIcon(PK.OUTPUT_DIRECTORY.key(), R.drawable.baseline_folder_24)
-                .addTextFilter(PK.OUTPUT_DIRECTORY.key(), R.string.invalidOutputPath, new LovelyTextInputDialog.TextFilter() {
-                    @Override
-                    public boolean check(String text) {
-                        File path = new File(text);
-                        return path.exists() && path.canWrite();
-                    }
+                .addTextFilter(PK.OUTPUT_DIRECTORY.key(), R.string.invalidOutputPath, text -> {
+                    File path = new File(text);
+                    return path.exists() && path.canWrite();
                 })
                 .addIcon(PK.RPC_PORT.key(), R.drawable.baseline_import_export_24)
-                .addTextFilter(PK.RPC_PORT.key(), R.string.invalidPort, new LovelyTextInputDialog.TextFilter() {
-                    @Override
-                    public boolean check(String text) {
-                        try {
-                            int port = Integer.parseInt(text);
-                            return port > 0 && port < 65536;
-                        } catch (Exception ex) {
-                            Logging.log(ex);
-                            return false;
-                        }
+                .addTextFilter(PK.RPC_PORT.key(), R.string.invalidPort, text -> {
+                    try {
+                        int port = Integer.parseInt(text);
+                        return port > 0 && port < 65536;
+                    } catch (Exception ex) {
+                        Logging.log(ex);
+                        return false;
                     }
                 })
                 .addIcon(PK.RPC_TOKEN.key(), R.drawable.baseline_vpn_key_24)
-                .addTextFilter(PK.RPC_TOKEN.key(), R.string.invalidToken, new LovelyTextInputDialog.TextFilter() {
-                    @Override
-                    public boolean check(String text) {
-                        return !text.isEmpty();
-                    }
-                })
+                .addTextFilter(PK.RPC_TOKEN.key(), R.string.invalidToken, text -> !text.isEmpty())
                 .addIcon(PK.NOTIFICATION_UPDATE_DELAY.key(), R.drawable.baseline_notifications_24)
                 .setTopColor(ContextCompat.getColor(this, R.color.colorPrimary))
                 .build());
@@ -210,17 +178,14 @@ public class MainActivity extends ActivityWithDialog {
                 .defaultValue(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath())
                 .build();
         outputPath.setTitle(R.string.outputPath);
-        outputPath.setOverrideClickListener(new AbsMaterialPreference.OverrideOnClickListener() {
-            @Override
-            public boolean onClick(View v) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    startActivityForResult(intent, STORAGE_ACCESS_CODE);
-                    return true;
-                } catch (ActivityNotFoundException ex) {
-                    Toaster.with(MainActivity.this).message(R.string.noOpenTree).ex(ex).show();
-                    return false;
-                }
+        outputPath.setOverrideClickListener(v -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                startActivityForResult(intent, STORAGE_ACCESS_CODE);
+                return true;
+            } catch (ActivityNotFoundException ex) {
+                Toaster.with(MainActivity.this).message(R.string.noOpenTree).ex(ex).show();
+                return false;
             }
         });
         generalCategory.addView(outputPath);
@@ -242,12 +207,7 @@ public class MainActivity extends ActivityWithDialog {
         generalCategory.addView(startAtBoot);
 
         MaterialStandardPreference customOptions = new MaterialStandardPreference(this);
-        customOptions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class));
-            }
-        });
+        customOptions.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class)));
         customOptions.setTitle(R.string.customOptions);
         generalCategory.addView(customOptions);
 
@@ -257,12 +217,7 @@ public class MainActivity extends ActivityWithDialog {
         screen.addView(uiCategory);
 
         MaterialStandardPreference openAria2App = new MaterialStandardPreference(this);
-        openAria2App.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAria2App();
-            }
-        });
+        openAria2App.setOnClickListener(v -> openAria2App());
         openAria2App.setTitle(R.string.openAria2App);
         openAria2App.setSummary(R.string.openAria2App_summary);
         uiCategory.addView(openAria2App);
@@ -337,24 +292,16 @@ public class MainActivity extends ActivityWithDialog {
         logsContainer.setVisibility(View.GONE);
 
         MaterialStandardPreference clearLogs = new MaterialStandardPreference(this);
-        clearLogs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logsContainer.removeAllViews();
-                logsContainer.setVisibility(View.GONE);
-                logsMessage.setVisibility(View.VISIBLE);
-            }
+        clearLogs.setOnClickListener(v -> {
+            logsContainer.removeAllViews();
+            logsContainer.setVisibility(View.GONE);
+            logsMessage.setVisibility(View.VISIBLE);
         });
         clearLogs.setTitle(R.string.clearLogs);
         logsCategory.addView(clearLogs);
 
         toggleServer = findViewById(R.id.main_toggleServer);
-        toggleServer.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                toggleService(isChecked);
-            }
-        });
+        toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
 
         TextView version = findViewById(R.id.main_binVersion);
         version.setText(BinUtils.binVersion(this));
@@ -495,18 +442,15 @@ public class MainActivity extends ActivityWithDialog {
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(R.string.aria2AppNotInstalled)
                 .setMessage(R.string.aria2AppNotInstalled_message)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    try {
                         try {
-                            try {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
-                            } catch (android.content.ActivityNotFoundException ex) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
-                            }
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
                         } catch (ActivityNotFoundException ex) {
-                            Logging.log(ex);
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
                         }
+                    } catch (ActivityNotFoundException ex) {
+                        Logging.log(ex);
                     }
                 }).setNegativeButton(android.R.string.no, null);
 
@@ -529,12 +473,7 @@ public class MainActivity extends ActivityWithDialog {
                     .setTitle(R.string.aria2NotRunning)
                     .setMessage(R.string.aria2NotRunning_message)
                     .setPositiveButton(android.R.string.no, null)
-                    .setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            startAria2App();
-                        }
-                    });
+                    .setNegativeButton(android.R.string.yes, (dialogInterface, i) -> startAria2App());
 
             showDialog(builder);
         }
@@ -568,16 +507,13 @@ public class MainActivity extends ActivityWithDialog {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.changeBinVersion)
                         .setMessage(R.string.changeBinVersion_message)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                if (BinUtils.delete(MainActivity.this)) {
-                                    startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                                    finish();
-                                } else {
-                                    Toaster.with(MainActivity.this).message(R.string.cannotDeleteBin).error(true).show();
-                                }
+                        .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
+                            if (BinUtils.delete(MainActivity.this)) {
+                                startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                finish();
+                            } else {
+                                Toaster.with(MainActivity.this).message(R.string.cannotDeleteBin).error(true).show();
                             }
                         }).setNegativeButton(android.R.string.no, null);
 
@@ -600,27 +536,24 @@ public class MainActivity extends ActivityWithDialog {
         public void onReceive(Context context, final Intent intent) {
             final BinService.Action action = BinService.Action.find(intent);
             if (action != null && intent != null) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        switch (action) {
-                            case SERVER_START:
-                                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
-                                break;
-                            case SERVER_STOP:
-                                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
-                                LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
-                                toggleService(false);
-                                break;
-                            case SERVER_EX:
-                                Exception ex = (Exception) intent.getSerializableExtra("ex");
-                                Logging.log(ex);
-                                addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
-                                break;
-                            case SERVER_MSG:
-                                addLog((Logging.LogLine) intent.getSerializableExtra("msg"));
-                                break;
-                        }
+                runOnUiThread(() -> {
+                    switch (action) {
+                        case SERVER_START:
+                            addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
+                            break;
+                        case SERVER_STOP:
+                            addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
+                            LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
+                            toggleService(false);
+                            break;
+                        case SERVER_EX:
+                            Exception ex = (Exception) intent.getSerializableExtra("ex");
+                            Logging.log(ex);
+                            addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
+                            break;
+                        case SERVER_MSG:
+                            addLog((Logging.LogLine) intent.getSerializableExtra("msg"));
+                            break;
                     }
                 });
             }

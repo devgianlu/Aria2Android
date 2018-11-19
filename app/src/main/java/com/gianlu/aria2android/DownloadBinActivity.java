@@ -27,7 +27,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.OnResult<List<GitHubApi.Release>>, ReleasesAdapter.IAdapter, BinUtils.IDownloadAndExtractBin {
+public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.OnResult<List<GitHubApi.Release>>, ReleasesAdapter.Listener, BinUtils.IDownloadAndExtractBin {
     private static final int IMPORT_BIN_CODE = 8;
     private ListView list;
     private TextView progress;

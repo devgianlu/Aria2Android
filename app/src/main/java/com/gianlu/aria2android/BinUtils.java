@@ -30,59 +30,41 @@ public class BinUtils {
 
     public static void downloadAndExtractBin(final Context context, final GitHubApi.Release.Asset asset, final IDownloadAndExtractBin listener) {
         final Handler handler = new Handler(Looper.getMainLooper());
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    HttpURLConnection conn = (HttpURLConnection) new URL(asset.downloadUrl).openConnection();
-                    conn.connect();
+        new Thread(() -> {
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL(asset.downloadUrl).openConnection();
+                conn.connect();
 
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onBinDownloaded();
-                            }
-                        });
-                        try (InputStream in = conn.getInputStream(); ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in))) {
-                            ZipEntry ze;
-                            while ((ze = zis.getNextEntry()) != null) {
-                                if (ze.isDirectory()) continue;
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    handler.post(listener::onBinDownloaded);
+                    try (InputStream in = conn.getInputStream(); ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in))) {
+                        ZipEntry ze;
+                        while ((ze = zis.getNextEntry()) != null) {
+                            if (ze.isDirectory()) continue;
 
-                                if (ze.getName().endsWith("/aria2c")) {
-                                    int count;
-                                    byte[] buffer = new byte[8192];
-                                    try (FileOutputStream out = context.openFileOutput("aria2c", Context.MODE_PRIVATE)) {
-                                        while ((count = zis.read(buffer)) != -1)
-                                            out.write(buffer, 0, count);
-                                        out.flush();
+                            if (ze.getName().endsWith("/aria2c")) {
+                                int count;
+                                byte[] buffer = new byte[8192];
+                                try (FileOutputStream out = context.openFileOutput("aria2c", Context.MODE_PRIVATE)) {
+                                    while ((count = zis.read(buffer)) != -1)
+                                        out.write(buffer, 0, count);
+                                    out.flush();
 
-                                        Runtime.getRuntime().exec("chmod 711 " + new File(context.getFilesDir(), "aria2c").getAbsolutePath());
-                                    }
+                                    Runtime.getRuntime().exec("chmod 711 " + new File(context.getFilesDir(), "aria2c").getAbsolutePath());
                                 }
                             }
                         }
-
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onBinExtracted();
-                            }
-                        });
-
-                        conn.disconnect();
-                    } else {
-                        conn.disconnect();
-                        throw new IOException(String.format("%d: %s", conn.getResponseCode(), conn.getResponseMessage()));
                     }
-                } catch (final IOException ex) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onException(ex);
-                        }
-                    });
+
+                    handler.post(listener::onBinExtracted);
+
+                    conn.disconnect();
+                } else {
+                    conn.disconnect();
+                    throw new IOException(String.format("%d: %s", conn.getResponseCode(), conn.getResponseMessage()));
                 }
+            } catch (final IOException ex) {
+                handler.post(() -> listener.onException(ex));
             }
         }).start();
     }

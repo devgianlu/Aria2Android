@@ -2,7 +2,6 @@ package com.gianlu.aria2android.ConfigEditor;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -31,7 +30,7 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
     private final Set<Integer> edited;
     private boolean changed = false;
 
-    public OptionsAdapter(Context context, Listener listener) {
+    public OptionsAdapter(@NonNull Context context, Listener listener) {
         this.context = context;
         this.options = new ArrayList<>();
         this.inflater = LayoutInflater.from(context);
@@ -52,18 +51,10 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
 
         holder.key.setText(entry.key());
         holder.value.setText(entry.value());
-        holder.edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) listener.onEditOption(entry);
-            }
+        holder.edit.setOnClickListener(view -> {
+            if (listener != null) listener.onEditOption(entry);
         });
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                remove(holder.getAdapterPosition());
-            }
-        });
+        holder.delete.setOnClickListener(view -> remove(holder.getAdapterPosition()));
 
         if (edited.contains(position))
             holder.value.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
