@@ -63,6 +63,14 @@ public class MainActivity extends ActivityWithDialog {
     private volatile boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Messenger serviceMessenger;
+    private ToggleButton toggleServer;
+    private MaterialEditTextPreference outputPath;
+    private MaterialPreferenceCategory generalCategory;
+    private MaterialPreferenceCategory rpcCategory;
+    private MaterialPreferenceCategory notificationsCategory;
+    private LinearLayout logsContainer;
+    private MessageView logsMessage;
+    private LocalBroadcastManager broadcastManager;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -84,14 +92,6 @@ public class MainActivity extends ActivityWithDialog {
             broadcastManager.unregisterReceiver(receiver);
         }
     };
-    private ToggleButton toggleServer;
-    private MaterialEditTextPreference outputPath;
-    private MaterialPreferenceCategory generalCategory;
-    private MaterialPreferenceCategory rpcCategory;
-    private MaterialPreferenceCategory notificationsCategory;
-    private LinearLayout logsContainer;
-    private MessageView logsMessage;
-    private LocalBroadcastManager broadcastManager;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -422,7 +422,6 @@ public class MainActivity extends ActivityWithDialog {
             }
         }
 
-
         try {
             bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
             startService(new Intent(this, BinService.class)
@@ -463,8 +462,6 @@ public class MainActivity extends ActivityWithDialog {
 
         startService(new Intent(this, BinService.class)
                 .setAction(BinService.ACTION_STOP_SERVICE));
-
-
 
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
@@ -564,9 +561,11 @@ public class MainActivity extends ActivityWithDialog {
     }
 
     private void addLog(@NonNull Logging.LogLine line) {
-        logsContainer.setVisibility(View.VISIBLE);
-        logsMessage.setVisibility(View.GONE);
-        logsContainer.addView(Logging.LogLineAdapter.createLogLineView(getLayoutInflater(), logsContainer, line), logsContainer.getChildCount());
+        if (logsContainer != null) {
+            logsContainer.setVisibility(View.VISIBLE);
+            logsMessage.setVisibility(View.GONE);
+            logsContainer.addView(Logging.LogLineAdapter.createLogLineView(getLayoutInflater(), logsContainer, line), logsContainer.getChildCount());
+        }
     }
 
     private class ServiceBroadcastReceiver extends BroadcastReceiver {
