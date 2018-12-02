@@ -73,6 +73,7 @@ public class MainActivity extends ActivityWithDialog {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serviceMessenger = new Messenger(iBinder);
             checkIntentAction(getIntent());
+            askForStatus();
         }
 
         @Override
@@ -89,6 +90,23 @@ public class MainActivity extends ActivityWithDialog {
                 return true;
 
         return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        askForStatus();
+    }
+
+    private void askForStatus() {
+        if (serviceMessenger == null) return;
+
+        try {
+            serviceMessenger.send(Message.obtain(null, BinService.STATUS, null));
+        } catch (RemoteException ex) {
+            Logging.log(ex);
+        }
     }
 
     @Override
@@ -558,6 +576,9 @@ public class MainActivity extends ActivityWithDialog {
             if (action != null && intent != null) {
                 runOnUiThread(() -> {
                     switch (action) {
+                        case SERVER_STATUS:
+                            updateUiStatus(intent.getBooleanExtra("on", false));
+                            break;
                         case SERVER_START:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                             break;

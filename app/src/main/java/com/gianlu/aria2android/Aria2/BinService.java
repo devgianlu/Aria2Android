@@ -42,6 +42,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 public class BinService extends Service implements StreamListener.Listener {
     public static final int START = 0;
     public static final int STOP = 1;
+    public static final int STATUS = 2;
     public static final int NOTIFICATION_ID = 1;
     public static final String ACTION_START_SERVICE = "com.gianlu.aria2android.START_SERVICE";
     public static final String ACTION_STOP_SERVICE = "com.gianlu.aria2android.STOP_SERVICE";
@@ -67,6 +68,12 @@ public class BinService extends Service implements StreamListener.Listener {
         }
 
         return messenger.getBinder();
+    }
+
+    private void dispatchStatus() {
+        Intent intent = new Intent(Action.SERVER_STATUS.toString());
+        intent.putExtra("on", process != null);
+        broadcastManager.sendBroadcast(intent);
     }
 
     @TargetApi(Build.VERSION_CODES.O)
@@ -118,7 +125,7 @@ public class BinService extends Service implements StreamListener.Listener {
         dispatchBroadcast(Action.SERVER_START, null, null);
     }
 
-    private void ex(Exception ex) {
+    private void ex(@NonNull Exception ex) {
         Logging.log(ex);
         dispatchBroadcast(Action.SERVER_EX, null, ex);
     }
@@ -200,6 +207,7 @@ public class BinService extends Service implements StreamListener.Listener {
     }
 
     public enum Action {
+        SERVER_STATUS,
         SERVER_START,
         SERVER_MSG,
         SERVER_EX,
@@ -235,6 +243,9 @@ public class BinService extends Service implements StreamListener.Listener {
                     break;
                 case STOP:
                     stopBin();
+                    break;
+                case STATUS:
+                    dispatchStatus();
                     break;
                 default:
                     super.handleMessage(msg);
