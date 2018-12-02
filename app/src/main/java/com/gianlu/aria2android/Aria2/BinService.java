@@ -74,7 +74,7 @@ public class BinService extends Service implements StreamListener.Listener {
                 .setShowWhen(false)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(PendingIntent.getActivity(this, 5756, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentText("aria2c is currently running");
 
