@@ -67,12 +67,21 @@ public class MainActivity extends ActivityWithDialog {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serviceMessenger = new Messenger(iBinder);
+
+            IntentFilter filter = new IntentFilter();
+            for (BinService.Action action : BinService.Action.values())
+                filter.addAction(action.toString());
+
+            receiver = new ServiceBroadcastReceiver();
+            broadcastManager.registerReceiver(receiver, filter);
+
             askForStatus();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             serviceMessenger = null;
+            broadcastManager.unregisterReceiver(receiver);
         }
     };
     private ToggleButton toggleServer;
@@ -413,12 +422,7 @@ public class MainActivity extends ActivityWithDialog {
             }
         }
 
-        IntentFilter filter = new IntentFilter();
-        for (BinService.Action action : BinService.Action.values())
-            filter.addAction(action.toString());
 
-        receiver = new ServiceBroadcastReceiver();
-        broadcastManager.registerReceiver(receiver, filter);
         try {
             bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
             startService(new Intent(this, BinService.class)
@@ -427,13 +431,8 @@ public class MainActivity extends ActivityWithDialog {
             return true;
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
-            broadcastManager.unregisterReceiver(receiver);
             return false;
-        } /*catch (RemoteException ex) {
-            Toaster.with(this).message(R.string.failedStarting).ex(ex).show();
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-            return false;
-        } */
+        }
     }
 
     @Override
@@ -465,7 +464,7 @@ public class MainActivity extends ActivityWithDialog {
         startService(new Intent(this, BinService.class)
                 .setAction(BinService.ACTION_STOP_SERVICE));
 
-        broadcastManager.unregisterReceiver(receiver);
+
 
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
@@ -579,14 +578,13 @@ public class MainActivity extends ActivityWithDialog {
                 runOnUiThread(() -> {
                     switch (action) {
                         case SERVER_STATUS:
-                            updateUiStatus(intent.getBooleanExtra("on", false)); // FIXME: UI changes are not applied
+                            updateUiStatus(intent.getBooleanExtra("on", false));
                             break;
                         case SERVER_START:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                             break;
                         case SERVER_STOP:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
-                            broadcastManager.unregisterReceiver(receiver);
                             updateUiStatus(false);
                             break;
                         case SERVER_EX:
