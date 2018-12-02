@@ -59,13 +59,28 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MainActivity extends ActivityWithDialog {
     private static final int STORAGE_ACCESS_CODE = 1;
+    private static final String ACTION_START_STOP_RECEIVED = "com.gianlu.aria2android.START_STOP_RECEIVED";
     private boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Messenger serviceMessenger;
+    private ToggleButton toggleServer;
+    private MaterialEditTextPreference outputPath;
+    private MaterialPreferenceCategory generalCategory;
+    private MaterialPreferenceCategory rpcCategory;
+    private MaterialPreferenceCategory notificationsCategory;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serviceMessenger = new Messenger(iBinder);
+
+            Intent intent = getIntent();
+            if (Objects.equals(intent.getAction(), BinService.ACTION_START_SERVICE)) {
+                toggleService(true);
+                intent.setAction(ACTION_START_STOP_RECEIVED);
+            } else if (Objects.equals(intent.getAction(), BinService.ACTION_STOP_SERVICE)) {
+                toggleService(false);
+                intent.setAction(ACTION_START_STOP_RECEIVED);
+            }
         }
 
         @Override
@@ -73,11 +88,6 @@ public class MainActivity extends ActivityWithDialog {
             serviceMessenger = null;
         }
     };
-    private ToggleButton toggleServer;
-    private MaterialEditTextPreference outputPath;
-    private MaterialPreferenceCategory generalCategory;
-    private MaterialPreferenceCategory rpcCategory;
-    private MaterialPreferenceCategory notificationsCategory;
     private LinearLayout logsContainer;
     private MessageView logsMessage;
 
@@ -126,18 +136,6 @@ public class MainActivity extends ActivityWithDialog {
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))).setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
 
             showDialog(builder);
-            return;
-        }
-
-        if (Objects.equals(getIntent().getAction(), BinService.ACTION_START_SERVICE)) {
-            toggleService(true);
-            finish();
-            return;
-        }
-
-        if (Objects.equals(getIntent().getAction(), BinService.ACTION_STOP_SERVICE)) {
-            toggleService(false);
-            finish();
             return;
         }
 
@@ -314,15 +312,19 @@ public class MainActivity extends ActivityWithDialog {
         if (on) successful = startService();
         else successful = stopService();
 
-        if (successful) {
-            int visibility = on ? View.GONE : View.VISIBLE;
-            generalCategory.setVisibility(visibility);
-            rpcCategory.setVisibility(visibility);
-            notificationsCategory.setVisibility(visibility);
+        if (successful) updateUiStatus(on);
+    }
 
-            isRunning = on;
-            toggleServer.setChecked(on);
-        }
+    private void updateUiStatus(boolean on) {
+        int visibility = on ? View.GONE : View.VISIBLE;
+        generalCategory.setVisibility(visibility);
+        rpcCategory.setVisibility(visibility);
+        notificationsCategory.setVisibility(visibility);
+
+        isRunning = on;
+        toggleServer.setOnCheckedChangeListener(null);
+        toggleServer.setChecked(on);
+        toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
     }
 
     @SuppressWarnings("deprecation")
@@ -544,7 +546,7 @@ public class MainActivity extends ActivityWithDialog {
                         case SERVER_STOP:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
                             LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
-                            toggleService(false);
+                            updateUiStatus(false);
                             break;
                         case SERVER_EX:
                             Exception ex = (Exception) intent.getSerializableExtra("ex");
