@@ -108,13 +108,21 @@ public class MainActivity extends ActivityWithDialog {
     }
 
     private void checkIntentAction(@NonNull Intent intent) {
+        boolean successful = false;
         if (Objects.equals(intent.getAction(), BinService.ACTION_START_SERVICE)) {
-            toggleService(true);
+            successful = toggleService(true);
             intent.setAction(ACTION_START_STOP_RECEIVED);
         } else if (Objects.equals(intent.getAction(), BinService.ACTION_STOP_SERVICE)) {
-            toggleService(false);
+            successful = toggleService(false);
             intent.setAction(ACTION_START_STOP_RECEIVED);
         }
+
+        if (intent.getBooleanExtra("goBack", false)) {
+            setResult(successful ? 1 : 0);
+            finish();
+        }
+
+        intent.removeExtra("goBack");
     }
 
     @Override
@@ -316,12 +324,13 @@ public class MainActivity extends ActivityWithDialog {
         if (serviceMessenger != null) checkIntentAction(intent);
     }
 
-    private void toggleService(boolean on) {
+    private boolean toggleService(boolean on) {
         boolean successful;
         if (on) successful = startService();
         else successful = stopService();
 
         if (successful) updateUiStatus(on);
+        return successful;
     }
 
     private void updateUiStatus(boolean on) {
