@@ -72,15 +72,7 @@ public class MainActivity extends ActivityWithDialog {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serviceMessenger = new Messenger(iBinder);
-
-            Intent intent = getIntent();
-            if (Objects.equals(intent.getAction(), BinService.ACTION_START_SERVICE)) {
-                toggleService(true);
-                intent.setAction(ACTION_START_STOP_RECEIVED);
-            } else if (Objects.equals(intent.getAction(), BinService.ACTION_STOP_SERVICE)) {
-                toggleService(false);
-                intent.setAction(ACTION_START_STOP_RECEIVED);
-            }
+            checkIntentAction(getIntent());
         }
 
         @Override
@@ -112,6 +104,16 @@ public class MainActivity extends ActivityWithDialog {
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void checkIntentAction(@NonNull Intent intent) {
+        if (Objects.equals(intent.getAction(), BinService.ACTION_START_SERVICE)) {
+            toggleService(true);
+            intent.setAction(ACTION_START_STOP_RECEIVED);
+        } else if (Objects.equals(intent.getAction(), BinService.ACTION_STOP_SERVICE)) {
+            toggleService(false);
+            intent.setAction(ACTION_START_STOP_RECEIVED);
         }
     }
 
@@ -305,6 +307,13 @@ public class MainActivity extends ActivityWithDialog {
         version.setText(BinUtils.binVersion(this));
 
         backwardCompatibility();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (serviceMessenger != null) checkIntentAction(intent);
     }
 
     private void toggleService(boolean on) {
