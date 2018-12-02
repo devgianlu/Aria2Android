@@ -1,6 +1,5 @@
 package com.gianlu.aria2android.Aria2;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -40,8 +39,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class BinService extends Service implements StreamListener.Listener {
-    public static final int START = 0;
-    public static final int STOP = 1;
     public static final int STATUS = 2;
     public static final int NOTIFICATION_ID = 1;
     public static final String ACTION_START_SERVICE = "com.gianlu.aria2android.START_SERVICE";
@@ -55,34 +52,6 @@ public class BinService extends Service implements StreamListener.Listener {
     private StreamListener streamListener;
     private PerformanceMonitor performanceMonitor;
     private ShortcutManager shortcutManager;
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        if (messenger == null) {
-            serviceThread.start();
-            broadcastManager = LocalBroadcastManager.getInstance(this);
-            messenger = new Messenger(new LocalHandler());
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1)
-                shortcutManager = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
-        }
-
-        return messenger.getBinder();
-    }
-
-    private void dispatchStatus() {
-        Intent intent = new Intent(Action.SERVER_STATUS.toString());
-        intent.putExtra("on", process != null);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    private void createChannel() {
-        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_DEFAULT);
-        chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (service != null) service.createNotificationChannel(chan);
-    }
 
     private void startBin(@NonNull StartConfig config) {
         String cmd = BinUtils.createCommandLine(this, config);
@@ -123,6 +92,47 @@ public class BinService extends Service implements StreamListener.Listener {
 
         dispatchBroadcast(Action.SERVER_MSG, new Logging.LogLine(Logging.LogLine.Type.INFO, cmd), null);
         dispatchBroadcast(Action.SERVER_START, null, null);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
+            startBin((StartConfig) intent.getSerializableExtra("config"));
+            return super.onStartCommand(intent, flags, startId);
+        } else if (Objects.equals(intent.getAction(), ACTION_STOP_SERVICE)) {
+            stopBin();
+        }
+
+        stopSelf();
+        return START_NOT_STICKY;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        if (messenger == null) {
+            serviceThread.start();
+            broadcastManager = LocalBroadcastManager.getInstance(this);
+            messenger = new Messenger(new LocalHandler(this));
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1)
+                shortcutManager = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
+        }
+
+        return messenger.getBinder();
+    }
+
+    public void dispatchStatus() {
+        Intent intent = new Intent(Action.SERVER_STATUS.toString());
+        intent.putExtra("on", process != null);
+        broadcastManager.sendBroadcast(intent);
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private void createChannel() {
+        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (service != null) service.createNotificationChannel(chan);
     }
 
     private void ex(@NonNull Exception ex) {
@@ -228,24 +238,19 @@ public class BinService extends Service implements StreamListener.Listener {
         }
     }
 
-    @SuppressLint("HandlerLeak")
-    private class LocalHandler extends Handler {
+    private static class LocalHandler extends Handler {
+        private final BinService service;
 
-        LocalHandler() {
-            super(serviceThread.getLooper());
+        LocalHandler(@NonNull BinService service) {
+            super(service.serviceThread.getLooper());
+            this.service = service;
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case START:
-                    startBin((StartConfig) msg.obj);
-                    break;
-                case STOP:
-                    stopBin();
-                    break;
                 case STATUS:
-                    dispatchStatus();
+                    service.dispatchStatus();
                     break;
                 default:
                     super.handleMessage(msg);

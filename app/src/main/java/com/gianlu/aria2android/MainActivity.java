@@ -60,19 +60,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 public class MainActivity extends ActivityWithDialog {
     private static final int STORAGE_ACCESS_CODE = 1;
     private static final String ACTION_START_STOP_RECEIVED = "com.gianlu.aria2android.START_STOP_RECEIVED";
-    private boolean isRunning;
+    private volatile boolean isRunning;
     private ServiceBroadcastReceiver receiver;
     private Messenger serviceMessenger;
-    private ToggleButton toggleServer;
-    private MaterialEditTextPreference outputPath;
-    private MaterialPreferenceCategory generalCategory;
-    private MaterialPreferenceCategory rpcCategory;
-    private MaterialPreferenceCategory notificationsCategory;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serviceMessenger = new Messenger(iBinder);
-            checkIntentAction(getIntent());
             askForStatus();
         }
 
@@ -81,6 +75,11 @@ public class MainActivity extends ActivityWithDialog {
             serviceMessenger = null;
         }
     };
+    private ToggleButton toggleServer;
+    private MaterialEditTextPreference outputPath;
+    private MaterialPreferenceCategory generalCategory;
+    private MaterialPreferenceCategory rpcCategory;
+    private MaterialPreferenceCategory notificationsCategory;
     private LinearLayout logsContainer;
     private MessageView logsMessage;
 
@@ -95,17 +94,16 @@ public class MainActivity extends ActivityWithDialog {
     @Override
     protected void onResume() {
         super.onResume();
-
         askForStatus();
     }
 
     private void askForStatus() {
-        if (serviceMessenger == null) return;
-
-        try {
-            serviceMessenger.send(Message.obtain(null, BinService.STATUS, null));
-        } catch (RemoteException ex) {
-            Logging.log(ex);
+        if (serviceMessenger != null) {
+            try {
+                serviceMessenger.send(Message.obtain(null, BinService.STATUS, null));
+            } catch (RemoteException ex) {
+                Logging.log(ex);
+            }
         }
     }
 
@@ -333,6 +331,7 @@ public class MainActivity extends ActivityWithDialog {
         version.setText(BinUtils.binVersion(this));
 
         backwardCompatibility();
+        checkIntentAction(getIntent());
     }
 
     @Override
@@ -372,17 +371,6 @@ public class MainActivity extends ActivityWithDialog {
                         .putExtra("import", file.getAbsolutePath()));
             }
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        try {
-            unbindService(serviceConnection);
-        } catch (IllegalArgumentException ex) {
-            Logging.log(ex);
-        }
-
-        super.onDestroy();
     }
 
     private boolean startService() {
@@ -430,22 +418,20 @@ public class MainActivity extends ActivityWithDialog {
         receiver = new ServiceBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
         try {
-            if (serviceMessenger != null) {
-                serviceMessenger.send(Message.obtain(null, BinService.START, StartConfig.fromPrefs()));
-                return true;
-            } else {
-                bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
-                return false;
-            }
+            bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
+            startService(new Intent(this, BinService.class)
+                    .setAction(BinService.ACTION_START_SERVICE)
+                    .putExtra("config", StartConfig.fromPrefs()));
+            return true;
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             return false;
-        } catch (RemoteException ex) {
+        } /*catch (RemoteException ex) {
             Toaster.with(this).message(R.string.failedStarting).ex(ex).show();
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             return false;
-        }
+        } */
     }
 
     @Override
@@ -454,15 +440,28 @@ public class MainActivity extends ActivityWithDialog {
         bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        try {
+            unbindService(serviceConnection);
+        } catch (IllegalArgumentException ex) {
+            Logging.log(ex);
+        }
+    }
+
     private boolean stopService() {
         if (serviceMessenger == null) return true;
 
         try {
-            serviceMessenger.send(Message.obtain(null, BinService.STOP, null));
-        } catch (RemoteException ex) {
-            Toaster.with(this).message(R.string.failedStopping).ex(ex).show();
-            return false;
+            unbindService(serviceConnection);
+        } catch (IllegalArgumentException ex) {
+            Logging.log(ex);
         }
+
+        startService(new Intent(this, BinService.class)
+                .setAction(BinService.ACTION_STOP_SERVICE));
 
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
@@ -572,11 +571,12 @@ public class MainActivity extends ActivityWithDialog {
 
         @Override
         public void onReceive(Context context, final Intent intent) {
-            final BinService.Action action = BinService.Action.find(intent);
+            BinService.Action action = BinService.Action.find(intent);
             if (action != null && intent != null) {
                 runOnUiThread(() -> {
                     switch (action) {
                         case SERVER_STATUS:
+                            System.out.println("UPDATE!!");
                             updateUiStatus(intent.getBooleanExtra("on", false));
                             break;
                         case SERVER_START:
