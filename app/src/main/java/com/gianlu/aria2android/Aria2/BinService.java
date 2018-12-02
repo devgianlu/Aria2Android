@@ -20,7 +20,6 @@ import android.os.Message;
 import android.os.Messenger;
 
 import com.gianlu.aria2android.BinUtils;
-import com.gianlu.aria2android.BuildConfig;
 import com.gianlu.aria2android.MainActivity;
 import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.R;
@@ -54,6 +53,11 @@ public class BinService extends Service implements StreamListener.Listener {
     private ShortcutManager shortcutManager;
 
     private void startBin(@NonNull StartConfig config) {
+        if (process != null) {
+            dispatchBroadcast(Action.SERVER_START, null, null);
+            return;
+        }
+
         String cmd = BinUtils.createCommandLine(this, config);
         try {
             process = Runtime.getRuntime().exec(cmd);
@@ -96,11 +100,13 @@ public class BinService extends Service implements StreamListener.Listener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
-            startBin((StartConfig) intent.getSerializableExtra("config"));
-            return super.onStartCommand(intent, flags, startId);
-        } else if (Objects.equals(intent.getAction(), ACTION_STOP_SERVICE)) {
-            stopBin();
+        if (intent != null) {
+            if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
+                startBin((StartConfig) intent.getSerializableExtra("config"));
+                return super.onStartCommand(intent, flags, startId);
+            } else if (Objects.equals(intent.getAction(), ACTION_STOP_SERVICE)) {
+                stopBin();
+            }
         }
 
         stopSelf();
@@ -209,8 +215,6 @@ public class BinService extends Service implements StreamListener.Listener {
 
     @Override
     public void unknownLogLine(@NonNull String line) {
-        if (BuildConfig.DEBUG) System.out.println("UNKNOWN LINE: " + line);
-
         Bundle bundle = new Bundle();
         bundle.putString(Utils.LABEL_LOG_LINE, line);
         AnalyticsApplication.sendAnalytics(Utils.EVENT_UNKNOWN_LOG_LINE, bundle);

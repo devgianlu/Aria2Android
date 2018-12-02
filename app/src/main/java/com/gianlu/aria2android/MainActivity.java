@@ -82,6 +82,7 @@ public class MainActivity extends ActivityWithDialog {
     private MaterialPreferenceCategory notificationsCategory;
     private LinearLayout logsContainer;
     private MessageView logsMessage;
+    private LocalBroadcastManager broadcastManager;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -114,8 +115,8 @@ public class MainActivity extends ActivityWithDialog {
                 Uri uri = data.getData();
                 if (uri != null) {
                     outputPath.setValue(FileUtil.getFullPathFromTreeUri(uri, this));
-                    int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    getContentResolver().takePersistableUriPermission(uri, takeFlags);
+                    getContentResolver().takePersistableUriPermission(uri,
+                            data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
                 }
             }
         } else {
@@ -166,6 +167,7 @@ public class MainActivity extends ActivityWithDialog {
         }
 
         setContentView(R.layout.activity_main);
+        broadcastManager = LocalBroadcastManager.getInstance(this);
 
         MaterialPreferences.instance().setUserInputModule(new LovelyInput.Builder()
                 .addIcon(PK.OUTPUT_DIRECTORY.key(), R.drawable.baseline_folder_24)
@@ -416,7 +418,7 @@ public class MainActivity extends ActivityWithDialog {
             filter.addAction(action.toString());
 
         receiver = new ServiceBroadcastReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+        broadcastManager.registerReceiver(receiver, filter);
         try {
             bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
             startService(new Intent(this, BinService.class)
@@ -425,7 +427,7 @@ public class MainActivity extends ActivityWithDialog {
             return true;
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            broadcastManager.unregisterReceiver(receiver);
             return false;
         } /*catch (RemoteException ex) {
             Toaster.with(this).message(R.string.failedStarting).ex(ex).show();
@@ -463,6 +465,8 @@ public class MainActivity extends ActivityWithDialog {
         startService(new Intent(this, BinService.class)
                 .setAction(BinService.ACTION_STOP_SERVICE));
 
+        broadcastManager.unregisterReceiver(receiver);
+
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
             bundle = new Bundle();
@@ -471,7 +475,6 @@ public class MainActivity extends ActivityWithDialog {
         }
 
         AnalyticsApplication.sendAnalytics(Utils.ACTION_TURN_OFF, bundle);
-
         return true;
     }
 
@@ -576,15 +579,14 @@ public class MainActivity extends ActivityWithDialog {
                 runOnUiThread(() -> {
                     switch (action) {
                         case SERVER_STATUS:
-                            System.out.println("UPDATE!!");
-                            updateUiStatus(intent.getBooleanExtra("on", false));
+                            updateUiStatus(intent.getBooleanExtra("on", false)); // FIXME: UI changes are not applied
                             break;
                         case SERVER_START:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
                             break;
                         case SERVER_STOP:
                             addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
-                            LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(receiver);
+                            broadcastManager.unregisterReceiver(receiver);
                             updateUiStatus(false);
                             break;
                         case SERVER_EX:
