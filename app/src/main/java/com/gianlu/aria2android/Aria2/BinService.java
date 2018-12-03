@@ -18,15 +18,19 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.TransactionTooLargeException;
 
 import com.gianlu.aria2android.BinUtils;
 import com.gianlu.aria2android.MainActivity;
 import com.gianlu.aria2android.PK;
 import com.gianlu.aria2android.R;
+import com.gianlu.aria2android.ThisApplication;
 import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -51,6 +55,21 @@ public class BinService extends Service implements StreamListener.Listener {
     private StreamListener streamListener;
     private PerformanceMonitor performanceMonitor;
     private ShortcutManager shortcutManager;
+
+    public static void startService(@NonNull Context context) throws JSONException {
+        StartConfig config = StartConfig.fromPrefs();
+
+        try {
+            context.startService(new Intent(context, BinService.class)
+                    .setAction(BinService.ACTION_START_SERVICE)
+                    .putExtra("config", StartConfig.fromPrefs()));
+        } catch (RuntimeException ex) {
+            if (ex.getCause() instanceof RuntimeException && ex.getCause().getCause() instanceof TransactionTooLargeException)
+                ThisApplication.setCrashlyticsInt("optionsSize", config.options.size());
+
+            throw ex;
+        }
+    }
 
     private void startBin(@NonNull StartConfig config) {
         if (process != null) {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.gianlu.aria2android.Aria2.BinService;
-import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
 
@@ -19,10 +18,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         if (Prefs.getBoolean(PK.START_AT_BOOT)) {
             try {
-                context.getApplicationContext()
-                        .startService(new Intent(context, BinService.class)
-                                .setAction(BinService.ACTION_START_SERVICE)
-                                .putExtra("config", StartConfig.fromPrefs()));
+                BinService.startService(context.getApplicationContext());
             } catch (JSONException ex) {
                 Logging.log(ex);
             }

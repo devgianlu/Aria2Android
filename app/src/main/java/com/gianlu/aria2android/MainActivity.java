@@ -27,7 +27,6 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.gianlu.aria2android.Aria2.BinService;
-import com.gianlu.aria2android.Aria2.StartConfig;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
@@ -424,9 +423,7 @@ public class MainActivity extends ActivityWithDialog {
 
         try {
             bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
-            startService(new Intent(this, BinService.class)
-                    .setAction(BinService.ACTION_START_SERVICE)
-                    .putExtra("config", StartConfig.fromPrefs()));
+            BinService.startService(this);
             return true;
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
