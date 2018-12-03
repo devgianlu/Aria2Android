@@ -20,7 +20,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         if (Prefs.getBoolean(PK.START_AT_BOOT)) {
             try {
                 context.getApplicationContext()
-                        .startActivity(new Intent(context, BinService.class)
+                        .startService(new Intent(context, BinService.class)
                                 .setAction(BinService.ACTION_START_SERVICE)
                                 .putExtra("config", StartConfig.fromPrefs()));
             } catch (JSONException ex) {
