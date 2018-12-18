@@ -147,6 +147,8 @@ public class BinService extends Service implements StreamListener.Listener {
     }
 
     public void dispatchStatus() {
+        if (broadcastManager == null) return;
+
         Intent intent = new Intent(Action.SERVER_STATUS.toString());
         intent.putExtra("on", process != null);
         broadcastManager.sendBroadcast(intent);
@@ -207,6 +209,8 @@ public class BinService extends Service implements StreamListener.Listener {
     }
 
     private void dispatchBroadcast(Action action, @Nullable Logging.LogLine msg, @Nullable Throwable ex) {
+        if (broadcastManager == null) return;
+
         Intent intent = new Intent(action.toString());
         if (msg != null) intent.putExtra("msg", msg);
         if (ex != null) intent.putExtra("ex", ex);
