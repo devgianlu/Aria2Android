@@ -66,7 +66,10 @@ public class PerformanceMonitor extends Thread {
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(rss) * 1024, false));
         builder.setCustomContentView(layout);
 
-        manager.notify(BinService.NOTIFICATION_ID, builder.build());
+        try {
+            manager.notify(BinService.NOTIFICATION_ID, builder.build());
+        } catch (NullPointerException ignored) {
+        }
     }
 
     public void stopSafe() {
