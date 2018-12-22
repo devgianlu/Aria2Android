@@ -39,6 +39,7 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class BinService extends Service implements StreamListener.Listener {
@@ -60,7 +61,7 @@ public class BinService extends Service implements StreamListener.Listener {
         StartConfig config = StartConfig.fromPrefs();
 
         try {
-            context.startService(new Intent(context, BinService.class)
+            ContextCompat.startForegroundService(context, new Intent(context, BinService.class)
                     .setAction(BinService.ACTION_START_SERVICE)
                     .putExtra("config", StartConfig.fromPrefs()));
         } catch (RuntimeException ex) {
