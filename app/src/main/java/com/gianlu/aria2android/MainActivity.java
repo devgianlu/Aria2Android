@@ -3,21 +3,12 @@ package com.gianlu.aria2android;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.gianlu.aria2android.Aria2.BinService;
+import com.gianlu.aria2lib.Aria2Ui;
+import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.aria2lib.Internal.Message;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
@@ -45,23 +38,18 @@ import com.yarolegovich.mp.MaterialSeekBarPreference;
 import com.yarolegovich.mp.MaterialStandardPreference;
 import com.yarolegovich.mp.io.MaterialPreferences;
 
-import org.json.JSONException;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
+import java.io.Serializable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class MainActivity extends ActivityWithDialog {
+public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
-    private static final String ACTION_START_STOP_RECEIVED = "com.gianlu.aria2android.START_STOP_RECEIVED";
     private volatile boolean isRunning;
-    private ServiceBroadcastReceiver receiver;
-    private Messenger serviceMessenger;
     private ToggleButton toggleServer;
     private MaterialEditTextPreference outputPath;
     private MaterialPreferenceCategory generalCategory;
@@ -69,28 +57,7 @@ public class MainActivity extends ActivityWithDialog {
     private MaterialPreferenceCategory notificationsCategory;
     private LinearLayout logsContainer;
     private MessageView logsMessage;
-    private LocalBroadcastManager broadcastManager;
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            serviceMessenger = new Messenger(iBinder);
-
-            IntentFilter filter = new IntentFilter();
-            for (BinService.Action action : BinService.Action.values())
-                filter.addAction(action.toString());
-
-            receiver = new ServiceBroadcastReceiver();
-            broadcastManager.registerReceiver(receiver, filter);
-
-            askForStatus();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            serviceMessenger = null;
-            broadcastManager.unregisterReceiver(receiver);
-        }
-    };
+    private Aria2Ui aria2;
 
     private static boolean isARM() {
         for (String abi : Build.SUPPORTED_ABIS)
@@ -98,22 +65,6 @@ public class MainActivity extends ActivityWithDialog {
                 return true;
 
         return false;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        askForStatus();
-    }
-
-    private void askForStatus() {
-        if (serviceMessenger != null) {
-            try {
-                serviceMessenger.send(Message.obtain(null, BinService.STATUS, null));
-            } catch (RemoteException ex) {
-                Logging.log(ex);
-            }
-        }
     }
 
     @Override
@@ -132,28 +83,27 @@ public class MainActivity extends ActivityWithDialog {
         }
     }
 
-    private void checkIntentAction(@NonNull Intent intent) {
-        boolean successful = false;
-        if (Objects.equals(intent.getAction(), BinService.ACTION_START_SERVICE)) {
-            successful = toggleService(true);
-            intent.setAction(ACTION_START_STOP_RECEIVED);
-        } else if (Objects.equals(intent.getAction(), BinService.ACTION_STOP_SERVICE)) {
-            successful = toggleService(false);
-            intent.setAction(ACTION_START_STOP_RECEIVED);
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        aria2.onStart();
+    }
 
-        if (intent.getBooleanExtra("goBack", false)) {
-            setResult(successful ? 1 : 0);
-            finish();
-        }
-
-        intent.removeExtra("goBack");
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        aria2.onDestroy();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!BinUtils.binAvailable(this)) {
+        aria2 = new Aria2Ui(this, this);
+
+        try {
+            Aria2Compat.loadEnv(aria2);
+        } catch (BadEnvironmentException ex) {
+            Logging.log(ex);
             startActivity(new Intent(this, DownloadBinActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
@@ -166,7 +116,7 @@ public class MainActivity extends ActivityWithDialog {
                     .setMessage(R.string.archNotSupported_message)
                     .setOnDismissListener(dialog -> finish())
                     .setOnCancelListener(dialog -> finish())
-                    .setNeutralButton(R.string.importBin, (dialog, which) -> startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                    .setNeutralButton(R.string.importBin, (dialog, which) -> startActivity(new Intent(this, DownloadBinActivity.class)
                             .putExtra("importBin", true)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))).setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
 
@@ -175,7 +125,6 @@ public class MainActivity extends ActivityWithDialog {
         }
 
         setContentView(R.layout.activity_main);
-        broadcastManager = LocalBroadcastManager.getInstance(this);
 
         MaterialPreferences.instance().setUserInputModule(new LovelyInput.Builder()
                 .addIcon(PK.OUTPUT_DIRECTORY.key(), R.drawable.baseline_folder_24)
@@ -241,7 +190,7 @@ public class MainActivity extends ActivityWithDialog {
         generalCategory.addView(startAtBoot);
 
         MaterialStandardPreference customOptions = new MaterialStandardPreference(this);
-        customOptions.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ConfigEditorActivity.class)));
+        customOptions.setOnClickListener(v -> startActivity(new Intent(this, ConfigEditorActivity.class)));
         customOptions.setTitle(R.string.customOptions);
         generalCategory.addView(customOptions);
 
@@ -337,18 +286,14 @@ public class MainActivity extends ActivityWithDialog {
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
 
-        TextView version = findViewById(R.id.main_binVersion);
-        version.setText(BinUtils.binVersion(this));
+        try {
+            TextView version = findViewById(R.id.main_binVersion);
+            version.setText(aria2.version());
+        } catch (BadEnvironmentException | IOException ex) {
+            ex.printStackTrace(); // TODO
+        }
 
         backwardCompatibility();
-        checkIntentAction(getIntent());
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (serviceMessenger != null) checkIntentAction(intent);
     }
 
     private boolean toggleService(boolean on) {
@@ -421,44 +366,12 @@ public class MainActivity extends ActivityWithDialog {
             }
         }
 
-        try {
-            bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
-            BinService.startService(this);
-            return true;
-        } catch (JSONException ex) {
-            Toaster.with(this).message(R.string.failedLoadingOptions).ex(ex).show();
-            return false;
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bindService(new Intent(this, BinService.class), serviceConnection, BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        try {
-            unbindService(serviceConnection);
-        } catch (IllegalArgumentException ex) {
-            Logging.log(ex);
-        }
+        aria2.startService();
+        return true;
     }
 
     private boolean stopService() {
-        if (serviceMessenger == null) return true;
-
-        try {
-            unbindService(serviceConnection);
-        } catch (IllegalArgumentException ex) {
-            Logging.log(ex);
-        }
-
-        startService(new Intent(this, BinService.class)
-                .setAction(BinService.ACTION_STOP_SERVICE));
+        aria2.stopService();
 
         Bundle bundle = null;
         if (Prefs.getLong(PK.CURRENT_SESSION_START, -1) != -1) {
@@ -541,8 +454,8 @@ public class MainActivity extends ActivityWithDialog {
                 builder.setTitle(R.string.changeBinVersion)
                         .setMessage(R.string.changeBinVersion_message)
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
-                            if (BinUtils.delete(MainActivity.this)) {
-                                startActivity(new Intent(MainActivity.this, DownloadBinActivity.class)
+                            if (aria2.delete()) {
+                                startActivity(new Intent(this, DownloadBinActivity.class)
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                 finish();
                             } else {
@@ -565,35 +478,30 @@ public class MainActivity extends ActivityWithDialog {
         }
     }
 
-    private class ServiceBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, final Intent intent) {
-            BinService.Action action = BinService.Action.find(intent);
-            if (action != null && intent != null) {
-                runOnUiThread(() -> {
-                    switch (action) {
-                        case SERVER_STATUS:
-                            updateUiStatus(intent.getBooleanExtra("on", false));
-                            break;
-                        case SERVER_START:
-                            addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStarted)));
-                            break;
-                        case SERVER_STOP:
-                            addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.serverStopped)));
-                            updateUiStatus(false);
-                            break;
-                        case SERVER_EX:
-                            Exception ex = (Exception) intent.getSerializableExtra("ex");
-                            Logging.log(ex);
-                            addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, getString(R.string.serverException, ex.getMessage())));
-                            break;
-                        case SERVER_MSG:
-                            addLog((Logging.LogLine) intent.getSerializableExtra("msg"));
-                            break;
-                    }
-                });
-            }
+    @Override
+    public void onMessage(@NonNull Message.Type type, int i, @Nullable Serializable o) {
+        switch (type) {
+            case PROCESS_TERMINATED:
+                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, "TERMINATED! " + i));
+                updateUiStatus(false);
+                break;
+            case PROCESS_STARTED:
+                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, "STARTED! " + o));
+                updateUiStatus(true);
+                break;
+            case MONITOR_FAILED:
+                break;
+            case MONITOR_UPDATE:
+                break;
+            case PROCESS_WARN:
+                addLog(new Logging.LogLine(Logging.LogLine.Type.WARNING, (String) o));
+                break;
+            case PROCESS_ERROR:
+                addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, (String) o));
+                break;
+            case PROCESS_INFO:
+                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, (String) o));
+                break;
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.gianlu.aria2android.DownloadBin;
+package com.gianlu.aria2lib;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 
-public class GitHubApi {
+public final class GitHubApi {
     private static GitHubApi instance;
     private final Handler handler;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -40,8 +41,38 @@ public class GitHubApi {
     }
 
     @NonNull
+    private static String read(@NonNull InputStream in) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        StringBuilder builder = new StringBuilder();
+
+        String line;
+        while ((line = reader.readLine()) != null)
+            builder.append(line);
+
+        return builder.toString();
+    }
+
+    @NonNull
     private static SimpleDateFormat getDateParser() {
         return new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'", Locale.getDefault());
+    }
+
+    void execute(@NonNull Runnable runnable) {
+        executorService.execute(runnable);
+    }
+
+    void inputStream(@NonNull String url, @NonNull InputStreamWorker worker) {
+        executorService.execute(() -> {
+            HttpURLConnection conn = null;
+            try {
+                conn = basicRequestSync(url);
+                worker.work(conn.getInputStream());
+            } catch (Exception ex) {
+                worker.exception(ex);
+            } finally {
+                if (conn != null) conn.disconnect();
+            }
+        });
     }
 
     @WorkerThread
@@ -49,40 +80,57 @@ public class GitHubApi {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.connect();
 
-        if (conn.getResponseCode() == 200) return conn;
+        if (conn.getResponseCode() == 200)
+            return conn;
         else
             throw new IOException(String.format("%d: %s", conn.getResponseCode(), conn.getResponseMessage()));
     }
 
-    public void getReleases(final String author, final String repo, final OnResult<List<Release>> listener) {
-        executorService.execute(() -> {
-            try {
-                HttpURLConnection conn = basicRequestSync("https://api.github.com/repos/" + author + "/" + repo + "/releases");
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder builder = new StringBuilder();
-
-                String line;
-                while ((line = reader.readLine()) != null)
-                    builder.append(line);
-
-                JSONArray array = new JSONArray(builder.toString());
+    public void getReleases(@NonNull String owner, @NonNull String repo, @NonNull OnResult<List<Release>> listener) {
+        inputStream("https://api.github.com/repos/" + owner + "/" + repo + "/releases", new InputStreamWorker() {
+            @Override
+            public void work(@NonNull InputStream in) throws IOException, JSONException, ParseException {
+                JSONArray array = new JSONArray(read(in));
                 final List<Release> releases = new ArrayList<>();
                 for (int i = 0; i < array.length(); i++)
                     releases.add(new Release(array.getJSONObject(i)));
 
                 handler.post(() -> listener.onResult(releases));
-            } catch (IOException | JSONException | ParseException ex) {
+            }
+
+            @Override
+            public void exception(@NonNull Exception ex) {
                 handler.post(() -> listener.onException(ex));
             }
         });
     }
 
+    public void getRelease(@NonNull String owner, @NonNull String repo, int id, OnResult<Release> listener) {
+        inputStream("https://api.github.com/repos/" + owner + "/" + repo + "/releases/" + id, new InputStreamWorker() {
+            @Override
+            public void work(@NonNull InputStream in) throws Exception {
+                Release release = new Release(new JSONObject(read(in)));
+                handler.post(() -> listener.onResult(release));
+            }
+
+            @Override
+            public void exception(@NonNull Exception ex) {
+                handler.post(() -> listener.onException(ex));
+            }
+        });
+    }
+
+    @WorkerThread
+    public interface InputStreamWorker {
+        void work(@NonNull InputStream in) throws Exception;
+
+        void exception(@NonNull Exception ex);
+    }
+
+    @UiThread
     public interface OnResult<E> {
-        @UiThread
         void onResult(@NonNull E result);
 
-        @UiThread
         void onException(@NonNull Exception ex);
     }
 

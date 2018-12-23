@@ -12,8 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gianlu.aria2android.DownloadBin.GitHubApi;
-import com.gianlu.aria2android.DownloadBin.ReleasesAdapter;
+import com.gianlu.aria2lib.Aria2Downloader;
+import com.gianlu.aria2lib.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
@@ -21,18 +21,22 @@ import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi.OnResult<List<GitHubApi.Release>>, ReleasesAdapter.Listener, BinUtils.IDownloadAndExtractBin {
+public class DownloadBinActivity extends ActivityWithDialog implements ReleasesAdapter.Listener, GitHubApi.OnResult<List<GitHubApi.Release>>, Aria2Downloader.DownloadRelease, Aria2Downloader.ExtractTo {
     private static final int IMPORT_BIN_CODE = 8;
     private ListView list;
     private TextView progress;
     private LinearLayout loading;
     private MessageView message;
+    private Aria2Downloader downloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +50,13 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         list = findViewById(R.id.downloadBin_list);
 
         progress.setText(R.string.retrievingReleases);
-        GitHubApi.get().getReleases("aria2", "aria2", this);
+        downloader = new Aria2Downloader();
 
         if (getIntent().getBooleanExtra("importBin", false)) {
             importBin();
             getIntent().removeExtra("importBin");
+        } else {
+            downloader.getReleases(this);
         }
     }
 
@@ -95,11 +101,21 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
         });
     }
 
+    public void writeStreamAsBin(InputStream in) throws IOException {
+        if (in == null) throw new IOException(new NullPointerException("InputStream is null!"));
+
+        int count;
+        byte[] buffer = new byte[4096];
+        try (FileOutputStream out = new FileOutputStream(new File(getFilesDir(), "aria2c"))) {
+            while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == IMPORT_BIN_CODE && resultCode == RESULT_OK && data.getData() != null) {
             try {
-                BinUtils.writeStreamAsBin(this, getContentResolver().openInputStream(data.getData()));
+                writeStreamAsBin(getContentResolver().openInputStream(data.getData()));
             } catch (IOException | NetworkOnMainThreadException ex) {
                 Toaster.with(this).message(R.string.failedImportingBin).ex(ex).show();
                 return;
@@ -125,21 +141,6 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     }
 
     @Override
-    public void onBinDownloaded() {
-        progress.setText(R.string.extractingBin);
-    }
-
-    @Override
-    public void onBinExtracted() {
-        progress.setText(R.string.binExtracted);
-
-        Prefs.putBoolean(PK.CUSTOM_BIN, false);
-        startActivity(new Intent(this, MainActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-        finish();
-    }
-
-    @Override
     public void onException(@NonNull Exception ex) {
         loading.setVisibility(View.GONE);
         list.setVisibility(View.GONE);
@@ -147,12 +148,45 @@ public class DownloadBinActivity extends ActivityWithDialog implements GitHubApi
     }
 
     @Override
-    public void onReleaseSelected(GitHubApi.Release release) {
+    public void onReleaseSelected(@NonNull GitHubApi.Release release) {
         progress.setText(R.string.downloadingBin);
         loading.setVisibility(View.VISIBLE);
         list.setVisibility(View.GONE);
         message.hide();
 
-        BinUtils.downloadAndExtractBin(this, release.androidAsset, this);
+        downloader.setRelease(release);
+        downloader.downloadRelease(this);
+    }
+
+    @Override
+    public void doneDownload(@NonNull File tmp) {
+        progress.setText(R.string.extractingBin);
+        downloader.extractTo(getEnvDir(), (entry, name) -> name.equals("aria2c"), this);
+    }
+
+    @NonNull
+    private File getEnvDir() {
+        return new File(getFilesDir(), "env");
+    }
+
+    @Override
+    public void failedDownload(@NonNull Exception ex) {
+        ex.printStackTrace(); // TODO
+    }
+
+    @Override
+    public void doneExtract(@NonNull File dest) {
+        progress.setText(R.string.binExtracted);
+
+        Prefs.putBoolean(PK.CUSTOM_BIN, false);
+        Prefs.putString(PK.ENV_LOCATION, dest.getAbsolutePath());
+        startActivity(new Intent(this, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        finish();
+    }
+
+    @Override
+    public void failedExtract(@NonNull Exception ex) {
+        ex.printStackTrace(); // TODO
     }
 }

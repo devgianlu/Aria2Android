@@ -1,4 +1,4 @@
-include ':CommonUtils', ':app', ':MaterialPreferences', ':LovelyMaterialPreferences'
+include ':CommonUtils', ':app', ':MaterialPreferences', ':LovelyMaterialPreferences', ':aria2lib'
 project(':CommonUtils').projectDir = new File('./CommonUtils/utils')
 project(':MaterialPreferences').projectDir = new File('./MaterialPreferences/library')
 project(':LovelyMaterialPreferences').projectDir = new File('./MaterialPreferences/lovelyinput')

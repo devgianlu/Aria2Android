@@ -1,4 +1,4 @@
-package com.gianlu.aria2android.ConfigEditor;
+package com.gianlu.aria2android;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,8 +6,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.gianlu.aria2android.R;
-import com.gianlu.aria2android.Utils;
 import com.gianlu.commonutils.NameValuePair;
 
 import org.json.JSONObject;

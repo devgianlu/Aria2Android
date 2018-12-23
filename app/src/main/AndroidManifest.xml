@@ -43,11 +43,6 @@
             </intent-filter>
         </activity>
 
-        <!-- aria2 service -->
-        <service
-            android:name=".Aria2.BinService"
-            android:enabled="true" />
-
         <!-- Preferences activity -->
         <activity android:name=".PreferenceActivity" />
 

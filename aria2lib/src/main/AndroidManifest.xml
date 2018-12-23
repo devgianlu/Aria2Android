@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.gianlu.aria2lib">
+
+    <application>
+        <service
+            android:name=".Internal.Aria2Service"
+            android:enabled="true" />
+    </application>
+</manifest>

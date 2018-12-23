@@ -1,4 +1,4 @@
-package com.gianlu.aria2android.DownloadBin;
+package com.gianlu.aria2android;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.gianlu.aria2android.R;
+import com.gianlu.aria2lib.GitHubApi;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.SuperTextView;
 

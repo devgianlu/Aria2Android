@@ -22,4 +22,5 @@ public final class PK extends CommonPK {
     public static final Prefs.Key DEPRECATED_USE_CONFIG = new Prefs.Key("useConfig");
     @Deprecated
     public static final Prefs.Key DEPRECATED_CONFIG_FILE = new Prefs.Key("configFile");
+    public static final Prefs.Key ENV_LOCATION = new Prefs.Key("envLocation");
 }

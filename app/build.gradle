@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    api project(':aria2lib')
     api project(':LovelyMaterialPreferences')
     api(project(':CommonUtils')) {
         exclude group: 'com.getkeepsafe.taptargetview'
