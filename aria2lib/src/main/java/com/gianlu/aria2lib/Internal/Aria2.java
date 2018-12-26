@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 
 public final class Aria2 {
     private static final Pattern TOP_PATTERN = Pattern.compile("(\\d*?)\\s+(\\d*?)\\s+(\\d*?)%\\s(.)\\s+(\\d*?)\\s+(\\d*?)K\\s+(\\d*?)K\\s+(..)\\s(.*?)\\s+(.*)$");
+    private static final Pattern INFO_MESSAGE_PATTERN = Pattern.compile("^\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2} \\[.+] (.+)$");
     private static Aria2 instance;
     private final MessageHandler messageHandler;
     private Env env;
@@ -193,7 +194,11 @@ public final class Aria2 {
         } else if (line.startsWith("ERROR: ")) {
             postMessage(Message.obtain(Message.Type.PROCESS_ERROR, line.substring(7)));
         } else {
-            postMessage(Message.obtain(Message.Type.PROCESS_INFO, line)); // TODO: Clear message
+            String clean;
+            Matcher matcher = INFO_MESSAGE_PATTERN.matcher(line);
+            if (matcher.find()) clean = matcher.group(1);
+            else clean = line;
+            postMessage(Message.obtain(Message.Type.PROCESS_INFO, clean));
         }
     }
 
