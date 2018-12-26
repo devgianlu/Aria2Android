@@ -116,6 +116,11 @@ public final class Aria2 {
     }
 
     void start() throws BadEnvironmentException, IOException {
+        if (currentProcess != null) {
+            postMessage(Message.obtain(Message.Type.PROCESS_STARTED, "[already started]"));
+            return;
+        }
+
         if (env == null)
             throw new BadEnvironmentException("Missing environment!");
 
@@ -159,6 +164,8 @@ public final class Aria2 {
             inputWatcher.close();
             inputWatcher = null;
         }
+
+        stop();
     }
 
     private void monitorFailed(@NonNull Exception ex) {
@@ -186,7 +193,7 @@ public final class Aria2 {
         } else if (line.startsWith("ERROR: ")) {
             postMessage(Message.obtain(Message.Type.PROCESS_ERROR, line.substring(7)));
         } else {
-            postMessage(Message.obtain(Message.Type.PROCESS_INFO, line));
+            postMessage(Message.obtain(Message.Type.PROCESS_INFO, line)); // TODO: Clear message
         }
     }
 
@@ -200,6 +207,10 @@ public final class Aria2 {
     public boolean delete() {
         stop();
         return env.delete();
+    }
+
+    public boolean isRunning() {
+        return currentProcess != null;
     }
 
     public interface MessageListener {

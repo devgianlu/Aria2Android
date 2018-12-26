@@ -37,11 +37,12 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     public static final String ACTION_START_SERVICE = Aria2Service.class.getCanonicalName() + ".START";
     public static final String ACTION_STOP_SERVICE = Aria2Service.class.getCanonicalName() + ".STOP";
     public static final String BROADCAST_MESSAGE = Aria2Service.class.getCanonicalName() + ".BROADCAST_MESSAGE";
+    public static final String BROADCAST_STATUS = Aria2Service.class.getCanonicalName() + ".BROADCAST_STATUS";
     public static final int MESSAGE_STATUS = 2;
     private static final String CHANNEL_ID = "aria2service";
     private static final String SERVICE_NAME = "Service for aria2";
     private static final int NOTIFICATION_ID = 4;
-    private final HandlerThread serviceThread = new HandlerThread("aria2android-service");
+    private final HandlerThread serviceThread = new HandlerThread("aria2-service");
     private Messenger messenger;
     private LocalBroadcastManager broadcastManager;
     private Aria2 aria2;
@@ -170,11 +171,14 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     }
 
     private void dispatchStatus() {
-        // TODO
+        if (broadcastManager == null) return;
+
+        Intent intent = new Intent(BROADCAST_STATUS);
+        intent.putExtra("on", aria2.isRunning());
+        broadcastManager.sendBroadcast(intent);
     }
 
     private static class LocalHandler extends Handler {
-
         private final Aria2Service service;
 
         LocalHandler(@NonNull Aria2Service service) {

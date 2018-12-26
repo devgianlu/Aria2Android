@@ -9,15 +9,18 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.RemoteException;
 
 import com.gianlu.aria2lib.Internal.Aria2;
 import com.gianlu.aria2lib.Internal.Aria2Service;
 import com.gianlu.aria2lib.Internal.Message;
+import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Objects;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -36,6 +39,8 @@ public class Aria2Ui {
         public void onServiceConnected(ComponentName name, IBinder service) {
             messenger = new Messenger(service);
             broadcastManager.registerReceiver(receiver = new ServiceBroadcastReceiver(), new IntentFilter(Aria2Service.BROADCAST_MESSAGE));
+
+            askForStatus();
         }
 
         @Override
@@ -67,6 +72,19 @@ public class Aria2Ui {
 
     public void onStart() {
         bind();
+    }
+
+    public void onResume() {
+        askForStatus();
+    }
+
+    private void askForStatus() {
+        try {
+            if (messenger != null)
+                messenger.send(android.os.Message.obtain(null, Aria2Service.MESSAGE_STATUS));
+        } catch (RemoteException ex) {
+            Logging.log(ex);
+        }
     }
 
     public void onDestroy() {
@@ -102,16 +120,22 @@ public class Aria2Ui {
 
     public interface Listener {
         void onMessage(@NonNull Message.Type type, int i, @Nullable Serializable o);
+
+        void updateUi(boolean on);
     }
 
     private class ServiceBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Message.Type type = (Message.Type) intent.getSerializableExtra("type");
-            int i = intent.getIntExtra("i", 0);
-            Serializable o = intent.getSerializableExtra("o");
-            if (listener != null) listener.onMessage(type, i, o);
+            if (Objects.equals(intent.getAction(), Aria2Service.BROADCAST_MESSAGE)) {
+                Message.Type type = (Message.Type) intent.getSerializableExtra("type");
+                int i = intent.getIntExtra("i", 0);
+                Serializable o = intent.getSerializableExtra("o");
+                if (listener != null) listener.onMessage(type, i, o);
+            } else if (Objects.equals(intent.getAction(), Aria2Service.BROADCAST_STATUS)) {
+                if (listener != null) listener.updateUi(intent.getBooleanExtra("on", false));
+            }
         }
     }
 }

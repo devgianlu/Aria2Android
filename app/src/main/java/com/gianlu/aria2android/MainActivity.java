@@ -96,6 +96,12 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        aria2.onResume();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         aria2 = Utils.createAria2(this, this);
@@ -497,5 +503,10 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                     addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, (String) o));
                 break;
         }
+    }
+
+    @Override
+    public void updateUi(boolean on) {
+        updateUiStatus(on);
     }
 }
