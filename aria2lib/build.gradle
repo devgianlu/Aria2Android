@@ -21,9 +21,21 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    flavorDimensions 'main'
+    productFlavors {
+        foss {
+            dimension 'main'
+        }
+
+        standard {
+            dimension 'main'
+        }
+    }
 }
 
 dependencies {
+    api project(':CommonUtils')
     api 'androidx.annotation:annotation:1.0.1'
     api 'androidx.core:core:1.0.1'
     api 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'

@@ -17,13 +17,12 @@ import android.widget.RemoteViews;
 
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.R;
+import com.gianlu.commonutils.CommonUtils;
+import com.gianlu.commonutils.Logging;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,48 +53,6 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     public static void stopService(@NonNull Context context) {
         context.startService(new Intent(context, Aria2Service.class)
                 .setAction(ACTION_STOP_SERVICE));
-    }
-
-    @NonNull
-    private static String timeFormatter(long sec) {
-        int day = (int) TimeUnit.SECONDS.toDays(sec);
-        long hours = TimeUnit.SECONDS.toHours(sec) - TimeUnit.DAYS.toHours(day);
-        long minute = TimeUnit.SECONDS.toMinutes(sec) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(sec));
-        long second = TimeUnit.SECONDS.toSeconds(sec) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(sec));
-
-        if (day > 0) {
-            if (day > 1000) {
-                return "∞";
-            } else {
-                return String.format(Locale.getDefault(), "%02d", day) + "d " + String.format(Locale.getDefault(), "%02d", hours) + "h " + String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
-            }
-        } else {
-            if (hours > 0) {
-                return String.format(Locale.getDefault(), "%02d", hours) + "h " + String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
-            } else {
-                if (minute > 0) {
-                    return String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
-                } else {
-                    if (second > 0) {
-                        return String.format(Locale.getDefault(), "%02d", second) + "s";
-                    } else {
-                        return "∞";
-                    }
-                }
-            }
-        }
-    }
-
-    @NonNull
-    private static String dimensionFormatter(float v) {
-        if (v <= 0) {
-            return "0 B";
-        } else {
-            final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
-            int digitGroups = (int) (Math.log10(v) / Math.log10(1024));
-            if (digitGroups > 4) return "∞ B";
-            return new DecimalFormat("#,##0.#").format(v / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
-        }
     }
 
     @Nullable
@@ -138,7 +95,7 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
                     start();
                     return START_STICKY;
                 } catch (IOException | BadEnvironmentException ex) {
-                    ex.printStackTrace(); // TODO
+                    Logging.log(ex);
                 }
             } else if (Objects.equals(intent.getAction(), ACTION_STOP_SERVICE)) {
                 stop();
@@ -177,10 +134,10 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         if (update == null || notificationManager == null) return;
 
         RemoteViews layout = new RemoteViews(getPackageName(), R.layout.custom_notification);
-        layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + timeFormatter((System.currentTimeMillis() - startTime) / 1000));
+        layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + CommonUtils.timeFormatter((System.currentTimeMillis() - startTime) / 1000));
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + update.pid());
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + update.cpu() + "%");
-        layout.setTextViewText(R.id.customNotification_memory, "Memory: " + dimensionFormatter(Integer.parseInt(update.rss()) * 1024));
+        layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(update.rss()) * 1024, false));
         defaultNotification.setCustomContentView(layout);
 
         notificationManager.notify(NOTIFICATION_ID, defaultNotification.build());

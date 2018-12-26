@@ -1,6 +1,7 @@
 package com.gianlu.aria2lib.Internal;
 
 import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.commonutils.Logging;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -41,7 +42,8 @@ public final class Aria2 {
         return instance;
     }
 
-    private static String startCommandForLog(String exec, String... params) {
+    @NonNull
+    private static String startCommandForLog(@NonNull String exec, String... params) {
         StringBuilder builder = new StringBuilder(exec);
         for (String param : params) builder.append(' ').append(param);
         return builder.toString();
@@ -112,7 +114,7 @@ public final class Aria2 {
         postMessage(Message.obtain(Message.Type.PROCESS_STARTED, startCommandForLog(execPath, params)));
     }
 
-    void reloadEnv() throws BadEnvironmentException {
+    private void reloadEnv() throws BadEnvironmentException {
         if (env == null)
             throw new BadEnvironmentException("Missing environment!");
 
@@ -140,6 +142,7 @@ public final class Aria2 {
 
     private void monitorFailed(@NonNull Exception ex) {
         postMessage(Message.obtain(Message.Type.MONITOR_FAILED, ex));
+        Logging.log(ex);
     }
 
     private void monitorGotLine(@NonNull String line) {
@@ -148,7 +151,7 @@ public final class Aria2 {
             postMessage(Message.obtain(Message.Type.MONITOR_UPDATE,
                     MonitorUpdate.obtain(matcher.group(1), matcher.group(3), matcher.group(7))));
         } else {
-            System.err.println("Bad line: " + line); // FIXME
+            Logging.log("Bad `top` line: " + line, true);
         }
     }
 
@@ -198,7 +201,7 @@ public final class Aria2 {
                     msg.recycle();
                 } catch (InterruptedException ex) {
                     close();
-                    ex.printStackTrace(); // TODO
+                    Logging.log(ex);
                 }
             }
         }
@@ -319,7 +322,8 @@ public final class Aria2 {
                 int exit = process.waitFor();
                 processTerminated(exit);
             } catch (InterruptedException ex) {
-                ex.printStackTrace(); // TODO
+                processTerminated(999);
+                Logging.log(ex);
             }
         }
     }

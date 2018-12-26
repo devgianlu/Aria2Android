@@ -286,11 +286,12 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
 
+        TextView version = findViewById(R.id.main_binVersion);
         try {
-            TextView version = findViewById(R.id.main_binVersion);
             version.setText(aria2.version());
         } catch (BadEnvironmentException | IOException ex) {
-            ex.printStackTrace(); // TODO
+            version.setText(R.string.unknown);
+            Logging.log(ex);
         }
 
         backwardCompatibility();
@@ -495,13 +496,16 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             case MONITOR_UPDATE:
                 break;
             case PROCESS_WARN:
-                addLog(new Logging.LogLine(Logging.LogLine.Type.WARNING, (String) o));
+                if (o != null)
+                    addLog(new Logging.LogLine(Logging.LogLine.Type.WARNING, (String) o));
                 break;
             case PROCESS_ERROR:
-                addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, (String) o));
+                if (o != null)
+                    addLog(new Logging.LogLine(Logging.LogLine.Type.ERROR, (String) o));
                 break;
             case PROCESS_INFO:
-                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, (String) o));
+                if (o != null)
+                    addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, (String) o));
                 break;
         }
     }
