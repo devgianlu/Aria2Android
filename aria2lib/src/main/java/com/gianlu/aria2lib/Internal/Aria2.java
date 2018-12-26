@@ -61,7 +61,7 @@ public final class Aria2 {
             throw new BadEnvironmentException("Missing environment!");
 
         try {
-            Process process = execWithParams("-v");
+            Process process = execWithParams(false, "-v");
             process.waitFor();
             return new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
         } catch (InterruptedException ex) {
@@ -70,14 +70,14 @@ public final class Aria2 {
     }
 
     @NonNull
-    private Process execWithParams(String... params) throws BadEnvironmentException, IOException {
+    private Process execWithParams(boolean redirect, String... params) throws BadEnvironmentException, IOException {
         if (env == null)
             throw new BadEnvironmentException("Missing environment!");
 
         String[] cmdline = new String[params.length + 1];
         cmdline[0] = env.execPath();
         System.arraycopy(params, 0, cmdline, 1, params.length);
-        return Runtime.getRuntime().exec(cmdline);
+        return new ProcessBuilder(cmdline).redirectErrorStream(redirect).start();
     }
 
     public void loadEnv(@NonNull File env) throws BadEnvironmentException {
@@ -103,7 +103,7 @@ public final class Aria2 {
         String execPath = env.execPath();
         String[] params = env.startArgs();
 
-        currentProcess = execWithParams(params);
+        currentProcess = execWithParams(true, params);
         new Thread(new Waiter(currentProcess), "aria2android-waiterThread").start();
         new Thread(this.monitor = new Monitor(), "aria2android-monitorThread").start();
         new Thread(this.inputWatcher = new StreamWatcher(currentProcess.getInputStream()), "aria2-android-inputWatcherThread").start();
@@ -144,7 +144,12 @@ public final class Aria2 {
 
     private void monitorGotLine(@NonNull String line) {
         Matcher matcher = TOP_PATTERN.matcher(line);
-        postMessage(Message.obtain(Message.Type.MONITOR_UPDATE, line)); // TODO
+        if (matcher.find()) {
+            postMessage(Message.obtain(Message.Type.MONITOR_UPDATE,
+                    MonitorUpdate.obtain(matcher.group(1), matcher.group(3), matcher.group(7))));
+        } else {
+            System.err.println("Bad line: " + line); // FIXME
+        }
     }
 
     private void postMessage(@NonNull Message message) {
@@ -152,18 +157,20 @@ public final class Aria2 {
     }
 
     private void handleStreamMessage(@NonNull String line) {
-        if (line.startsWith("WARNING")) {
-            postMessage(Message.obtain(Message.Type.PROCESS_WARN, line));
-        } else if (line.startsWith("ERROR")) {
-            postMessage(Message.obtain(Message.Type.PROCESS_ERROR, line));
+        if (line.startsWith("WARNING: ")) {
+            postMessage(Message.obtain(Message.Type.PROCESS_WARN, line.substring(9)));
+        } else if (line.startsWith("ERROR: ")) {
+            postMessage(Message.obtain(Message.Type.PROCESS_ERROR, line.substring(7)));
         } else {
             postMessage(Message.obtain(Message.Type.PROCESS_INFO, line));
         }
     }
 
     void stop() {
-        if (currentProcess != null)
+        if (currentProcess != null) {
             currentProcess.destroy();
+            currentProcess = null;
+        }
     }
 
     public boolean delete() {
@@ -211,8 +218,8 @@ public final class Aria2 {
             this.baseDir = baseDir;
             this.exec = exec;
             this.params = new HashMap<>(); // TODO: Load
-            params.put("--daemon", "true");
             params.put("--rpc-listen-all", "true");
+            params.put("--enable-color", "false");
             params.put("--enable-rpc", "true");
             params.put("--rpc-secret", "aria2");
             params.put("--rpc-listen-port", "6800");
@@ -239,7 +246,10 @@ public final class Aria2 {
         }
 
         boolean delete() {
-            return baseDir.delete();
+            boolean fine = true;
+            for (File file : baseDir.listFiles())
+                if (!file.delete()) fine = false;
+            return fine;
         }
     }
 
@@ -254,8 +264,11 @@ public final class Aria2 {
         @Override
         public void run() {
             try (Scanner scanner = new Scanner(stream)) {
-                while (!shouldStop && scanner.hasNextLine())
-                    handleStreamMessage(scanner.nextLine());
+
+                while (!shouldStop && scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    if (!line.isEmpty()) handleStreamMessage(line);
+                }
             }
         }
 
@@ -272,11 +285,12 @@ public final class Aria2 {
         public void run() {
             Process process = null;
             try {
-                process = Runtime.getRuntime().exec("top -d 1 | grep aria2c");
-
+                process = Runtime.getRuntime().exec("top -d 1");
                 try (Scanner scanner = new Scanner(process.getInputStream())) {
                     while (!shouldStop && scanner.hasNextLine()) {
-                        monitorGotLine(scanner.nextLine());
+                        String line = scanner.nextLine();
+                        if (line.endsWith("aria2c"))
+                            monitorGotLine(line);
                     }
                 }
             } catch (IOException ex) {

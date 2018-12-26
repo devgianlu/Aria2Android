@@ -87,4 +87,6 @@
     <string name="general">General</string>
     <string name="clearLogs">Clear logs</string>
     <string name="ui">UI</string>
+    <string name="logTerminated">Terminated with exit code %d.</string>
+    <string name="logStarted">Started: %s</string>
 </resources>

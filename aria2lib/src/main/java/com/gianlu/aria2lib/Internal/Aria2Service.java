@@ -13,12 +13,17 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.widget.RemoteViews;
 
 import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.aria2lib.R;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +42,9 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     private Messenger messenger;
     private LocalBroadcastManager broadcastManager;
     private Aria2 aria2;
+    private NotificationCompat.Builder defaultNotification;
+    private NotificationManager notificationManager;
+    private long startTime = System.currentTimeMillis();
 
     public static void startService(@NonNull Context context) {
         ContextCompat.startForegroundService(context, new Intent(context, Aria2Service.class)
@@ -48,15 +56,67 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
                 .setAction(ACTION_STOP_SERVICE));
     }
 
+    @NonNull
+    private static String timeFormatter(long sec) {
+        int day = (int) TimeUnit.SECONDS.toDays(sec);
+        long hours = TimeUnit.SECONDS.toHours(sec) - TimeUnit.DAYS.toHours(day);
+        long minute = TimeUnit.SECONDS.toMinutes(sec) - TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(sec));
+        long second = TimeUnit.SECONDS.toSeconds(sec) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(sec));
+
+        if (day > 0) {
+            if (day > 1000) {
+                return "∞";
+            } else {
+                return String.format(Locale.getDefault(), "%02d", day) + "d " + String.format(Locale.getDefault(), "%02d", hours) + "h " + String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
+            }
+        } else {
+            if (hours > 0) {
+                return String.format(Locale.getDefault(), "%02d", hours) + "h " + String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
+            } else {
+                if (minute > 0) {
+                    return String.format(Locale.getDefault(), "%02d", minute) + "m " + String.format(Locale.getDefault(), "%02d", second) + "s";
+                } else {
+                    if (second > 0) {
+                        return String.format(Locale.getDefault(), "%02d", second) + "s";
+                    } else {
+                        return "∞";
+                    }
+                }
+            }
+        }
+    }
+
+    @NonNull
+    private static String dimensionFormatter(float v) {
+        if (v <= 0) {
+            return "0 B";
+        } else {
+            final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+            int digitGroups = (int) (Math.log10(v) / Math.log10(1024));
+            if (digitGroups > 4) return "∞ B";
+            return new DecimalFormat("#,##0.#").format(v / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         if (messenger == null) {
             serviceThread.start();
             broadcastManager = LocalBroadcastManager.getInstance(this);
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             messenger = new Messenger(new LocalHandler(this));
             aria2 = Aria2.get();
             aria2.addListener(this);
+
+            defaultNotification = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                    .setContentTitle(SERVICE_NAME)
+                    .setShowWhen(false)
+                    .setAutoCancel(false)
+                    .setOngoing(true)
+                    .setSmallIcon(android.R.drawable.star_on) // FIXME
+                    //   .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setContentText("aria2c is currently running");
         }
 
         return messenger.getBinder();
@@ -74,8 +134,12 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
-                start();
-                return START_STICKY;
+                try {
+                    start();
+                    return START_STICKY;
+                } catch (IOException | BadEnvironmentException ex) {
+                    ex.printStackTrace(); // TODO
+                }
             } else if (Objects.equals(intent.getAction(), ACTION_STOP_SERVICE)) {
                 stop();
             }
@@ -90,37 +154,45 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         stopForeground(true);
     }
 
-    private void start() {
-        try {
-            aria2.start();
-        } catch (BadEnvironmentException | IOException ex) {
-            ex.printStackTrace(); // TODO
-        }
+    private void start() throws IOException, BadEnvironmentException {
+        aria2.start();
+        startTime = System.currentTimeMillis();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createChannel();
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                .setContentTitle(SERVICE_NAME)
-                .setShowWhen(false)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                //   .setSmallIcon(R.drawable.ic_notification)
-                //   .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
-                .setContentText("aria2c is currently running");
-
-        startForeground(NOTIFICATION_ID, builder.build());
+        startForeground(NOTIFICATION_ID, defaultNotification.build());
     }
 
     @Override
     public void onMessage(@NonNull com.gianlu.aria2lib.Internal.Message msg) {
         dispatch(msg);
+
+        switch (msg.type()) {
+            case MONITOR_UPDATE:
+                updateMonitor((MonitorUpdate) msg.object());
+                break;
+        }
+    }
+
+    private void updateMonitor(@Nullable MonitorUpdate update) {
+        if (update == null || notificationManager == null) return;
+
+        RemoteViews layout = new RemoteViews(getPackageName(), R.layout.custom_notification);
+        layout.setTextViewText(R.id.customNotification_runningTime, "Running time: " + timeFormatter((System.currentTimeMillis() - startTime) / 1000));
+        layout.setTextViewText(R.id.customNotification_pid, "PID: " + update.pid());
+        layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + update.cpu() + "%");
+        layout.setTextViewText(R.id.customNotification_memory, "Memory: " + dimensionFormatter(Integer.parseInt(update.rss()) * 1024));
+        defaultNotification.setCustomContentView(layout);
+
+        notificationManager.notify(NOTIFICATION_ID, defaultNotification.build());
+
+        update.recycle();
     }
 
     private void dispatch(@NonNull com.gianlu.aria2lib.Internal.Message msg) {
         Intent intent = new Intent(BROADCAST_MESSAGE);
-        intent.putExtra("type", msg.type);
-        intent.putExtra("i", msg.i);
-        if (msg.o instanceof Serializable) intent.putExtra("o", (Serializable) msg.o);
+        intent.putExtra("type", msg.type());
+        intent.putExtra("i", msg.integer());
+        if (msg.object() instanceof Serializable) intent.putExtra("o", (Serializable) msg.object());
         broadcastManager.sendBroadcast(intent);
     }
 

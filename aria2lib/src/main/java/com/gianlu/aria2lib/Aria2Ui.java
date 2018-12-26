@@ -58,7 +58,10 @@ public class Aria2Ui {
     }
 
     public void onDestroy() {
-        context.unbindService(serviceConnection);
+        try {
+            context.unbindService(serviceConnection);
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 
     public void loadEnv(@NonNull File env) throws BadEnvironmentException {

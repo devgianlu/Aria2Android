@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public final class Message {
     private static final Queue<Message> cache = new LinkedList<>();
@@ -13,9 +14,9 @@ public final class Message {
             cache.add(new Message());
     }
 
-    public Object o;
-    public int i;
-    public Type type;
+    private Object o;
+    private int i;
+    private Type type;
     private boolean recycled = false;
 
     private Message() {
@@ -45,6 +46,20 @@ public final class Message {
     @NonNull
     public static Message obtain(@NonNull Type type) {
         return obtain(type, 0, null);
+    }
+
+    @NonNull
+    public Type type() {
+        return type;
+    }
+
+    public int integer() {
+        return i;
+    }
+
+    @Nullable
+    public Object object() {
+        return o;
     }
 
     public void recycle() {

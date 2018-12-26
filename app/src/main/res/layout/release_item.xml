@@ -10,17 +10,19 @@
         android:id="@+id/releaseItem_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/primary_text_light" />
+        android:textColor="?android:textColorPrimary" />
 
     <com.gianlu.commonutils.SuperTextView
         android:id="@+id/releaseItem_publishedAt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="?android:textColorSecondary"
         android:textSize="12sp" />
 
     <com.gianlu.commonutils.SuperTextView
         android:id="@+id/releaseItem_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="?android:textColorSecondary"
         android:textSize="12sp" />
 </LinearLayout>

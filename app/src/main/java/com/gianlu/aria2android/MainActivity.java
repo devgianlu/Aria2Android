@@ -482,14 +482,15 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     public void onMessage(@NonNull Message.Type type, int i, @Nullable Serializable o) {
         switch (type) {
             case PROCESS_TERMINATED:
-                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, "TERMINATED! " + i));
+                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.logTerminated, i)));
                 updateUiStatus(false);
                 break;
             case PROCESS_STARTED:
-                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, "STARTED! " + o));
+                addLog(new Logging.LogLine(Logging.LogLine.Type.INFO, getString(R.string.logStarted, o)));
                 updateUiStatus(true);
                 break;
             case MONITOR_FAILED:
+                Logging.log("Monitor failed!", (Throwable) o);
                 break;
             case MONITOR_UPDATE:
                 break;
