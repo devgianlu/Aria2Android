@@ -261,8 +261,11 @@ public final class Aria2 {
             this.session = session;
             this.params = new HashMap<>();
 
-            params.put("--save-session-interval", "30"); // Can be overridden
+            if (Prefs.getBoolean(Aria2PK.SAVE_SESSION))
+                params.put("--save-session-interval", "30"); // Can be overridden
+
             loadCustomOptions(params);
+
             params.put("--daemon", "false");
             params.put("--enable-color", "false");
             params.put("--rpc-listen-all", "true");
@@ -270,8 +273,11 @@ public final class Aria2 {
             params.put("--rpc-secret", Prefs.getString(Aria2PK.RPC_TOKEN));
             params.put("--rpc-listen-port", String.valueOf(Prefs.getInt(Aria2PK.RPC_PORT, 6800)));
             params.put("--dir", Prefs.getString(Aria2PK.OUTPUT_DIRECTORY));
-            params.put("--input-file", session.getAbsolutePath());
-            params.put("--save-session", session.getAbsolutePath());
+
+            if (Prefs.getBoolean(Aria2PK.SAVE_SESSION)) {
+                params.put("--input-file", session.getAbsolutePath());
+                params.put("--save-session", session.getAbsolutePath());
+            }
 
             if (Prefs.getBoolean(Aria2PK.RPC_ALLOW_ORIGIN_ALL))
                 params.put("--rpc-allow-origin-all", "true");
