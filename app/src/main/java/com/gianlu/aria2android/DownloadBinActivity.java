@@ -17,6 +17,7 @@ import com.gianlu.aria2lib.GitHubApi;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
+import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
@@ -142,6 +143,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void onException(@NonNull Exception ex) {
+        Logging.log(ex);
         loading.setVisibility(View.GONE);
         list.setVisibility(View.GONE);
         message.setError(R.string.failedRetrievingReleases_reason, ex.getMessage());
@@ -171,7 +173,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void failedDownload(@NonNull Exception ex) {
-        ex.printStackTrace(); // TODO
+        onException(ex);
     }
 
     @Override
@@ -187,6 +189,6 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void failedExtract(@NonNull Exception ex) {
-        ex.printStackTrace(); // TODO
+        onException(ex);
     }
 }
