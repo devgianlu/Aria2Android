@@ -77,9 +77,9 @@ public class Aria2Ui {
     }
 
     public void loadEnv() throws BadEnvironmentException {
-        String path = Prefs.getString(Aria2PK.ENV_LOCATION, null);
-        if (path == null) throw new BadEnvironmentException("Environment path not set!");
-        aria2.loadEnv(new File(path));
+        String envPath = Prefs.getString(Aria2PK.ENV_LOCATION, null);
+        if (envPath == null) throw new BadEnvironmentException("Environment path not set!");
+        aria2.loadEnv(new File(envPath), new File(context.getFilesDir(), "session"));
     }
 
     @NonNull

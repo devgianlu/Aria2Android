@@ -89,7 +89,7 @@ public final class Aria2 {
         return new ProcessBuilder(cmdline).redirectErrorStream(redirect).start();
     }
 
-    public void loadEnv(@NonNull File env) throws BadEnvironmentException {
+    public void loadEnv(@NonNull File env, @NonNull File session) throws BadEnvironmentException {
         if (!env.isDirectory())
             throw new BadEnvironmentException(env.getAbsolutePath() + " is not a directory!");
 
@@ -100,7 +100,19 @@ public final class Aria2 {
         if (!exec.canExecute() && !exec.setExecutable(true))
             throw new BadEnvironmentException(exec.getAbsolutePath() + " can't be executed!");
 
-        this.env = new Env(env, exec);
+        if (session.exists()) {
+            if (!session.canRead() && !session.setReadable(true))
+                throw new BadEnvironmentException(session.getAbsolutePath() + " can't be read!");
+        } else {
+            try {
+                if (!session.createNewFile())
+                    throw new BadEnvironmentException(session.getAbsolutePath() + " can't be created!");
+            } catch (IOException ex) {
+                throw new BadEnvironmentException(ex);
+            }
+        }
+
+        this.env = new Env(env, exec, session);
     }
 
     void start() throws BadEnvironmentException, IOException {
@@ -127,7 +139,7 @@ public final class Aria2 {
         if (env == null)
             throw new BadEnvironmentException("Missing environment!");
 
-        loadEnv(env.baseDir);
+        loadEnv(env.baseDir, env.session);
     }
 
     private void processTerminated(int code) {
@@ -224,12 +236,16 @@ public final class Aria2 {
     private static class Env {
         private final File baseDir;
         private final File exec;
+        private final File session;
         private final Map<String, String> params;
 
-        Env(@NonNull File baseDir, @NonNull File exec) {
+        Env(@NonNull File baseDir, @NonNull File exec, @NonNull File session) {
             this.baseDir = baseDir;
             this.exec = exec;
+            this.session = session;
             this.params = new HashMap<>();
+
+            params.put("--save-session-interval", "30"); // Can be overridden
             loadCustomOptions(params);
             params.put("--daemon", "false");
             params.put("--enable-color", "false");
@@ -238,11 +254,11 @@ public final class Aria2 {
             params.put("--rpc-secret", Prefs.getString(Aria2PK.RPC_TOKEN));
             params.put("--rpc-listen-port", String.valueOf(Prefs.getInt(Aria2PK.RPC_PORT, 6800)));
             params.put("--dir", Prefs.getString(Aria2PK.OUTPUT_DIRECTORY));
+            params.put("--input-file", session.getAbsolutePath());
+            params.put("--save-session", session.getAbsolutePath());
 
             if (Prefs.getBoolean(Aria2PK.RPC_ALLOW_ORIGIN_ALL))
                 params.put("--rpc-allow-origin-all", "true");
-
-            // TODO: Save session
         }
 
         private static void loadCustomOptions(@NonNull Map<String, String> options) {

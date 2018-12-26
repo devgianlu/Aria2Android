@@ -459,6 +459,8 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     private void addLog(@NonNull Logging.LogLine line) {
+        Logging.log(line);
+
         if (logsContainer != null) {
             logsContainer.setVisibility(View.VISIBLE);
             logsMessage.setVisibility(View.GONE);
