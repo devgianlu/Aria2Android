@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.NameValuePair;
+import com.gianlu.commonutils.Preferences.Json.JsonStoring;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
@@ -19,7 +20,6 @@ import com.gianlu.commonutils.SuppressingLinearLayoutManager;
 import com.gianlu.commonutils.Toaster;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -91,12 +91,12 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
     }
 
     private void load() throws JSONException {
-        adapter.load(Prefs.getJSONObject(PK.CUSTOM_OPTIONS, new JSONObject()));
+        adapter.load(JsonStoring.intoPrefs().getJsonObject(PK.CUSTOM_OPTIONS));
     }
 
     private void save() {
         try {
-            Prefs.putJSONObject(PK.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()));
+            JsonStoring.intoPrefs().putJsonObject(PK.CUSTOM_OPTIONS, NameValuePair.toJson(adapter.get()));
             adapter.saved();
         } catch (JSONException ex) {
             Toaster.with(this).message(R.string.failedSavingCustomOptions).ex(ex).show();

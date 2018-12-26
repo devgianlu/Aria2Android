@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -109,13 +110,15 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         return options;
     }
 
-    public void load(@NonNull JSONObject obj) {
+    public void load(@Nullable JSONObject obj) {
         options.clear();
 
-        Iterator<String> iterator = obj.keys();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            options.add(new NameValuePair(key, obj.optString(key, null)));
+        if (obj != null) {
+            Iterator<String> iterator = obj.keys();
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                options.add(new NameValuePair(key, obj.optString(key, null)));
+            }
         }
 
         notifyDataSetChanged();
