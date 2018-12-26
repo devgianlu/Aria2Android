@@ -1,9 +1,11 @@
 package com.gianlu.aria2lib.Internal;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -44,9 +47,13 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     private NotificationCompat.Builder defaultNotification;
     private NotificationManager notificationManager;
     private long startTime = System.currentTimeMillis();
+    private int mLauncherIcon;
 
-    public static void startService(@NonNull Context context) {
+    public static void startService(@NonNull Context context, @DrawableRes int launcher, @DrawableRes int notification, @NonNull Class<? extends Activity> actionClass) {
         ContextCompat.startForegroundService(context, new Intent(context, Aria2Service.class)
+                .putExtra("notification", notification)
+                .putExtra("launcher", launcher)
+                .putExtra("actionClass", actionClass)
                 .setAction(ACTION_START_SERVICE));
     }
 
@@ -65,15 +72,6 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
             messenger = new Messenger(new LocalHandler(this));
             aria2 = Aria2.get();
             aria2.addListener(this);
-
-            defaultNotification = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                    .setContentTitle(SERVICE_NAME)
-                    .setShowWhen(false)
-                    .setAutoCancel(false)
-                    .setOngoing(true)
-                    .setSmallIcon(android.R.drawable.star_on) // FIXME
-                    //   .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setContentText("aria2c is currently running");
         }
 
         return messenger.getBinder();
@@ -92,6 +90,16 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         if (intent != null) {
             if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
                 try {
+                    mLauncherIcon = intent.getIntExtra("launcher", 0);
+                    defaultNotification = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                            .setContentTitle(SERVICE_NAME)
+                            .setShowWhen(false)
+                            .setAutoCancel(false)
+                            .setOngoing(true)
+                            .setSmallIcon(intent.getIntExtra("notification", 0))
+                            .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, (Class<?>) intent.getSerializableExtra("actionClass")), PendingIntent.FLAG_UPDATE_CURRENT))
+                            .setContentText("aria2c is currently running");
+
                     start();
                     return START_STICKY;
                 } catch (IOException | BadEnvironmentException ex) {
@@ -138,6 +146,7 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + update.pid());
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + update.cpu() + "%");
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(update.rss()) * 1024, false));
+        layout.setImageViewResource(R.id.customNotification_icon, mLauncherIcon);
         defaultNotification.setCustomContentView(layout);
 
         notificationManager.notify(NOTIFICATION_ID, defaultNotification.build());

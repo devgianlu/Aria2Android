@@ -98,7 +98,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        aria2 = new Aria2Ui(this, this);
+        aria2 = Utils.createAria2(this, this);
 
         try {
             Aria2Compat.loadEnv(aria2);

@@ -1,5 +1,6 @@
 package com.gianlu.aria2lib;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -41,12 +43,21 @@ public class Aria2Ui {
             if (receiver != null) broadcastManager.unregisterReceiver(receiver);
         }
     };
+    private int launcherIcon;
+    private int notificationIcon;
+    private Class<? extends Activity> actionClass;
 
     public Aria2Ui(@NonNull Context context, @Nullable Listener listener) {
         this.context = context;
         this.listener = listener;
         this.aria2 = Aria2.get();
         this.broadcastManager = LocalBroadcastManager.getInstance(context);
+    }
+
+    public void setup(@DrawableRes int launcherIcon, @DrawableRes int notificationIcon, @NonNull Class<? extends Activity> actionClass) {
+        this.launcherIcon = launcherIcon;
+        this.notificationIcon = notificationIcon;
+        this.actionClass = actionClass;
     }
 
     private void bind() {
@@ -75,7 +86,7 @@ public class Aria2Ui {
 
     public void startService() {
         bind();
-        Aria2Service.startService(context);
+        Aria2Service.startService(context, launcherIcon, notificationIcon, actionClass);
     }
 
     public void stopService() {

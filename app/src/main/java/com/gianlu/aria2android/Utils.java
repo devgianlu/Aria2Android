@@ -1,5 +1,8 @@
 package com.gianlu.aria2android;
 
+import android.content.Context;
+
+import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.commonutils.NameValuePair;
 
 import org.json.JSONObject;
@@ -9,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class Utils {
@@ -19,6 +23,13 @@ public final class Utils {
     public static final String EVENT_UNKNOWN_LOG_LINE = "read_unknown_log_line";
     public static final String LABEL_LOG_LINE = "log_line";
     public static final String ACTION_IMPORT_BIN = "imported_bin";
+
+    @NonNull
+    public static Aria2Ui createAria2(@NonNull Context context, @Nullable Aria2Ui.Listener listener) {
+        Aria2Ui ui = new Aria2Ui(context, listener);
+        ui.setup(R.mipmap.ic_launcher, R.drawable.ic_notification, MainActivity.class);
+        return ui;
+    }
 
     public static String optionsBuilder(@Nullable Map<String, String> options) {
         if (options == null || options.isEmpty()) return "";

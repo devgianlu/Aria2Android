@@ -7,12 +7,12 @@
     android:paddingEnd="8dp">
 
     <ImageView
+        android:id="@+id/customNotification_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="8dp"
-        android:scaleType="fitCenter"
-        android:src="@mipmap/ic_launcher" />
+        android:scaleType="fitCenter" />
 
     <LinearLayout
         android:layout_width="match_parent"
