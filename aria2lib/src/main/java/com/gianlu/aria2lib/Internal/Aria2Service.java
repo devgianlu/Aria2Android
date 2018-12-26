@@ -77,6 +77,12 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         return messenger.getBinder();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (aria2 != null) aria2.removeListener(this);
+    }
+
     @TargetApi(Build.VERSION_CODES.O)
     private void createChannel() {
         NotificationChannel chan = new NotificationChannel(CHANNEL_ID, SERVICE_NAME, NotificationManager.IMPORTANCE_DEFAULT);

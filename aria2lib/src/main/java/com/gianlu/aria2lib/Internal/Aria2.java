@@ -1,7 +1,13 @@
 package com.gianlu.aria2lib.Internal;
 
+import com.gianlu.aria2lib.Aria2PK;
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.Preferences.Json.JsonStoring;
+import com.gianlu.commonutils.Preferences.Prefs;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -11,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -107,9 +114,11 @@ public final class Aria2 {
 
         currentProcess = execWithParams(true, params);
         new Thread(new Waiter(currentProcess), "aria2android-waiterThread").start();
-        new Thread(this.monitor = new Monitor(), "aria2android-monitorThread").start();
         new Thread(this.inputWatcher = new StreamWatcher(currentProcess.getInputStream()), "aria2-android-inputWatcherThread").start();
         new Thread(this.errorWatcher = new StreamWatcher(currentProcess.getErrorStream()), "aria2-android-errorWatcherThread").start();
+
+        if (Prefs.getBoolean(Aria2PK.SHOW_PERFORMANCE))
+            new Thread(this.monitor = new Monitor(), "aria2android-monitorThread").start();
 
         postMessage(Message.obtain(Message.Type.PROCESS_STARTED, startCommandForLog(execPath, params)));
     }
@@ -220,12 +229,35 @@ public final class Aria2 {
         Env(@NonNull File baseDir, @NonNull File exec) {
             this.baseDir = baseDir;
             this.exec = exec;
-            this.params = new HashMap<>(); // TODO: Load
-            params.put("--rpc-listen-all", "true");
+            this.params = new HashMap<>();
+            loadCustomOptions(params);
+            params.put("--daemon", "false");
             params.put("--enable-color", "false");
+            params.put("--rpc-listen-all", "true");
             params.put("--enable-rpc", "true");
-            params.put("--rpc-secret", "aria2");
-            params.put("--rpc-listen-port", "6800");
+            params.put("--rpc-secret", Prefs.getString(Aria2PK.RPC_TOKEN));
+            params.put("--rpc-listen-port", String.valueOf(Prefs.getInt(Aria2PK.RPC_PORT, 6800)));
+            params.put("--dir", Prefs.getString(Aria2PK.OUTPUT_DIRECTORY));
+
+            if (Prefs.getBoolean(Aria2PK.RPC_ALLOW_ORIGIN_ALL))
+                params.put("--rpc-allow-origin-all", "true");
+
+            // TODO: Save session
+        }
+
+        private static void loadCustomOptions(@NonNull Map<String, String> options) {
+            try {
+                JSONObject obj = JsonStoring.intoPrefs().getJsonObject(Aria2PK.CUSTOM_OPTIONS);
+                if (obj == null) return;
+
+                Iterator<String> iterator = obj.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    options.put("--" + key, obj.getString(key));
+                }
+            } catch (JSONException ex) {
+                Logging.log(ex);
+            }
         }
 
         @NonNull
@@ -288,7 +320,7 @@ public final class Aria2 {
         public void run() {
             Process process = null;
             try {
-                process = Runtime.getRuntime().exec("top -d 1");
+                process = Runtime.getRuntime().exec("top -d " + String.valueOf(Prefs.getInt(Aria2PK.NOTIFICATION_UPDATE_DELAY, 1)));
                 try (Scanner scanner = new Scanner(process.getInputStream())) {
                     while (!shouldStop && scanner.hasNextLine()) {
                         String line = scanner.nextLine();

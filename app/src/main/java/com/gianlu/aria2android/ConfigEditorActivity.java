@@ -13,7 +13,6 @@ import android.widget.LinearLayout;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.NameValuePair;
 import com.gianlu.commonutils.Preferences.Json.JsonStoring;
-import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.SuperTextView;
 import com.gianlu.commonutils.SuppressingLinearLayoutManager;
@@ -69,11 +68,6 @@ public class ConfigEditorActivity extends ActivityWithDialog implements OptionsA
             }
 
             save();
-
-            // noinspection deprecation
-            Prefs.remove(PK.DEPRECATED_USE_CONFIG);
-            // noinspection deprecation
-            Prefs.remove(PK.DEPRECATED_CONFIG_FILE);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.updatedApp_importedConfig)

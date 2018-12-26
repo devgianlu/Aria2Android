@@ -101,7 +101,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         aria2 = Utils.createAria2(this, this);
 
         try {
-            Aria2Compat.loadEnv(aria2);
+            aria2.loadEnv();
         } catch (BadEnvironmentException ex) {
             Logging.log(ex);
             startActivity(new Intent(this, DownloadBinActivity.class)
@@ -293,8 +293,6 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             version.setText(R.string.unknown);
             Logging.log(ex);
         }
-
-        backwardCompatibility();
     }
 
     private boolean toggleService(boolean on) {
@@ -316,17 +314,6 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         toggleServer.setOnCheckedChangeListener(null);
         toggleServer.setChecked(on);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
-    }
-
-    @SuppressWarnings("deprecation")
-    private void backwardCompatibility() {
-        if (Prefs.getBoolean(PK.DEPRECATED_USE_CONFIG, false)) {
-            File file = new File(Prefs.getString(PK.DEPRECATED_CONFIG_FILE, ""));
-            if (file.exists() && file.isFile() && file.canRead()) {
-                startActivity(new Intent(this, ConfigEditorActivity.class)
-                        .putExtra("import", file.getAbsolutePath()));
-            }
-        }
     }
 
     private boolean startService() {

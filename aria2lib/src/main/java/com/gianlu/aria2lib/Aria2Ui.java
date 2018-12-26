@@ -13,6 +13,7 @@ import android.os.Messenger;
 import com.gianlu.aria2lib.Internal.Aria2;
 import com.gianlu.aria2lib.Internal.Aria2Service;
 import com.gianlu.aria2lib.Internal.Message;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,8 +76,10 @@ public class Aria2Ui {
         }
     }
 
-    public void loadEnv(@NonNull File env) throws BadEnvironmentException {
-        aria2.loadEnv(env);
+    public void loadEnv() throws BadEnvironmentException {
+        String path = Prefs.getString(Aria2PK.ENV_LOCATION, null);
+        if (path == null) throw new BadEnvironmentException("Environment path not set!");
+        aria2.loadEnv(new File(path));
     }
 
     @NonNull
