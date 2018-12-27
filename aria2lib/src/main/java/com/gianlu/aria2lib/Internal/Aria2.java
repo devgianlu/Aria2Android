@@ -116,10 +116,10 @@ public final class Aria2 {
         this.env = new Env(env, exec, session);
     }
 
-    void start() throws BadEnvironmentException, IOException {
+    boolean start() throws BadEnvironmentException, IOException {
         if (currentProcess != null) {
             postMessage(Message.obtain(Message.Type.PROCESS_STARTED, "[already started]"));
-            return;
+            return false;
         }
 
         if (env == null)
@@ -139,6 +139,7 @@ public final class Aria2 {
             new Thread(this.monitor = new Monitor(), "aria2android-monitorThread").start();
 
         postMessage(Message.obtain(Message.Type.PROCESS_STARTED, startCommandForLog(execPath, params)));
+        return true;
     }
 
     private void reloadEnv() throws BadEnvironmentException {

@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
 
+import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
@@ -17,6 +18,8 @@ public class ThisApplication extends AnalyticsApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Aria2Ui.provider(Aria2BareConfig.class);
 
         if (Prefs.getBoolean(PK.IS_NEW_V2, true)) {
             File oldExec = new File(getFilesDir(), "aria2c");

@@ -1,7 +1,6 @@
 package com.gianlu.aria2lib.Internal;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,16 +16,18 @@ import android.os.Message;
 import android.os.Messenger;
 import android.widget.RemoteViews;
 
+import com.gianlu.aria2lib.Aria2PK;
 import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.aria2lib.BareConfigProvider;
 import com.gianlu.aria2lib.R;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Logging;
+import com.gianlu.commonutils.Preferences.Prefs;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -49,13 +50,10 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     private NotificationCompat.Builder defaultNotification;
     private NotificationManager notificationManager;
     private long startTime = System.currentTimeMillis();
-    private int mLauncherIcon;
+    private BareConfigProvider provider;
 
-    public static void startService(@NonNull Context context, @DrawableRes int launcher, @DrawableRes int notification, @NonNull Class<? extends Activity> actionClass) {
+    public static void startService(@NonNull Context context) {
         ContextCompat.startForegroundService(context, new Intent(context, Aria2Service.class)
-                .putExtra("notification", notification)
-                .putExtra("launcher", launcher)
-                .putExtra("actionClass", actionClass)
                 .setAction(ACTION_START_SERVICE));
     }
 
@@ -64,17 +62,45 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
                 .setAction(ACTION_STOP_SERVICE));
     }
 
+    @NonNull
+    private static BareConfigProvider loadProvider() {
+        String classStr = Prefs.getString(Aria2PK.BARE_CONFIG_PROVIDER, null);
+        if (classStr == null) throw new IllegalStateException("Provider not initialized!");
+
+        try {
+            Class<?> clazz = Class.forName(classStr);
+            return (BareConfigProvider) clazz.newInstance();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
+            throw new RuntimeException("Failed initializing provider!", ex);
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        aria2 = Aria2.get();
+        aria2.addListener(this);
+        serviceThread.start();
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        provider = loadProvider();
+
+        defaultNotification = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                .setContentTitle(SERVICE_NAME)
+                .setShowWhen(false)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setSmallIcon(provider.notificationIcon())
+                .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, provider.actionClass()), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentText("aria2c is running...");
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        if (messenger == null) {
-            serviceThread.start();
-            broadcastManager = LocalBroadcastManager.getInstance(this);
-            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (messenger == null)
             messenger = new Messenger(new LocalHandler(this));
-            aria2 = Aria2.get();
-            aria2.addListener(this);
-        }
 
         return messenger.getBinder();
     }
@@ -98,18 +124,8 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         if (intent != null) {
             if (Objects.equals(intent.getAction(), ACTION_START_SERVICE)) {
                 try {
-                    mLauncherIcon = intent.getIntExtra("launcher", 0);
-                    defaultNotification = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                            .setContentTitle(SERVICE_NAME)
-                            .setShowWhen(false)
-                            .setAutoCancel(false)
-                            .setOngoing(true)
-                            .setSmallIcon(intent.getIntExtra("notification", 0))
-                            .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, (Class<?>) intent.getSerializableExtra("actionClass")), PendingIntent.FLAG_UPDATE_CURRENT))
-                            .setContentText("aria2c is currently running");
-
                     start();
-                    return START_STICKY;
+                    return flags == 1 ? START_STICKY : START_REDELIVER_INTENT;
                 } catch (IOException | BadEnvironmentException ex) {
                     Logging.log(ex);
                 }
@@ -128,8 +144,8 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
     }
 
     private void start() throws IOException, BadEnvironmentException {
-        aria2.start();
-        startTime = System.currentTimeMillis();
+        if (aria2.start())
+            startTime = System.currentTimeMillis();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createChannel();
         startForeground(NOTIFICATION_ID, defaultNotification.build());
@@ -154,7 +170,7 @@ public final class Aria2Service extends Service implements Aria2.MessageListener
         layout.setTextViewText(R.id.customNotification_pid, "PID: " + update.pid());
         layout.setTextViewText(R.id.customNotification_cpu, "CPU: " + update.cpu() + "%");
         layout.setTextViewText(R.id.customNotification_memory, "Memory: " + CommonUtils.dimensionFormatter(Integer.parseInt(update.rss()) * 1024, false));
-        layout.setImageViewResource(R.id.customNotification_icon, mLauncherIcon);
+        layout.setImageViewResource(R.id.customNotification_icon, provider.launcherIcon());
         defaultNotification.setCustomContentView(layout);
 
         notificationManager.notify(NOTIFICATION_ID, defaultNotification.build());

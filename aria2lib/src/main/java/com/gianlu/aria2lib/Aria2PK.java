@@ -15,4 +15,5 @@ public class Aria2PK extends CommonPK {
     public static final Prefs.KeyWithDefault<String> OUTPUT_DIRECTORY = new Prefs.KeyWithDefault<>("outputPath", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
     public static final Prefs.Key CUSTOM_OPTIONS = new Prefs.Key("customOptions");
     public static final Prefs.KeyWithDefault<Boolean> SAVE_SESSION = new Prefs.KeyWithDefault<>("saveSession", true);
+    public static final Prefs.Key BARE_CONFIG_PROVIDER = new Prefs.Key("bareConfigProvider");
 }

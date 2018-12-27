@@ -1,6 +1,5 @@
 package com.gianlu.aria2lib;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -38,7 +36,11 @@ public class Aria2Ui {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             messenger = new Messenger(service);
-            broadcastManager.registerReceiver(receiver = new ServiceBroadcastReceiver(), new IntentFilter(Aria2Service.BROADCAST_MESSAGE));
+
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Aria2Service.BROADCAST_MESSAGE);
+            filter.addAction(Aria2Service.BROADCAST_STATUS);
+            broadcastManager.registerReceiver(receiver = new ServiceBroadcastReceiver(), filter);
 
             askForStatus();
         }
@@ -49,9 +51,6 @@ public class Aria2Ui {
             if (receiver != null) broadcastManager.unregisterReceiver(receiver);
         }
     };
-    private int launcherIcon;
-    private int notificationIcon;
-    private Class<? extends Activity> actionClass;
 
     public Aria2Ui(@NonNull Context context, @Nullable Listener listener) {
         this.context = context;
@@ -60,10 +59,8 @@ public class Aria2Ui {
         this.broadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
-    public void setup(@DrawableRes int launcherIcon, @DrawableRes int notificationIcon, @NonNull Class<? extends Activity> actionClass) {
-        this.launcherIcon = launcherIcon;
-        this.notificationIcon = notificationIcon;
-        this.actionClass = actionClass;
+    public static void provider(@NonNull Class<? extends BareConfigProvider> providerClass) {
+        Prefs.putString(Aria2PK.BARE_CONFIG_PROVIDER, providerClass.getCanonicalName());
     }
 
     private void bind() {
@@ -107,7 +104,7 @@ public class Aria2Ui {
 
     public void startService() {
         bind();
-        Aria2Service.startService(context, launcherIcon, notificationIcon, actionClass);
+        Aria2Service.startService(context);
     }
 
     public void stopService() {

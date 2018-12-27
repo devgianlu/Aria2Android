@@ -453,7 +453,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                 finish();
                             } else {
-                                Toaster.with(MainActivity.this).message(R.string.cannotDeleteBin).error(true).show();
+                                Toaster.with(this).message(R.string.cannotDeleteBin).error(true).show();
                             }
                         }).setNegativeButton(android.R.string.no, null);
 

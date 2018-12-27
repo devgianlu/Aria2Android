@@ -20,9 +20,7 @@ public final class Utils {
 
     @NonNull
     public static Aria2Ui createAria2(@NonNull Context context, @Nullable Aria2Ui.Listener listener) {
-        Aria2Ui ui = new Aria2Ui(context, listener);
-        ui.setup(R.mipmap.ic_launcher, R.drawable.ic_notification, MainActivity.class);
-        return ui;
+        return new Aria2Ui(context, listener); // Useless I'd say
     }
 
     public static List<NameValuePair> parseOptions(@NonNull String str) {
