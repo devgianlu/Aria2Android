@@ -86,4 +86,6 @@
     <string name="general">通用</string>
     <string name="clearLogs">清除日志</string>
     <string name="ui">UI</string>
+    <string name="logTerminated">以退出代码终止 %d.</string>
+    <string name="logStarted">开始: %s</string>
 </resources>
