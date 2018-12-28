@@ -6,7 +6,3 @@
 	path = MaterialPreferences
 	url = http://github.com/devgianlu/MaterialPreferences
 	branch = master
-[submodule "aria2lib"]
-    path = aria2lib
-    url = http://github.com/devgianlu/aria2lib
-    branch = master
