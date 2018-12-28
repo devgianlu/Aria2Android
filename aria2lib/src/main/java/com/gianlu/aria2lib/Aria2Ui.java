@@ -107,6 +107,10 @@ public class Aria2Ui {
         Aria2Service.startService(context);
     }
 
+    public void startServiceFromReceiver() {
+        Aria2Service.startService(context);
+    }
+
     public void stopService() {
         Aria2Service.stopService(context);
     }

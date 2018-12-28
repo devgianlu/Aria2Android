@@ -13,6 +13,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             return;
 
         if (Prefs.getBoolean(PK.START_AT_BOOT))
-            Utils.createAria2(context, null).startService();
+            Utils.createAria2(context, null).startServiceFromReceiver();
     }
 }
