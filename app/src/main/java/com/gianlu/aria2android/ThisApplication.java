@@ -1,6 +1,7 @@
 package com.gianlu.aria2android;
 
 
+import com.gianlu.aria2lib.Aria2PK;
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.Logging;
@@ -33,6 +34,7 @@ public class ThisApplication extends AnalyticsApplication {
                 }
             }
 
+            Prefs.putString(Aria2PK.ENV_LOCATION, new File(getFilesDir(), "env").getAbsolutePath());
             Prefs.putBoolean(PK.IS_NEW_V2, false);
         }
     }
