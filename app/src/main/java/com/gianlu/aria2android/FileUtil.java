@@ -11,35 +11,31 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class FileUtil {
     private static final String PRIMARY_VOLUME_NAME = "primary";
 
     @Nullable
-    public static String getFullPathFromTreeUri(@Nullable final Uri treeUri, Context con) {
-        if (treeUri == null) {
+    public static String getFullPathFromTreeUri(@Nullable Uri treeUri, @NonNull Context con) {
+        if (treeUri == null)
             return null;
-        }
+
         String volumePath = FileUtil.getVolumePath(FileUtil.getVolumeIdFromTreeUri(treeUri), con);
-        if (volumePath == null) {
+        if (volumePath == null)
             return File.separator;
-        }
-        if (volumePath.endsWith(File.separator)) {
+
+        if (volumePath.endsWith(File.separator))
             volumePath = volumePath.substring(0, volumePath.length() - 1);
-        }
 
         String documentPath = FileUtil.getDocumentPathFromTreeUri(treeUri);
-        if (documentPath.endsWith(File.separator)) {
+        if (documentPath != null && documentPath.endsWith(File.separator))
             documentPath = documentPath.substring(0, documentPath.length() - 1);
-        }
 
-        if (documentPath.length() > 0) {
-            if (documentPath.startsWith(File.separator)) {
-                return volumePath + documentPath;
-            } else {
-                return volumePath + File.separator + documentPath;
-            }
+        if (documentPath != null && documentPath.length() > 0) {
+            if (documentPath.startsWith(File.separator)) return volumePath + documentPath;
+            else return volumePath + File.separator + documentPath;
         } else {
             return volumePath;
         }
@@ -47,7 +43,7 @@ public final class FileUtil {
 
     @Nullable
     @SuppressWarnings({"ConstantConditions", "JavaReflectionMemberAccess"})
-    private static String getVolumePath(final String volumeId, Context con) {
+    private static String getVolumePath(@NonNull String volumeId, @NonNull Context con) {
         try {
             StorageManager mStorageManager = (StorageManager) con.getSystemService(Context.STORAGE_SERVICE);
             Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
@@ -65,15 +61,13 @@ public final class FileUtil {
                 Boolean primary = (Boolean) isPrimary.invoke(storageVolumeElement);
 
                 // primary volume?
-                if (primary && PRIMARY_VOLUME_NAME.equals(volumeId)) {
+                if (primary && PRIMARY_VOLUME_NAME.equals(volumeId))
                     return (String) getPath.invoke(storageVolumeElement);
-                }
 
                 // other volumes?
                 if (uuid != null) {
-                    if (uuid.equals(volumeId)) {
+                    if (uuid.equals(volumeId))
                         return (String) getPath.invoke(storageVolumeElement);
-                    }
                 }
             }
 
@@ -84,16 +78,18 @@ public final class FileUtil {
         }
     }
 
+    @Nullable
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static String getVolumeIdFromTreeUri(final Uri treeUri) {
+    private static String getVolumeIdFromTreeUri(@NonNull Uri treeUri) {
         final String docId = DocumentsContract.getTreeDocumentId(treeUri);
         final String[] split = docId.split(":");
         if (split.length > 0) return split[0];
         else return null;
     }
 
+    @Nullable
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static String getDocumentPathFromTreeUri(final Uri treeUri) {
+    private static String getDocumentPathFromTreeUri(@NonNull Uri treeUri) {
         final String docId = DocumentsContract.getTreeDocumentId(treeUri);
         final String[] split = docId.split(":");
         if ((split.length >= 2) && (split[1] != null)) return split[1];

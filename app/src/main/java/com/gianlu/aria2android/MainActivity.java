@@ -170,10 +170,11 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         outputPath.setOverrideClickListener(v -> {
             try {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(intent, STORAGE_ACCESS_CODE);
                 return true;
             } catch (ActivityNotFoundException ex) {
-                Toaster.with(MainActivity.this).message(R.string.noOpenTree).ex(ex).show();
+                Toaster.with(this).message(R.string.noOpenTree).ex(ex).show();
                 return false;
             }
         });
@@ -301,13 +302,12 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         }
     }
 
-    private boolean toggleService(boolean on) {
+    private void toggleService(boolean on) {
         boolean successful;
         if (on) successful = startService();
         else successful = stopService();
 
         if (successful) updateUiStatus(on);
-        return successful;
     }
 
     private void updateUiStatus(boolean on) {
