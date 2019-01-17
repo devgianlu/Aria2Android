@@ -49,6 +49,7 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
+    private static final int MAX_LOG_LINES = 100;
     private volatile boolean isRunning;
     private ToggleButton toggleServer;
     private MaterialEditTextPreference outputPath;
@@ -471,6 +472,8 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             logsContainer.setVisibility(View.VISIBLE);
             logsMessage.setVisibility(View.GONE);
             logsContainer.addView(Logging.LogLineAdapter.createLogLineView(getLayoutInflater(), logsContainer, line), logsContainer.getChildCount());
+            if (logsContainer.getChildCount() > MAX_LOG_LINES)
+                logsContainer.removeViewAt(0);
         }
     }
 

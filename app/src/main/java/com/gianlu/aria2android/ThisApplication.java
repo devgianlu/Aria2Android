@@ -20,6 +20,8 @@ public class ThisApplication extends AnalyticsApplication {
     public void onCreate() {
         super.onCreate();
 
+        Logging.clearLogs(this, 1);
+
         Aria2Ui.provider(Aria2BareConfig.class);
 
         if (Prefs.getBoolean(PK.IS_NEW_V2, true)) {
