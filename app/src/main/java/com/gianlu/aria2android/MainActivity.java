@@ -87,36 +87,24 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     @Override
     protected void onStart() {
         super.onStart();
-        aria2.onStart();
+        if (aria2 != null) aria2.onStart();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        aria2.onDestroy();
+        if (aria2 != null) aria2.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        aria2.onResume();
+        if (aria2 != null) aria2.onResume();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        aria2 = Utils.createAria2(this, this);
-
-        try {
-            aria2.loadEnv();
-        } catch (BadEnvironmentException ex) {
-            Logging.log(ex);
-            startActivity(new Intent(this, DownloadBinActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
-            finish();
-            return;
-        }
-
         if (!isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.archNotSupported)
@@ -128,6 +116,17 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))).setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
 
             showDialog(builder);
+            return;
+        }
+
+        try {
+            aria2 = Utils.createAria2(this, this);
+            aria2.loadEnv();
+        } catch (BadEnvironmentException ex) {
+            Logging.log(ex);
+            startActivity(new Intent(this, DownloadBinActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
             return;
         }
 
