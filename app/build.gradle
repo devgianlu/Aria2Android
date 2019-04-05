@@ -8,8 +8,8 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 48
-        versionName "2.0.6"
+        versionCode 49
+        versionName "2.0.7"
     }
 
     buildTypes {
