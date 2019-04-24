@@ -7,10 +7,9 @@ import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import com.gianlu.aria2lib.Aria2Downloader;
 import com.gianlu.aria2lib.GitHubApi;
@@ -18,8 +17,8 @@ import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
+import com.gianlu.commonutils.RecyclerViewLayout;
 import com.gianlu.commonutils.Toaster;
 
 import java.io.File;
@@ -28,29 +27,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-
 public class DownloadBinActivity extends ActivityWithDialog implements ReleasesAdapter.Listener, GitHubApi.OnResult<List<GitHubApi.Release>>, Aria2Downloader.DownloadRelease, Aria2Downloader.ExtractTo {
     private static final int IMPORT_BIN_CODE = 8;
-    private ListView list;
-    private TextView progress;
-    private LinearLayout loading;
-    private MessageView message;
+    private RecyclerViewLayout layout;
     private Aria2Downloader downloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_download_bin);
+
+        layout = new RecyclerViewLayout(this);
+        setContentView(layout);
         setTitle(getString(R.string.downloadBin) + " - " + getString(R.string.app_name));
 
-        message = findViewById(R.id.downloadBin_message);
-        loading = findViewById(R.id.downloadBin_loading);
-        progress = findViewById(R.id.downloadBin_progress);
-        list = findViewById(R.id.downloadBin_list);
-
-        progress.setText(R.string.retrievingReleases);
+        layout.showInfo(R.string.retrievingReleases);
         downloader = new Aria2Downloader();
 
         if (getIntent().getBooleanExtra("importBin", false)) {
@@ -135,26 +125,18 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void onResult(@NonNull List<GitHubApi.Release> result) {
-        loading.setVisibility(View.GONE);
-        message.hide();
-        list.setVisibility(View.VISIBLE);
-        list.setAdapter(new ReleasesAdapter(this, result, this));
+        layout.loadListData(new ReleasesAdapter(this, result, this));
     }
 
     @Override
     public void onException(@NonNull Exception ex) {
         Logging.log(ex);
-        loading.setVisibility(View.GONE);
-        list.setVisibility(View.GONE);
-        message.setError(R.string.failedRetrievingReleases_reason, ex.getMessage());
+        layout.showError(R.string.failedRetrievingReleases_reason, ex.getMessage());
     }
 
     @Override
     public void onReleaseSelected(@NonNull GitHubApi.Release release) {
-        progress.setText(R.string.downloadingBin);
-        loading.setVisibility(View.VISIBLE);
-        list.setVisibility(View.GONE);
-        message.hide();
+        layout.showInfo(R.string.downloadingBin);
 
         downloader.setRelease(release);
         downloader.downloadRelease(this);
@@ -162,7 +144,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void doneDownload(@NonNull File tmp) {
-        progress.setText(R.string.extractingBin);
+        layout.showInfo(R.string.extractingBin);
         downloader.extractTo(getEnvDir(), (entry, name) -> name.equals("aria2c"), this);
     }
 
@@ -178,7 +160,7 @@ public class DownloadBinActivity extends ActivityWithDialog implements ReleasesA
 
     @Override
     public void doneExtract(@NonNull File dest) {
-        progress.setText(R.string.binExtracted);
+        layout.showInfo(R.string.binExtracted);
 
         Prefs.putBoolean(PK.CUSTOM_BIN, false);
         Prefs.putString(PK.ENV_LOCATION, dest.getAbsolutePath());

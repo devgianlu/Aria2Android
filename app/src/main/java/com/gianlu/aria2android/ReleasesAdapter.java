@@ -2,10 +2,11 @@ package com.gianlu.aria2android;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.gianlu.aria2lib.GitHubApi;
 import com.gianlu.commonutils.CommonUtils;
@@ -15,9 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-
-public class ReleasesAdapter extends BaseAdapter {
+public class ReleasesAdapter extends RecyclerView.Adapter<ReleasesAdapter.ViewHolder> {
     private final List<GitHubApi.Release> releases;
     private final LayoutInflater inflater;
     private final Listener listener;
@@ -31,38 +30,43 @@ public class ReleasesAdapter extends BaseAdapter {
                 this.releases.add(release);
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return releases.size();
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ViewHolder(parent);
     }
 
     @Override
-    public GitHubApi.Release getItem(int i) {
-        return releases.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return getItem(i).id;
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) view = inflater.inflate(R.layout.release_item, viewGroup, false);
-        final GitHubApi.Release release = getItem(i);
-        TextView name = view.findViewById(R.id.releaseItem_name);
-        name.setText(release.name);
-        SuperTextView uploadedAt = view.findViewById(R.id.releaseItem_publishedAt);
-        uploadedAt.setHtml(R.string.publishedAt, CommonUtils.getFullDateFormatter().format(new Date(release.publishedAt)));
-        SuperTextView size = view.findViewById(R.id.releaseItem_size);
-        size.setHtml(R.string.size, CommonUtils.dimensionFormatter(release.androidAsset.size, false));
-        view.setOnClickListener(view1 -> {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        GitHubApi.Release release = releases.get(position);
+        holder.name.setText(release.name);
+        holder.uploadedAt.setHtml(R.string.publishedAt, CommonUtils.getFullDateFormatter().format(new Date(release.publishedAt)));
+        holder.size.setHtml(R.string.size, CommonUtils.dimensionFormatter(release.androidAsset.size, false));
+        holder.itemView.setOnClickListener(view1 -> {
             if (listener != null) listener.onReleaseSelected(release);
         });
-        return view;
+    }
+
+    @Override
+    public int getItemCount() {
+        return releases.size();
     }
 
     public interface Listener {
         void onReleaseSelected(@NonNull GitHubApi.Release release);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView name;
+        final SuperTextView uploadedAt;
+        final SuperTextView size;
+
+        ViewHolder(@NonNull ViewGroup parent) {
+            super(inflater.inflate(R.layout.release_item, parent, false));
+
+            name = itemView.findViewById(R.id.releaseItem_name);
+            uploadedAt = itemView.findViewById(R.id.releaseItem_publishedAt);
+            size = itemView.findViewById(R.id.releaseItem_size);
+        }
     }
 }
