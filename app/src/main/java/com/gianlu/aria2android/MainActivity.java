@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.TypedValue;
@@ -17,11 +16,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.Internal.Message;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
+import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.MessageView;
@@ -42,11 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-
 public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
     private static final int MAX_LOG_LINES = 100;
@@ -59,14 +59,6 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     private LinearLayout logsContainer;
     private MessageView logsMessage;
     private Aria2Ui aria2;
-
-    private static boolean isARM() {
-        for (String abi : Build.SUPPORTED_ABIS)
-            if (abi.contains("arm"))
-                return true;
-
-        return false;
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -105,7 +97,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
+        if (!CommonUtils.isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
