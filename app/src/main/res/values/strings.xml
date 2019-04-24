@@ -29,8 +29,6 @@
     <string name="noLogs">The log is empty.</string>
     <string name="retrievingReleases">Retrieving releases. Please wait…</string>
     <string name="failedRetrievingReleases_reason">Failed retrieving releases: %s</string>
-    <string name="publishedAt"><![CDATA[<b>Published at:</b>]]> %s</string>
-    <string name="size"><![CDATA[<b>Size:</b>]]> %s</string>
     <string name="downloadingBin">Downloading the bin files…</string>
     <string name="binExtracted">Bin extracted successfully!</string>
     <string name="extractingBin">Extracting the bin files…</string>

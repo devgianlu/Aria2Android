@@ -6,6 +6,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.gianlu.commonutils.NameValuePair;
 
 import org.json.JSONObject;
@@ -15,11 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHolder> {
     private final Context context;
@@ -36,6 +36,21 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
         this.listener = listener;
         this.edited = new HashSet<>();
         if (listener != null) listener.onItemsCountChanged(options.size());
+    }
+
+    @NonNull
+    private static List<NameValuePair> parseOptions(@NonNull String str) {
+        List<NameValuePair> list = new ArrayList<>();
+        String[] lines = str.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.startsWith("#")) continue;
+            String[] split = line.split("=");
+            if (split.length > 0)
+                list.add(new NameValuePair(split[0], split.length == 1 ? null : split[1]));
+        }
+
+        return list;
     }
 
     @NonNull
@@ -126,7 +141,7 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.ViewHold
     }
 
     public void parseAndAdd(@NonNull String str) {
-        List<NameValuePair> newOptions = Utils.parseOptions(str);
+        List<NameValuePair> newOptions = parseOptions(str);
         options.addAll(newOptions);
         notifyItemRangeInserted(options.size() - newOptions.size(), newOptions.size());
         changed();

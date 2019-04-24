@@ -28,6 +28,7 @@ import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
+import com.gianlu.commonutils.FileUtil;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
@@ -112,7 +113,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         }
 
         try {
-            aria2 = Utils.createAria2(this, this);
+            aria2 = new Aria2Ui(this, this);
             aria2.loadEnv();
         } catch (BadEnvironmentException ex) {
             Logging.log(ex);

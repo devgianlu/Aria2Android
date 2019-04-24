@@ -28,8 +28,6 @@
     <string name="noLogs">紀錄檔為空。</string>
     <string name="retrievingReleases">檢查版本中，請稍待…</string>
     <string name="failedRetrievingReleases_reason">檢查版本失敗: %s</string>
-    <string name="publishedAt"><b>發佈於:</b>%s</string>
-    <string name="size"><b>大小:</b>%s</string>
     <string name="downloadingBin">正在下載二進位檔案…</string>
     <string name="binExtracted">二進位檔案解壓縮成功!</string>
     <string name="extractingBin">正在解壓縮二進位檔案…</string>

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.gianlu.aria2lib.Aria2Downloader;
 import com.gianlu.aria2lib.GitHubApi;
+import com.gianlu.aria2lib.Interface.ReleasesAdapter;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;

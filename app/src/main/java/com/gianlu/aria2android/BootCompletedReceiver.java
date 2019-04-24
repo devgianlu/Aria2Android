@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.commonutils.Preferences.Prefs;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
@@ -13,6 +14,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             return;
 
         if (Prefs.getBoolean(PK.START_AT_BOOT))
-            Utils.createAria2(context, null).startServiceFromReceiver();
+            new Aria2Ui(context, null).startServiceFromReceiver();
     }
 }
