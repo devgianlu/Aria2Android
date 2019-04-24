@@ -40,9 +40,6 @@
         <!-- Preferences activity -->
         <activity android:name=".PreferenceActivity" />
 
-        <!-- Download bin activity -->
-        <activity android:name=".DownloadBinActivity" />
-
         <!-- Custom options editor activity -->
         <activity
             android:name=".ConfigEditorActivity"

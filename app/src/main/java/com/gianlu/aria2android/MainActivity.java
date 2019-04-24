@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.aria2lib.Interface.DownloadBinActivity;
 import com.gianlu.aria2lib.Internal.Message;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
 import com.gianlu.commonutils.AskPermission;
@@ -104,9 +105,8 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                     .setMessage(R.string.archNotSupported_message)
                     .setOnDismissListener(dialog -> finish())
                     .setOnCancelListener(dialog -> finish())
-                    .setNeutralButton(R.string.importBin, (dialog, which) -> startActivity(new Intent(this, DownloadBinActivity.class)
-                            .putExtra("importBin", true)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))).setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
+                    .setNeutralButton(R.string.importBin, (dialog, which) -> startDownloadBin(true))
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> finish());
 
             showDialog(builder);
             return;
@@ -117,8 +117,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             aria2.loadEnv();
         } catch (BadEnvironmentException ex) {
             Logging.log(ex);
-            startActivity(new Intent(this, DownloadBinActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            startDownloadBin(false);
             finish();
             return;
         }
@@ -430,6 +429,15 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         return true;
     }
 
+    private void startDownloadBin(boolean importBin) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("importBin", importBin);
+
+        DownloadBinActivity.startActivity(this,
+                getString(com.gianlu.aria2lib.R.string.downloadBin) + " - " + getString(com.gianlu.aria2lib.R.string.app_name),
+                MainActivity.class, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK, bundle);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -442,8 +450,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                         .setMessage(R.string.changeBinVersion_message)
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
                             if (aria2.delete()) {
-                                startActivity(new Intent(this, DownloadBinActivity.class)
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                startDownloadBin(false);
                                 finish();
                             } else {
                                 Toaster.with(this).message(R.string.cannotDeleteBin).error(true).show();

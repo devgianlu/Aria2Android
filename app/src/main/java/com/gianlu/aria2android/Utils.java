@@ -5,5 +5,4 @@ public final class Utils {
     public static final String ACTION_TURN_ON = "aria2_on";
     public static final String ACTION_TURN_OFF = "aria2_off";
     public static final String ACTION_OPENED_ARIA2APP = "opened_aria2app";
-    public static final String ACTION_IMPORT_BIN = "imported_bin";
 }
