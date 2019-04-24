@@ -80,19 +80,19 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     @Override
     protected void onStart() {
         super.onStart();
-        if (aria2 != null) aria2.onStart();
+        if (aria2 != null) aria2.bind();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (aria2 != null) aria2.onDestroy();
+        if (aria2 != null) aria2.unbind();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (aria2 != null) aria2.onResume();
+        if (aria2 != null) aria2.askForStatus();
     }
 
     @Override
