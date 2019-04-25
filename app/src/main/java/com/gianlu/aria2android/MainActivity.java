@@ -2,17 +2,12 @@ package com.gianlu.aria2android;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -23,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
+import com.gianlu.aria2lib.Interface.Aria2ConfigurationScreen;
 import com.gianlu.aria2lib.Interface.DownloadBinActivity;
 import com.gianlu.aria2lib.Internal.Message;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
@@ -31,19 +27,8 @@ import com.gianlu.commonutils.CommonUtils;
 import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.FileUtil;
 import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.MessageView;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
-import com.yarolegovich.lovelyuserinput.LovelyInput;
-import com.yarolegovich.mp.AbsMaterialPreference;
-import com.yarolegovich.mp.AbsMaterialTextValuePreference;
-import com.yarolegovich.mp.MaterialCheckboxPreference;
-import com.yarolegovich.mp.MaterialEditTextPreference;
-import com.yarolegovich.mp.MaterialPreferenceCategory;
-import com.yarolegovich.mp.MaterialPreferenceScreen;
-import com.yarolegovich.mp.MaterialSeekBarPreference;
-import com.yarolegovich.mp.MaterialStandardPreference;
-import com.yarolegovich.mp.io.MaterialPreferences;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,15 +36,8 @@ import java.io.Serializable;
 
 public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
-    private static final int MAX_LOG_LINES = 100;
-    private volatile boolean isRunning;
     private ToggleButton toggleServer;
-    private MaterialEditTextPreference outputPath;
-    private MaterialPreferenceCategory generalCategory;
-    private MaterialPreferenceCategory rpcCategory;
-    private MaterialPreferenceCategory notificationsCategory;
-    private LinearLayout logsContainer;
-    private MessageView logsMessage;
+    private Aria2ConfigurationScreen screen;
     private Aria2Ui aria2;
 
     @Override
@@ -68,7 +46,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 if (uri != null) {
-                    outputPath.setValue(FileUtil.getFullPathFromTreeUri(uri, this));
+                    screen.setOutputPathValue(FileUtil.getFullPathFromTreeUri(uri, this));
                     getContentResolver().takePersistableUriPermission(uri,
                             data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
                 }
@@ -124,163 +102,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
         setContentView(R.layout.activity_main);
 
-        MaterialPreferences.instance().setUserInputModule(new LovelyInput.Builder()
-                .addIcon(PK.OUTPUT_DIRECTORY.key(), R.drawable.baseline_folder_24)
-                .addTextFilter(PK.OUTPUT_DIRECTORY.key(), R.string.invalidOutputPath, text -> {
-                    File path = new File(text);
-                    return path.exists() && path.canWrite();
-                })
-                .addIcon(PK.RPC_PORT.key(), R.drawable.baseline_import_export_24)
-                .addTextFilter(PK.RPC_PORT.key(), R.string.invalidPort, text -> {
-                    try {
-                        int port = Integer.parseInt(text);
-                        return port > 0 && port < 65536;
-                    } catch (Exception ex) {
-                        Logging.log(ex);
-                        return false;
-                    }
-                })
-                .addIcon(PK.RPC_TOKEN.key(), R.drawable.baseline_vpn_key_24)
-                .addTextFilter(PK.RPC_TOKEN.key(), R.string.invalidToken, text -> !text.isEmpty())
-                .addIcon(PK.NOTIFICATION_UPDATE_DELAY.key(), R.drawable.baseline_notifications_24)
-                .setTopColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .build());
-
-        MaterialPreferenceScreen screen = findViewById(R.id.main_preferences);
-
-        // General
-        generalCategory = new MaterialPreferenceCategory(this);
-        generalCategory.setTitle(R.string.general);
-        screen.addView(generalCategory);
-
-        outputPath = new MaterialEditTextPreference.Builder(this)
-                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_BOTTOM)
-                .key(PK.OUTPUT_DIRECTORY.key())
-                .defaultValue(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath())
-                .build();
-        outputPath.setTitle(R.string.outputPath);
-        outputPath.setOverrideClickListener(v -> {
-            try {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                startActivityForResult(intent, STORAGE_ACCESS_CODE);
-                return true;
-            } catch (ActivityNotFoundException ex) {
-                Toaster.with(this).message(R.string.noOpenTree).ex(ex).show();
-                return false;
-            }
-        });
-        generalCategory.addView(outputPath);
-
-        MaterialCheckboxPreference saveSession = new MaterialCheckboxPreference.Builder(this)
-                .key(PK.SAVE_SESSION.key())
-                .defaultValue(PK.SAVE_SESSION.fallback())
-                .build();
-        saveSession.setTitle(R.string.saveSession);
-        saveSession.setSummary(R.string.saveSession_summary);
-        generalCategory.addView(saveSession);
-
-        MaterialCheckboxPreference startAtBoot = new MaterialCheckboxPreference.Builder(this)
-                .key(PK.START_AT_BOOT.key())
-                .defaultValue(PK.START_AT_BOOT.fallback())
-                .build();
-        startAtBoot.setTitle(R.string.startServiceAtBoot);
-        startAtBoot.setSummary(R.string.startServiceAtBoot_summary);
-        generalCategory.addView(startAtBoot);
-
-        MaterialStandardPreference customOptions = new MaterialStandardPreference(this);
-        customOptions.setOnClickListener(v -> startActivity(new Intent(this, ConfigEditorActivity.class)));
-        customOptions.setTitle(R.string.customOptions);
-        generalCategory.addView(customOptions);
-
-        // UI
-        MaterialPreferenceCategory uiCategory = new MaterialPreferenceCategory(this);
-        uiCategory.setTitle(R.string.ui);
-        screen.addView(uiCategory);
-
-        MaterialStandardPreference openAria2App = new MaterialStandardPreference(this);
-        openAria2App.setOnClickListener(v -> openAria2App());
-        openAria2App.setTitle(R.string.openAria2App);
-        openAria2App.setSummary(R.string.openAria2App_summary);
-        uiCategory.addView(openAria2App);
-
-        // RPC
-        rpcCategory = new MaterialPreferenceCategory(this);
-        rpcCategory.setTitle(R.string.rpc);
-        screen.addView(rpcCategory);
-
-        MaterialEditTextPreference rpcPort = new MaterialEditTextPreference.Builder(this)
-                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_RIGHT)
-                .key(PK.RPC_PORT.key())
-                .defaultValue(String.valueOf(PK.RPC_PORT.fallback()))
-                .build();
-        rpcPort.setTitle(R.string.rpcPort);
-        rpcCategory.addView(rpcPort);
-
-        MaterialEditTextPreference rpcToken = new MaterialEditTextPreference.Builder(this)
-                .showValueMode(AbsMaterialTextValuePreference.SHOW_ON_RIGHT)
-                .key(PK.RPC_TOKEN.key())
-                .defaultValue(String.valueOf(PK.RPC_TOKEN.fallback()))
-                .build();
-        rpcToken.setTitle(R.string.rpcToken);
-        rpcCategory.addView(rpcToken);
-
-        MaterialCheckboxPreference allowOriginAll = new MaterialCheckboxPreference.Builder(this)
-                .key(PK.RPC_ALLOW_ORIGIN_ALL.key())
-                .defaultValue(PK.RPC_ALLOW_ORIGIN_ALL.fallback())
-                .build();
-        allowOriginAll.setTitle(R.string.accessControlAllowOriginAll);
-        allowOriginAll.setSummary(R.string.accessControlAllowOriginAll_summary);
-        rpcCategory.addView(allowOriginAll);
-
-        // Notifications
-        notificationsCategory = new MaterialPreferenceCategory(this);
-        notificationsCategory.setTitle(R.string.notification);
-        screen.addView(notificationsCategory);
-
-        MaterialCheckboxPreference showPerformance = new MaterialCheckboxPreference.Builder(this)
-                .key(PK.SHOW_PERFORMANCE.key())
-                .defaultValue(PK.SHOW_PERFORMANCE.fallback())
-                .build();
-        showPerformance.setTitle(R.string.showPerformance);
-        showPerformance.setSummary(R.string.showPerformance_summary);
-        notificationsCategory.addView(showPerformance);
-
-        MaterialSeekBarPreference updateDelay = new MaterialSeekBarPreference.Builder(this)
-                .showValue(true).minValue(1).maxValue(5)
-                .key(PK.NOTIFICATION_UPDATE_DELAY.key())
-                .defaultValue(PK.NOTIFICATION_UPDATE_DELAY.fallback())
-                .build();
-        updateDelay.setTitle(R.string.updateInterval);
-        notificationsCategory.addView(updateDelay);
-
-        screen.setVisibilityController(showPerformance, new AbsMaterialPreference[]{updateDelay}, true);
-
-        // Logs
-        MaterialPreferenceCategory logsCategory = new MaterialPreferenceCategory(this);
-        logsCategory.setTitle(R.string.logs);
-        screen.addView(logsCategory);
-
-        logsMessage = new MessageView(this);
-        logsMessage.setInfo(R.string.noLogs);
-        logsCategory.addView(logsMessage);
-        logsMessage.setVisibility(View.VISIBLE);
-
-        logsContainer = new LinearLayout(this);
-        logsContainer.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
-        logsContainer.setPaddingRelative(pad, 0, pad, 0);
-        logsCategory.addView(logsContainer);
-        logsContainer.setVisibility(View.GONE);
-
-        MaterialStandardPreference clearLogs = new MaterialStandardPreference(this);
-        clearLogs.setOnClickListener(v -> {
-            logsContainer.removeAllViews();
-            logsContainer.setVisibility(View.GONE);
-            logsMessage.setVisibility(View.VISIBLE);
-        });
-        clearLogs.setTitle(R.string.clearLogs);
-        logsCategory.addView(clearLogs);
+        screen = findViewById(R.id.main_preferences);
+        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT,
+                ConfigEditorActivity.class, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
@@ -303,12 +127,8 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     private void updateUiStatus(boolean on) {
-        int visibility = on ? View.GONE : View.VISIBLE;
-        generalCategory.setVisibility(visibility);
-        rpcCategory.setVisibility(visibility);
-        notificationsCategory.setVisibility(visibility);
+        screen.lockPreferences(on);
 
-        isRunning = on;
         toggleServer.setOnCheckedChangeListener(null);
         toggleServer.setChecked(on);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
@@ -370,59 +190,6 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         return true;
     }
 
-    private void installAria2App() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.aria2AppNotInstalled)
-                .setMessage(R.string.aria2AppNotInstalled_message)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                    try {
-                        try {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.gianlu.aria2app")));
-                        } catch (ActivityNotFoundException ex) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.gianlu.aria2app")));
-                        }
-                    } catch (ActivityNotFoundException ex) {
-                        Logging.log(ex);
-                    }
-                }).setNegativeButton(android.R.string.no, null);
-
-        showDialog(builder);
-    }
-
-    private void openAria2App() {
-        try {
-            getPackageManager().getPackageInfo("com.gianlu.aria2app", 0);
-        } catch (PackageManager.NameNotFoundException ex) {
-            Logging.log(ex);
-            installAria2App();
-            return;
-        }
-
-        if (isRunning) {
-            startAria2App();
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                    .setTitle(R.string.aria2NotRunning)
-                    .setMessage(R.string.aria2NotRunning_message)
-                    .setPositiveButton(android.R.string.no, null)
-                    .setNegativeButton(android.R.string.yes, (dialogInterface, i) -> startAria2App());
-
-            showDialog(builder);
-        }
-    }
-
-    private void startAria2App() {
-        Intent intent = getPackageManager().getLaunchIntentForPackage("com.gianlu.aria2app");
-        if (intent != null) {
-            startActivity(intent
-                    .putExtra("external", true)
-                    .putExtra("port", Prefs.getInt(PK.RPC_PORT))
-                    .putExtra("token", Prefs.getString(PK.RPC_TOKEN)));
-        }
-
-        AnalyticsApplication.sendAnalytics(Utils.ACTION_OPENED_ARIA2APP);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -467,13 +234,8 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     private void addLog(@NonNull Logging.LogLine line) {
         Logging.log(line);
 
-        if (logsContainer != null) {
-            logsContainer.setVisibility(View.VISIBLE);
-            logsMessage.setVisibility(View.GONE);
-            logsContainer.addView(Logging.LogLineAdapter.createLogLineView(getLayoutInflater(), logsContainer, line), logsContainer.getChildCount());
-            if (logsContainer.getChildCount() > MAX_LOG_LINES)
-                logsContainer.removeViewAt(0);
-        }
+        if (screen != null)
+            screen.appendLogLine(line);
     }
 
     @Override
