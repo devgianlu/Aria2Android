@@ -115,6 +115,15 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             version.setText(R.string.unknown);
             Logging.log(ex);
         }
+
+        if (Prefs.getBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, true)) {
+            showDialog(new AlertDialog.Builder(this)
+                    .setTitle(R.string.useNewAria2AppInstead)
+                    .setMessage(R.string.useNewAria2AppInstead_message)
+                    .setNeutralButton(android.R.string.ok, null));
+
+            Prefs.putBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, false);
+        }
     }
 
     private void toggleService(boolean on) {

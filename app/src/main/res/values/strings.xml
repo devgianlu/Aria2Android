@@ -23,4 +23,6 @@
     <string name="archNotSupported_message">The aria2 executable is compiled to run on arm devices only. If you compiled your own binary select the option below.</string>
     <string name="stopService">Stop service</string>
     <string name="startService">Start service</string>
+    <string name="useNewAria2AppInstead">Aria2App has been updated</string>
+    <string name="useNewAria2AppInstead_message">Aria2App will not provide the same functionalities of this app, but all-in-one. You are encouraged to migrate to Aria2App only if you were using the service on this device only. This app will be kept updated and working as usual.</string>
 </resources>
