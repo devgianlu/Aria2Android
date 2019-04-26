@@ -103,8 +103,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         setContentView(R.layout.activity_main);
 
         screen = findViewById(R.id.main_preferences);
-        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT,
-                ConfigEditorActivity.class, true);
+        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));

@@ -40,11 +40,6 @@
         <!-- Preferences activity -->
         <activity android:name=".PreferenceActivity" />
 
-        <!-- Custom options editor activity -->
-        <activity
-            android:name=".ConfigEditorActivity"
-            android:parentActivityName=".MainActivity" />
-
         <!-- Boot completed receiver -->
         <receiver
             android:name=".BootCompletedReceiver"
