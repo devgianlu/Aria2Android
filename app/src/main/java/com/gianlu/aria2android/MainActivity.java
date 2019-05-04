@@ -135,11 +135,16 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     private void updateUiStatus(boolean on) {
-        screen.lockPreferences(on);
+        if (screen != null) screen.lockPreferences(on);
 
-        toggleServer.setOnCheckedChangeListener(null);
-        toggleServer.setChecked(on);
-        toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+        if (toggleServer != null) {
+            toggleServer.setOnCheckedChangeListener(null);
+            toggleServer.setChecked(on);
+            toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+        }
+
+        if ((screen == null || toggleServer == null) && aria2 != null)
+            runOnUiThread(aria2::askForStatus);
     }
 
     private boolean startService() {
