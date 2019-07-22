@@ -23,8 +23,10 @@
         <!-- Main activity -->
         <activity
             android:name=".MainActivity"
+            android:configChanges="uiMode"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,7 +40,9 @@
         </activity>
 
         <!-- Preferences activity -->
-        <activity android:name=".PreferenceActivity" />
+        <activity
+            android:name=".PreferenceActivity"
+            android:configChanges="uiMode" />
 
         <!-- Boot completed receiver -->
         <receiver
