@@ -1,6 +1,11 @@
+plugins {
+    id 'com.github.triplet.play' version '2.2.1'
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+def isTravis = System.getenv("CI") == "true"
 android {
     compileSdkVersion 28
 
@@ -12,11 +17,23 @@ android {
         versionName "2.1.5"
     }
 
+    if (isTravis) {
+        signingConfigs {
+            release {
+                storeFile file("../.travis/keystore.jks")
+                storePassword System.getenv("keystore_storePsswd")
+                keyAlias = System.getenv("keystore_keyAlias")
+                keyPassword System.getenv("keystore_keyPsswd")
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (isTravis) signingConfig signingConfigs.release
         }
     }
 
@@ -38,11 +55,31 @@ android {
     lintOptions {
         warning 'MissingTranslation'
     }
+
+    playConfigs {
+        foss {
+            commit = false
+            enabled = false
+        }
+    }
+}
+
+play {
+    enabled = isTravis
+    serviceAccountCredentials = file("../.travis/secrets.json")
+    track = "production"
+    releaseStatus = "draft"
 }
 
 dependencies {
     api project(':aria2lib')
     api(project(':CommonUtils')) {
         exclude group: 'com.getkeepsafe.taptargetview'
+    }
+}
+
+task printVersionName {
+    doLast {
+        println android.defaultConfig.versionName
     }
 }
