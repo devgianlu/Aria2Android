@@ -1,4 +1,3 @@
-Release 2.1.5:
-- Added debug logs for service crash
-- Updated third-part deps
-- Minor bug fixes
+### Changed
+- Moved aria2c execution on service thread 
+- Fixed NPE crash due to service
