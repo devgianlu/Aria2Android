@@ -1,3 +1,2 @@
 ### Changed
-- Moved aria2c execution on service thread 
-- Fixed NPE crash due to service
+- Fixed crash due to aria2 service
