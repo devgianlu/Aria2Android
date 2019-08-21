@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +28,8 @@ import com.gianlu.commonutils.FileUtil;
 import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
+import com.google.android.material.bottomappbar.BottomAppBar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.List;
 
 public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
-    private ToggleButton toggleServer;
+    private FloatingActionButton toggleServer;
     private Aria2ConfigurationScreen screen;
     private Aria2Ui aria2;
 
@@ -102,13 +103,25 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
         setContentView(R.layout.activity_main);
 
+        BottomAppBar bar = findViewById(R.id.main_bottomAppBar);
+        setSupportActionBar(bar);
+
         screen = findViewById(R.id.main_preferences);
         screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
-        toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+        toggleServer.setOnClickListener(view -> {
+            Boolean b = (Boolean) view.getTag();
+            if (b == null) {
+                view.setTag(false);
+                b = false;
+            }
 
-        TextView version = findViewById(R.id.main_binVersion);
+            toggleService(!b);
+        });
+
+
+        TextView version = findViewById(R.id.main_version);
         try {
             version.setText(aria2.version());
         } catch (BadEnvironmentException | IOException ex) {
@@ -138,9 +151,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         if (screen != null) screen.lockPreferences(on);
 
         if (toggleServer != null) {
-            toggleServer.setOnCheckedChangeListener(null);
-            toggleServer.setChecked(on);
-            toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+            toggleServer.setTag(on);
+            if (on) toggleServer.setImageResource(R.drawable.baseline_stop_24);
+            else toggleServer.setImageResource(R.drawable.baseline_play_arrow_24);
         }
 
         if ((screen == null || toggleServer == null) && aria2 != null)

@@ -1,11 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <style name="AppTheme" parent="BaseAppTheme">
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorOnSecondary">@color/white</item>
-    </style>
-
-    <style name="AppTheme.Main" parent="AppTheme.NoActionBar">
         <item name="android:statusBarColor">?colorSurface</item>
     </style>
 </resources>
