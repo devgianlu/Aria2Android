@@ -73,6 +73,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     protected void onResume() {
         super.onResume();
         if (aria2 != null) aria2.askForStatus();
+        screen.refreshCustomOptionsNumber();
     }
 
     @Override
