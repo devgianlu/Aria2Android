@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.Interface.Aria2ConfigurationScreen;
+import com.gianlu.aria2lib.Interface.ConfigEditorActivity;
 import com.gianlu.aria2lib.Interface.DownloadBinActivity;
 import com.gianlu.aria2lib.Internal.Message;
 import com.gianlu.commonutils.Analytics.AnalyticsApplication;
@@ -253,6 +254,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
                 showDialog(builder);
                 return true;
+            case R.id.mainMenu_customOptions:
+                startActivity(new Intent(this, ConfigEditorActivity.class));
+                break;
         }
 
         return super.onOptionsItemSelected(item);
