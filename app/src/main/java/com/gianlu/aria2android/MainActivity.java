@@ -233,7 +233,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferenceActivity.class));

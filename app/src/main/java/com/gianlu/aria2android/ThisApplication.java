@@ -20,7 +20,7 @@ public class ThisApplication extends AnalyticsApplication {
     public void onCreate() {
         super.onCreate();
 
-        Logging.clearLogs(this, 1);
+        Logging.clearLogs(this, 3);
 
         Aria2Ui.provider(Aria2BareConfig.class);
 
