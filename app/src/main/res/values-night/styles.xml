@@ -2,8 +2,6 @@
 <resources>
 
     <style name="AppTheme" parent="BaseAppTheme">
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">?colorSurface</item>
+        <item name="android:statusBarColor">?android:colorBackground</item>
     </style>
 </resources>

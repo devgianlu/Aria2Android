@@ -1,11 +1,8 @@
 <resources>
 
-    <style name="AppTheme" parent="BaseAppTheme">
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorOnSecondary">@color/white</item>
-    </style>
+    <style name="AppTheme" parent="BaseAppTheme" />
 
     <style name="AppTheme.Main" parent="AppTheme.NoActionBar">
-        <item name="android:statusBarColor">?colorSurface</item>
+        <item name="android:statusBarColor">?android:colorBackground</item>
     </style>
 </resources>
