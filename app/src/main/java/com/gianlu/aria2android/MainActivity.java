@@ -30,6 +30,7 @@ import com.gianlu.commonutils.Logging;
 import com.gianlu.commonutils.Preferences.Prefs;
 import com.gianlu.commonutils.Toaster;
 import com.google.android.material.bottomappbar.BottomAppBar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -81,7 +82,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!CommonUtils.isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
                     .setOnDismissListener(dialog -> finish())
@@ -132,7 +133,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         }
 
         if (Prefs.getBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, true)) {
-            showDialog(new AlertDialog.Builder(this)
+            showDialog(new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.useNewAria2AppInstead)
                     .setMessage(R.string.useNewAria2AppInstead_message)
                     .setNeutralButton(android.R.string.ok, null));
@@ -240,7 +241,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
                 startActivity(new Intent(this, PreferenceActivity.class));
                 return true;
             case R.id.mainMenu_changeBin:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
                 builder.setTitle(R.string.changeBinVersion)
                         .setMessage(R.string.changeBinVersion_message)
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
