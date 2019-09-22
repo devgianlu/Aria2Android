@@ -3,6 +3,7 @@
 </h1>
 
 [![Build Status](https://travis-ci.com/devgianlu/Aria2Android.svg?branch=master)](https://travis-ci.com/devgianlu/Aria2Android)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d912003e65614572af2da5c2c4b71ef8)](https://www.codacy.com/manual/devgianlu/Aria2Android?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=devgianlu/Aria2Android&amp;utm_campaign=Badge_Grade)
 [![Translate - with Stringlate](https://img.shields.io/badge/translate%20with-stringlate-green.svg)](https://lonamiwebs.github.io/stringlate/translate?git=https%3A%2F%2Fgithub.com%2Fdevgianlu%2FAria2Android)
 [![Donate Bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)](https://gianlu.xyz/donate/)
 
