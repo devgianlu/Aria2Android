@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.gianlu.aria2lib.Aria2Ui;
-import com.gianlu.commonutils.Preferences.Prefs;
+import com.gianlu.commonutils.preferences.Prefs;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override

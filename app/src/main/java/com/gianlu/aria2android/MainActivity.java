@@ -17,18 +17,18 @@ import androidx.core.content.ContextCompat;
 
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
-import com.gianlu.aria2lib.Interface.Aria2ConfigurationScreen;
-import com.gianlu.aria2lib.Interface.ConfigEditorActivity;
-import com.gianlu.aria2lib.Interface.DownloadBinActivity;
-import com.gianlu.aria2lib.Internal.Message;
-import com.gianlu.commonutils.Analytics.AnalyticsApplication;
-import com.gianlu.commonutils.AskPermission;
+import com.gianlu.aria2lib.internal.Message;
+import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
+import com.gianlu.aria2lib.ui.ConfigEditorActivity;
+import com.gianlu.aria2lib.ui.DownloadBinActivity;
 import com.gianlu.commonutils.CommonUtils;
-import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
-import com.gianlu.commonutils.FileUtil;
-import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Preferences.Prefs;
-import com.gianlu.commonutils.Toaster;
+import com.gianlu.commonutils.FileUtils;
+import com.gianlu.commonutils.analytics.AnalyticsApplication;
+import com.gianlu.commonutils.dialogs.ActivityWithDialog;
+import com.gianlu.commonutils.logging.Logging;
+import com.gianlu.commonutils.permissions.AskPermission;
+import com.gianlu.commonutils.preferences.Prefs;
+import com.gianlu.commonutils.ui.Toaster;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -49,7 +49,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 if (uri != null) {
-                    screen.setOutputPathValue(FileUtil.getFullPathFromTreeUri(uri, this));
+                    screen.setOutputPathValue(FileUtils.getFullPathFromTreeUri(uri, this));
                     getContentResolver().takePersistableUriPermission(uri,
                             data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
                 }

@@ -3,9 +3,9 @@ package com.gianlu.aria2android;
 
 import com.gianlu.aria2lib.Aria2PK;
 import com.gianlu.aria2lib.Aria2Ui;
-import com.gianlu.commonutils.Analytics.AnalyticsApplication;
-import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Preferences.Prefs;
+import com.gianlu.commonutils.analytics.AnalyticsApplication;
+import com.gianlu.commonutils.logging.Logging;
+import com.gianlu.commonutils.preferences.Prefs;
 
 import java.io.File;
 
