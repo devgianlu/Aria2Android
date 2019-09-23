@@ -24,7 +24,7 @@
                 android:textColor="?colorOnSurface"
                 android:textStyle="bold" />
 
-            <com.gianlu.aria2lib.Interface.Aria2ConfigurationScreen
+            <com.gianlu.aria2lib.ui.Aria2ConfigurationScreen
                 android:id="@+id/main_preferences"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
