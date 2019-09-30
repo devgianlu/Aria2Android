@@ -18,12 +18,3 @@ This project uses [devgianlu/CommonUtils](https://github.com/devgianlu/CommonUti
 
 ## Logo design
 The logo has been renewed by [@zularizal](https://github.com/zularizal), see [#7](https://github.com/devgianlu/Aria2Android/issues/7).
-
-## Translations
-This project uses [POEditor](https://poeditor.com/) to keep track of the translation process. The following languages are currently available:
-
-![English](https://gianlu.xyz/poeditor-badge?id=287723&lang=en)
-![Chinese (simplified)](https://gianlu.xyz/poeditor-badge?id=287723&lang=zh-Hans)
-![Chinese (TW)](https://gianlu.xyz/poeditor-badge?id=287723&lang=zh-TW)
-
-If you're interested in helping out either create a PR or contact me via email to become a contributor on POEditor.
