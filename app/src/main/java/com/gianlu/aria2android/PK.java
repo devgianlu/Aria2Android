@@ -2,7 +2,7 @@ package com.gianlu.aria2android;
 
 
 import com.gianlu.aria2lib.Aria2PK;
-import com.gianlu.commonutils.Preferences.Prefs;
+import com.gianlu.commonutils.preferences.Prefs;
 
 public final class PK extends Aria2PK {
     public static final Prefs.Key CURRENT_SESSION_START = new Prefs.Key("currentSessionStart");

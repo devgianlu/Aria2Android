@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,17 +17,21 @@ import androidx.core.content.ContextCompat;
 
 import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
-import com.gianlu.aria2lib.Interface.Aria2ConfigurationScreen;
-import com.gianlu.aria2lib.Interface.DownloadBinActivity;
-import com.gianlu.aria2lib.Internal.Message;
-import com.gianlu.commonutils.Analytics.AnalyticsApplication;
-import com.gianlu.commonutils.AskPermission;
+import com.gianlu.aria2lib.internal.Message;
+import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
+import com.gianlu.aria2lib.ui.ConfigEditorActivity;
+import com.gianlu.aria2lib.ui.DownloadBinActivity;
 import com.gianlu.commonutils.CommonUtils;
-import com.gianlu.commonutils.Dialogs.ActivityWithDialog;
-import com.gianlu.commonutils.FileUtil;
-import com.gianlu.commonutils.Logging;
-import com.gianlu.commonutils.Preferences.Prefs;
-import com.gianlu.commonutils.Toaster;
+import com.gianlu.commonutils.FileUtils;
+import com.gianlu.commonutils.analytics.AnalyticsApplication;
+import com.gianlu.commonutils.dialogs.ActivityWithDialog;
+import com.gianlu.commonutils.logging.Logging;
+import com.gianlu.commonutils.permissions.AskPermission;
+import com.gianlu.commonutils.preferences.Prefs;
+import com.gianlu.commonutils.ui.Toaster;
+import com.google.android.material.bottomappbar.BottomAppBar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +39,7 @@ import java.util.List;
 
 public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener {
     private static final int STORAGE_ACCESS_CODE = 1;
-    private ToggleButton toggleServer;
+    private FloatingActionButton toggleServer;
     private Aria2ConfigurationScreen screen;
     private Aria2Ui aria2;
 
@@ -46,7 +49,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 if (uri != null) {
-                    screen.setOutputPathValue(FileUtil.getFullPathFromTreeUri(uri, this));
+                    screen.setOutputPathValue(FileUtils.getFullPathFromTreeUri(uri, this));
                     getContentResolver().takePersistableUriPermission(uri,
                             data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
                 }
@@ -72,13 +75,14 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     protected void onResume() {
         super.onResume();
         if (aria2 != null) aria2.askForStatus();
+        if (screen != null) screen.refreshCustomOptionsNumber();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!CommonUtils.isARM() && !Prefs.getBoolean(PK.CUSTOM_BIN)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setTitle(R.string.archNotSupported)
                     .setMessage(R.string.archNotSupported_message)
                     .setOnDismissListener(dialog -> finish())
@@ -102,13 +106,25 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
         setContentView(R.layout.activity_main);
 
+        BottomAppBar bar = findViewById(R.id.main_bottomAppBar);
+        setSupportActionBar(bar);
+
         screen = findViewById(R.id.main_preferences);
         screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
-        toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+        toggleServer.setOnClickListener(view -> {
+            Boolean b = (Boolean) view.getTag();
+            if (b == null) {
+                view.setTag(false);
+                b = false;
+            }
 
-        TextView version = findViewById(R.id.main_binVersion);
+            toggleService(!b);
+        });
+
+
+        TextView version = findViewById(R.id.main_version);
         try {
             version.setText(aria2.version());
         } catch (BadEnvironmentException | IOException ex) {
@@ -117,7 +133,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         }
 
         if (Prefs.getBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, true)) {
-            showDialog(new AlertDialog.Builder(this)
+            showDialog(new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.useNewAria2AppInstead)
                     .setMessage(R.string.useNewAria2AppInstead_message)
                     .setNeutralButton(android.R.string.ok, null));
@@ -138,9 +154,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         if (screen != null) screen.lockPreferences(on);
 
         if (toggleServer != null) {
-            toggleServer.setOnCheckedChangeListener(null);
-            toggleServer.setChecked(on);
-            toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> toggleService(isChecked));
+            toggleServer.setTag(on);
+            if (on) toggleServer.setImageResource(R.drawable.baseline_stop_24);
+            else toggleServer.setImageResource(R.drawable.baseline_play_arrow_24);
         }
 
         if ((screen == null || toggleServer == null) && aria2 != null)
@@ -219,13 +235,13 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferenceActivity.class));
                 return true;
             case R.id.mainMenu_changeBin:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
                 builder.setTitle(R.string.changeBinVersion)
                         .setMessage(R.string.changeBinVersion_message)
                         .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
@@ -239,6 +255,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
                 showDialog(builder);
                 return true;
+            case R.id.mainMenu_customOptions:
+                startActivity(new Intent(this, ConfigEditorActivity.class));
+                break;
         }
 
         return super.onOptionsItemSelected(item);

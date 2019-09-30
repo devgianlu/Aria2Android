@@ -3,11 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/mainMenu_changeBin"
+        android:icon="@drawable/baseline_update_24"
         android:title="@string/changeBinVersion"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/mainMenu_customOptions"
+        android:icon="@drawable/baseline_list_24"
+        android:title="@string/customOptions"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/mainMenu_preferences"
+        android:icon="@drawable/baseline_settings_24"
         android:title="@string/preferences"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

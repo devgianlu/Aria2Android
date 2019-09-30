@@ -2,16 +2,16 @@ package com.gianlu.aria2android;
 
 import android.content.Context;
 
-import com.gianlu.commonutils.Preferences.BasePreferenceActivity;
-import com.gianlu.commonutils.Preferences.BasePreferenceFragment;
-import com.gianlu.commonutils.Preferences.MaterialAboutPreferenceItem;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.gianlu.commonutils.preferences.BasePreferenceActivity;
+import com.gianlu.commonutils.preferences.BasePreferenceFragment;
+import com.gianlu.commonutils.preferences.MaterialAboutPreferenceItem;
 import com.yarolegovich.mp.MaterialCheckboxPreference;
 
 import java.util.Collections;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class PreferenceActivity extends BasePreferenceActivity {
     @NonNull
