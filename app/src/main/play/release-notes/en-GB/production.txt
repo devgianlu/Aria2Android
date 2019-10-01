@@ -1,2 +1,2 @@
 ### Changed
-- Fixed crash due to aria2 service
+- Updated Material Design
