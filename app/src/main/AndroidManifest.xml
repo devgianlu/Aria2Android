@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.gianlu.aria2android">
 
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
     <!-- You know... -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Import bin -->
@@ -13,6 +20,7 @@
     <application
         android:name=".ThisApplication"
         android:allowBackup="true"
+        android:banner="@mipmap/ic_launcher"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:installLocation="internalOnly"
@@ -30,10 +38,16 @@
             android:theme="@style/AppTheme.Main"
             android:windowSoftInputMode="stateHidden">
 
+            <!-- Standard launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Leanback (Android TV) launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
 
             <intent-filter>
