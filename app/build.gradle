@@ -73,9 +73,9 @@ play {
 }
 
 dependencies {
-    api project(':aria2lib')
-    api(project(':CommonUtils')) {
-        exclude group: 'com.getkeepsafe.taptargetview'
+    implementation project(':aria2lib')
+    implementation(project(':CommonUtils')) {
+        exclude group: 'me.toptas.fancyshowcase'
     }
 }
 
