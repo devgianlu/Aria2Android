@@ -20,7 +20,6 @@ import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.internal.Message;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
 import com.gianlu.aria2lib.ui.ConfigEditorActivity;
-import com.gianlu.aria2lib.ui.DownloadBinActivity;
 import com.gianlu.commonutils.FileUtils;
 import com.gianlu.commonutils.analytics.AnalyticsApplication;
 import com.gianlu.commonutils.dialogs.ActivityWithDialog;
@@ -83,10 +82,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
         try {
             aria2 = new Aria2Ui(this, this);
-            aria2.loadEnv();
+            aria2.loadEnv(this);
         } catch (BadEnvironmentException ex) {
             Logging.log(ex);
-            startDownloadBin();
             finish();
             return;
         }
@@ -212,32 +210,11 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         return true;
     }
 
-    private void startDownloadBin() {
-        DownloadBinActivity.startActivity(this,
-                getString(com.gianlu.aria2lib.R.string.downloadBin) + " - " + getString(com.gianlu.aria2lib.R.string.app_name),
-                MainActivity.class, Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK, null);
-    }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferenceActivity.class));
-                return true;
-            case R.id.mainMenu_changeBin:
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
-                builder.setTitle(R.string.changeBinVersion)
-                        .setMessage(R.string.changeBinVersion_message)
-                        .setPositiveButton(android.R.string.yes, (dialogInterface, i) -> {
-                            if (aria2.delete()) {
-                                startDownloadBin();
-                                finish();
-                            } else {
-                                Toaster.with(this).message(R.string.cannotDeleteBin).error(true).show();
-                            }
-                        }).setNegativeButton(android.R.string.no, null);
-
-                showDialog(builder);
                 return true;
             case R.id.mainMenu_customOptions:
                 startActivity(new Intent(this, ConfigEditorActivity.class));

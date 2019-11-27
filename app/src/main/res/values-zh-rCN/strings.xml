@@ -7,14 +7,10 @@
     <string name="writeStorageMessage">Aria2Android需要使用外部储存来保存你下载的文件。</string>
     <string name="about_app">关于应用</string>
     <string name="unknown">未知</string>
-    <string name="changeBinVersion">修改二进制文件版本</string>
     <string name="noLogs">日志为空.</string>
     <string name="failedCreatingSessionFile">创建空会话文件失败!</string>
     <string name="writePermissionDenied">你未授予写入权限! 无法启用aria2!</string>
-    <string name="cannotDeleteBin">无法删除二进制文件! 请清理应用数据。</string>
-    <string name="changeBinVersion_message">你确定你要修改二进制文件版本?</string>
     <string name="stopService">停止服务</string>
-    <string name="startService">开始服务</string>
     <string name="useNewAria2AppInstead">Aria2App has been updated</string>
     <string name="useNewAria2AppInstead_message">Aria2App will not provide the same functionalities of this app, but all-in-one. You are encouraged to migrate to Aria2App only if you were using the service on this device only. This app will be kept updated and working as usual.</string>
 </resources>
