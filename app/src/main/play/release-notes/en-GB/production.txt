@@ -1,2 +1,2 @@
 ### Changed
-- aria2 binary is now bundled inside the APK for compatibility reasons
+- Fixed aria2 not launching on some devices
