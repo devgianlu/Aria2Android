@@ -5,14 +5,10 @@
     <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
     <string name="about_app">About application</string>
     <string name="unknown">Unknown</string>
-    <string name="changeBinVersion">Change bin version</string>
     <string name="noLogs">The log is empty.</string>
     <string name="failedCreatingSessionFile">Failed creating an empty session file!</string>
     <string name="writePermissionDenied">You denied the write permission! Can\'t start aria2!</string>
-    <string name="cannotDeleteBin">Can\'t delete the bin file! Please clear application data.</string>
-    <string name="changeBinVersion_message">Are you sure you want to change the bin version?</string>
     <string name="stopService">Stop service</string>
-    <string name="startService">Start service</string>
     <string name="useNewAria2AppInstead">Aria2App has been updated</string>
     <string name="useNewAria2AppInstead_message">Aria2App will not provide the same functionalities of this app, but all-in-one. You are encouraged to migrate to Aria2App only if you were using the service on this device only. This app will be kept updated and working as usual.</string>
 </resources>

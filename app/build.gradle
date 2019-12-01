@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.triplet.play' version '2.2.1'
+    id 'com.github.triplet.play' version '2.3.0'
 }
 
 apply plugin: 'com.android.application'
@@ -14,8 +14,8 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 59
-        versionName "2.3.0"
+        versionCode 61
+        versionName "2.4.1"
     }
 
     if (isTravis) {
@@ -42,9 +42,24 @@ android {
     productFlavors {
         standard {
             dimension 'main'
+
+            buildTypes {
+                release {
+                    minifyEnabled true
+                    shrinkResources true
+                }
+            }
         }
+
         foss {
             dimension 'main'
+
+            buildTypes {
+                release {
+                    minifyEnabled false
+                    shrinkResources false
+                }
+            }
         }
     }
 
@@ -66,6 +81,7 @@ android {
 }
 
 play {
+    defaultToAppBundles = true
     enabled = isTravis
     serviceAccountCredentials = file("../.travis/secrets.json")
     track = "production"
@@ -73,9 +89,9 @@ play {
 }
 
 dependencies {
-    api project(':aria2lib')
-    api(project(':CommonUtils')) {
-        exclude group: 'com.getkeepsafe.taptargetview'
+    implementation project(':aria2lib')
+    implementation(project(':CommonUtils')) {
+        exclude group: 'me.toptas.fancyshowcase'
     }
 }
 
