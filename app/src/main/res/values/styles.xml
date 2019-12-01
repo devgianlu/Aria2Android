@@ -5,4 +5,20 @@
     <style name="AppTheme.Main" parent="AppTheme.NoActionBar">
         <item name="android:statusBarColor">?android:colorBackground</item>
     </style>
+
+    <style name="AppTheme.Leanback" parent="Theme.Leanback">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="android:statusBarColor">@color/colorPrimaryVariant</item>
+        <item name="android:textColorPrimary">#ff000000</item>
+        <item name="android:textColorSecondary">#8a000000</item>
+        <item name="colorControlNormal">#8a000000</item>
+
+        <item name="colorPrimaryDark">@color/colorPrimaryVariant</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
 </resources>

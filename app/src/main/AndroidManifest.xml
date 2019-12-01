@@ -30,6 +30,19 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <!-- TV activity -->
+        <activity
+            android:name=".TvActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.Leanback">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
         <!-- Main activity -->
         <activity
             android:name=".MainActivity"
