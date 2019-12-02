@@ -95,7 +95,7 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
         setSupportActionBar(bar);
 
         screen = findViewById(R.id.main_preferences);
-        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT, true);
+        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, STORAGE_ACCESS_CODE), PK.START_AT_BOOT, PK.START_WITH_APP, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnClickListener(view -> {
@@ -125,6 +125,9 @@ public class MainActivity extends ActivityWithDialog implements Aria2Ui.Listener
 
             Prefs.putBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, false);
         }
+
+        if (Prefs.getBoolean(PK.START_WITH_APP, false))
+            toggleService(true);
     }
 
     private void toggleService(boolean on) {
