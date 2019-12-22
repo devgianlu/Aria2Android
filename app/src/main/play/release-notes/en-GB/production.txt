@@ -1,2 +1,5 @@
+### Added
+- Start service when app opens
+
 ### Changed
-- Fixed permission denied on Android 10 devices
+- Migrated to Firebase (Google Play users only)
