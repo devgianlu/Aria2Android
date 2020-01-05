@@ -36,11 +36,11 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Leanback">
 
+            <!-- Leanback (Android TV) launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <!-- Main activity -->
@@ -55,17 +55,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-            <!-- Leanback (Android TV) launcher -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="com.gianlu.aria2android.START_SERVICE" />
-                <action android:name="com.gianlu.aria2android.STOP_SERVICE" />
             </intent-filter>
         </activity>
 
