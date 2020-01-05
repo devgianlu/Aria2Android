@@ -14,8 +14,8 @@ android {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 61
-        versionName "2.4.1"
+        versionCode 63
+        versionName "2.4.3"
     }
 
     if (isTravis) {
@@ -102,3 +102,5 @@ task printVersionName {
         println android.defaultConfig.versionName
     }
 }
+
+apply plugin: 'com.google.gms.google-services'

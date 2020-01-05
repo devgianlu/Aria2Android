@@ -1,2 +1,5 @@
+### Added
+- Start service when app opens
+
 ### Changed
-- Fixed aria2 not launching on some devices
+- Migrated to Firebase (Google Play users only)
