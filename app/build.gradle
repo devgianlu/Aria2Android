@@ -89,6 +89,8 @@ play {
 }
 
 dependencies {
+    implementation 'androidx.leanback:leanback:1.1.0-alpha03'
+
     implementation project(':aria2lib')
     implementation(project(':CommonUtils')) {
         exclude group: 'me.toptas.fancyshowcase'
