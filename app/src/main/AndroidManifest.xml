@@ -33,6 +33,7 @@
         <!-- TV activity -->
         <activity
             android:name=".TvActivity"
+            android:banner="@drawable/tv_banner"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Leanback">
 

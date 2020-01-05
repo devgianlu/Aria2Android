@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -47,6 +48,9 @@ public class TvActivity extends FragmentActivity implements ControlActivityDeleg
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tv_activity_main);
+
+        Button openPrefs = findViewById(R.id.main_openPrefs);
+        openPrefs.setOnClickListener((v) -> startActivity(new Intent(this, PreferenceActivity.class)));
 
         Aria2ConfigurationScreen screen = findViewById(R.id.main_preferences);
         screen.setup(R.style.Theme_MaterialComponents_DayNight_Dialog_Alert,
