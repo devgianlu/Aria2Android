@@ -49,7 +49,9 @@ public class TvActivity extends FragmentActivity implements ControlActivityDeleg
         setContentView(R.layout.tv_activity_main);
 
         Aria2ConfigurationScreen screen = findViewById(R.id.main_preferences);
-        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, ControlActivityDelegate.STORAGE_ACCESS_CODE), PK.START_AT_BOOT, PK.START_WITH_APP, true);
+        screen.setup(R.style.Theme_MaterialComponents_DayNight_Dialog_Alert,
+                new Aria2ConfigurationScreen.OutputPathSelector(this, ControlActivityDelegate.STORAGE_ACCESS_CODE),
+                PK.START_AT_BOOT, PK.START_WITH_APP, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnCheckedChangeListener((buttonView, isChecked) -> {
