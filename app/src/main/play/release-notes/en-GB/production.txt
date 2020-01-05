@@ -1,5 +1,2 @@
 ### Added
-- Start service when app opens
-
-### Changed
-- Migrated to Firebase (Google Play users only)
+- Support for Android TV
