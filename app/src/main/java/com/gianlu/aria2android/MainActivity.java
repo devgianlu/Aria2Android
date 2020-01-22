@@ -26,26 +26,26 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (delegate.onActivityResult(requestCode, resultCode, data))
+        if (delegate != null && delegate.onActivityResult(requestCode, resultCode, data))
             super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        delegate.onStart();
+        if (delegate != null) delegate.onStart();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        delegate.onDestroy();
+        if (delegate != null) delegate.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        delegate.onResume();
+        if (delegate != null) delegate.onResume();
     }
 
     @Override
