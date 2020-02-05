@@ -74,7 +74,10 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
             delegate = new ControlActivityDelegate(this, this, screen);
         } catch (BadEnvironmentException ex) {
             Logging.log(ex);
-            finish();
+            showDialog(new MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.badEnvIssue)
+                    .setMessage(R.string.badEnvIssue_message)
+                    .setNeutralButton(android.R.string.ok, (dialog, which) -> finish()));
             return;
         }
 
