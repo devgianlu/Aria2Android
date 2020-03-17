@@ -1,7 +1,2 @@
-### Added
-- Added dialog about native libraries not being extracted
-
-### Fixed
-- Fixed crash at startup
-- Fixed crash reporting and analytics (Google Play only)
-- Fixed billing system so that payments aren't refunded
+### Changed
+- Using Android logging utils
