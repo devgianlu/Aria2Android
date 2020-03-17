@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -12,7 +13,6 @@ import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
 import com.gianlu.aria2lib.ui.ConfigEditorActivity;
 import com.gianlu.commonutils.dialogs.ActivityWithDialog;
-import com.gianlu.commonutils.logging.Logging;
 import com.gianlu.commonutils.preferences.Prefs;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -21,6 +21,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.io.IOException;
 
 public class MainActivity extends ActivityWithDialog implements ControlActivityDelegate.UpdateToggle {
+    private static final String TAG = MainActivity.class.getSimpleName();
     private ControlActivityDelegate delegate;
     private FloatingActionButton toggleServer;
 
@@ -73,7 +74,7 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
         try {
             delegate = new ControlActivityDelegate(this, this, screen);
         } catch (BadEnvironmentException ex) {
-            Logging.log(ex);
+            Log.e(TAG, "Bad environment.", ex);
             showDialog(new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.badEnvIssue)
                     .setMessage(R.string.badEnvIssue_message)
@@ -86,7 +87,6 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
             version.setText(delegate.version());
         } catch (BadEnvironmentException | IOException ex) {
             version.setText(R.string.unknown);
-            Logging.log(ex);
         }
 
         if (Prefs.getBoolean(PK.IS_NEW_BUNDLED_WITH_ARIA2APP, true)) {

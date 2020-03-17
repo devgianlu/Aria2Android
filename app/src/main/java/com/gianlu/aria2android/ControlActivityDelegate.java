@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,9 +18,9 @@ import com.gianlu.aria2lib.Aria2Ui;
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.internal.Message;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
+import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen.LogEntry;
 import com.gianlu.commonutils.FileUtils;
 import com.gianlu.commonutils.analytics.AnalyticsApplication;
-import com.gianlu.commonutils.logging.Logging;
 import com.gianlu.commonutils.permissions.AskPermission;
 import com.gianlu.commonutils.preferences.Prefs;
 import com.gianlu.commonutils.ui.Toaster;
@@ -30,6 +31,7 @@ import java.util.List;
 
 public class ControlActivityDelegate implements Aria2Ui.Listener {
     static final int STORAGE_ACCESS_CODE = 1;
+    private static final String TAG = ControlActivityDelegate.class.getSimpleName();
     private final FragmentActivity context;
     private final UpdateToggle updateToggle;
     private final Aria2ConfigurationScreen screen;
@@ -103,7 +105,7 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
 
                 @Override
                 public void permissionDenied(@NonNull String permission) {
-                    Toaster.with(context).message(R.string.writePermissionDenied).error(true).show();
+                    Toaster.with(context).message(R.string.writePermissionDenied).show();
                 }
 
                 @Override
@@ -119,11 +121,12 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
         if (Prefs.getBoolean(PK.SAVE_SESSION) && !sessionFile.exists()) {
             try {
                 if (!sessionFile.createNewFile()) {
-                    Toaster.with(context).message(R.string.failedCreatingSessionFile).error(true).show();
+                    Toaster.with(context).message(R.string.failedCreatingSessionFile).show();
                     return false;
                 }
             } catch (IOException ex) {
-                Toaster.with(context).message(R.string.failedCreatingSessionFile).ex(ex).show();
+                Log.e(TAG, "Failed creating session file.", ex);
+                Toaster.with(context).message(R.string.failedCreatingSessionFile).show();
                 return false;
             }
         }
@@ -146,40 +149,37 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
         return true;
     }
 
-    private void addLog(@NonNull Logging.LogLine line) {
-        Logging.log(line);
-
-        if (screen != null)
-            screen.appendLogLine(line);
+    private void addLog(@NonNull LogEntry entry) {
+        if (screen != null) screen.appendLogEntry(entry);
     }
 
     @Override
     public void onUpdateLogs(@NonNull List<Aria2Ui.LogMessage> list) {
         for (Aria2Ui.LogMessage msg : list) {
-            Logging.LogLine line = createLogLine(msg);
-            if (line != null) addLog(line);
+            LogEntry entry = createLogEntry(msg);
+            if (entry != null) addLog(entry);
         }
     }
 
     @Nullable
-    private Logging.LogLine createLogLine(@NonNull Aria2Ui.LogMessage msg) {
+    private LogEntry createLogEntry(@NonNull Aria2Ui.LogMessage msg) {
         switch (msg.type) {
             case PROCESS_TERMINATED:
-                return new Logging.LogLine(Logging.LogLine.Type.INFO, context.getString(R.string.logTerminated, msg.i));
+                return new LogEntry(LogEntry.Type.INFO, context.getString(R.string.logTerminated, msg.i));
             case PROCESS_STARTED:
-                return new Logging.LogLine(Logging.LogLine.Type.INFO, context.getString(R.string.logStarted, msg.o));
+                return new LogEntry(LogEntry.Type.INFO, context.getString(R.string.logStarted, msg.o));
             case MONITOR_FAILED:
             case MONITOR_UPDATE:
                 return null;
             case PROCESS_WARN:
                 if (msg.o != null)
-                    return new Logging.LogLine(Logging.LogLine.Type.WARNING, (String) msg.o);
+                    return new LogEntry(LogEntry.Type.WARNING, (String) msg.o);
             case PROCESS_ERROR:
                 if (msg.o != null)
-                    return new Logging.LogLine(Logging.LogLine.Type.ERROR, (String) msg.o);
+                    return new LogEntry(LogEntry.Type.ERROR, (String) msg.o);
             case PROCESS_INFO:
                 if (msg.o != null)
-                    return new Logging.LogLine(Logging.LogLine.Type.INFO, (String) msg.o);
+                    return new LogEntry(LogEntry.Type.INFO, (String) msg.o);
         }
 
         return null;
@@ -188,14 +188,14 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
     @Override
     public void onMessage(@NonNull Aria2Ui.LogMessage msg) {
         if (msg.type == Message.Type.MONITOR_FAILED) {
-            Logging.log("Monitor failed!", (Throwable) msg.o);
+            Log.e(TAG, "Monitor failed!", (Throwable) msg.o);
             return;
         }
 
         if (msg.type == Message.Type.MONITOR_UPDATE) return;
 
-        Logging.LogLine line = createLogLine(msg);
-        if (line != null) addLog(line);
+        LogEntry entry = createLogEntry(msg);
+        if (entry != null) addLog(entry);
     }
 
     @Override

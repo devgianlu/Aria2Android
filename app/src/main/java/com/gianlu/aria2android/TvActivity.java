@@ -2,6 +2,7 @@ package com.gianlu.aria2android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -11,12 +12,12 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
-import com.gianlu.commonutils.logging.Logging;
 import com.gianlu.commonutils.preferences.Prefs;
 
 import java.io.IOException;
 
 public class TvActivity extends FragmentActivity implements ControlActivityDelegate.UpdateToggle {
+    private static final String TAG = TvActivity.class.getSimpleName();
     private ControlActivityDelegate delegate;
     private ToggleButton toggleServer;
 
@@ -65,7 +66,7 @@ public class TvActivity extends FragmentActivity implements ControlActivityDeleg
         try {
             delegate = new ControlActivityDelegate(this, this, screen);
         } catch (BadEnvironmentException ex) {
-            Logging.log(ex);
+            Log.e(TAG, "Bad environment.", ex);
             finish();
             return;
         }
@@ -75,7 +76,6 @@ public class TvActivity extends FragmentActivity implements ControlActivityDeleg
             version.setText(delegate.version());
         } catch (BadEnvironmentException | IOException ex) {
             version.setText(R.string.unknown);
-            Logging.log(ex);
         }
 
         if (Prefs.getBoolean(PK.START_WITH_APP, false))
