@@ -9,6 +9,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/mainMenu_importExport"
+        android:icon="@drawable/baseline_import_export_24"
+        android:title="@string/importExport"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/mainMenu_preferences"
         android:icon="@drawable/baseline_settings_24"
         android:title="@string/preferences"

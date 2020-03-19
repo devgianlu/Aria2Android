@@ -19,18 +19,25 @@ import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.internal.Message;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen.LogEntry;
+import com.gianlu.aria2lib.ui.ImportExportUtils;
 import com.gianlu.commonutils.FileUtils;
 import com.gianlu.commonutils.analytics.AnalyticsApplication;
+import com.gianlu.commonutils.dialogs.DialogUtils;
 import com.gianlu.commonutils.permissions.AskPermission;
 import com.gianlu.commonutils.preferences.Prefs;
 import com.gianlu.commonutils.ui.Toaster;
 
+import org.json.JSONException;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class ControlActivityDelegate implements Aria2Ui.Listener {
-    static final int STORAGE_ACCESS_CODE = 1;
+    static final int RC_STORAGE_ACCESS_CODE = 1;
+    static final int RC_IMPORT_CONFIG = 4;
     private static final String TAG = ControlActivityDelegate.class.getSimpleName();
     private final FragmentActivity context;
     private final UpdateToggle updateToggle;
@@ -46,13 +53,31 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
     }
 
     boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == STORAGE_ACCESS_CODE) {
+        if (requestCode == RC_STORAGE_ACCESS_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 if (uri != null) {
                     screen.setOutputPathValue(FileUtils.getFullPathFromTreeUri(uri, context));
                     context.getContentResolver().takePersistableUriPermission(uri,
                             data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
+                }
+            }
+
+            return false;
+        } else if (requestCode == RC_IMPORT_CONFIG) {
+            if (resultCode == Activity.RESULT_OK && data.getData() != null) {
+                try {
+                    InputStream in = context.getContentResolver().openInputStream(data.getData());
+                    if (in != null) {
+                        try {
+                            ImportExportUtils.importConfigFromStream(in);
+                            DialogUtils.showToast(context, Toaster.build().message(R.string.importedConfig));
+                        } catch (IOException | JSONException | OutOfMemoryError ex) {
+                            DialogUtils.showToast(context, Toaster.build().message(R.string.cannotImport));
+                        }
+                    }
+                } catch (FileNotFoundException ex) {
+                    DialogUtils.showToast(context, Toaster.build().message(R.string.fileNotFound));
                 }
             }
 

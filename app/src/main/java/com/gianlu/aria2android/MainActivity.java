@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
 import com.gianlu.aria2lib.ui.ConfigEditorActivity;
+import com.gianlu.aria2lib.ui.ImportExportUtils;
 import com.gianlu.commonutils.dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.preferences.Prefs;
 import com.google.android.material.bottomappbar.BottomAppBar;
@@ -58,7 +59,7 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
         setSupportActionBar(bar);
 
         Aria2ConfigurationScreen screen = findViewById(R.id.main_preferences);
-        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, ControlActivityDelegate.STORAGE_ACCESS_CODE), PK.START_AT_BOOT, PK.START_WITH_APP, true);
+        screen.setup(new Aria2ConfigurationScreen.OutputPathSelector(this, ControlActivityDelegate.RC_STORAGE_ACCESS_CODE), PK.START_AT_BOOT, PK.START_WITH_APP, true);
 
         toggleServer = findViewById(R.id.main_toggleServer);
         toggleServer.setOnClickListener(view -> {
@@ -116,6 +117,9 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
                 return true;
             case R.id.mainMenu_customOptions:
                 startActivity(new Intent(this, ConfigEditorActivity.class));
+                break;
+            case R.id.mainMenu_importExport:
+                ImportExportUtils.showDialog(this, ControlActivityDelegate.RC_IMPORT_CONFIG);
                 break;
         }
 
