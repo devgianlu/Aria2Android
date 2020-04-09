@@ -1,2 +1,2 @@
-### Changed
-- Using Android logging utils
+### Added
+- Added feature to import/export configuration and session
