@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Aria2Android</string>
-    <string name="logs">Logs</string>
-    <string name="permissionRequest">Permission request</string>
-    <string name="writeStorageMessage">Aria2Android needs to write the external storage to save your downloaded files.</string>
-    <string name="about_app">About application</string>
-    <string name="unknown">Unknown</string>
-    <string name="noLogs">The log is empty.</string>
-    <string name="failedCreatingSessionFile">Failed creating an empty session file!</string>
-    <string name="writePermissionDenied">You denied the write permission! Can\'t start aria2!</string>
-    <string name="stopService">Stop service</string>
-    <string name="useNewAria2AppInstead">Aria2App has been updated</string>
+    <string name="logs">Registros</string>
+    <string name="permissionRequest">Pedido de permissão</string>
+    <string name="writeStorageMessage">Aria2Android precisa escrever no armazenamento externo para salvar seus arquivos baixados.</string>
+    <string name="about_app">Sobre o aplicativo</string>
+    <string name="unknown">Desconhecido</string>
+    <string name="noLogs">O registro está vazio.</string>
+    <string name="failedCreatingSessionFile">Falha ao criar um arquivo de sessão vazio!</string>
+    <string name="writePermissionDenied">Você negou a permissão de escrita! Não foi possível iniciar o aria2!</string>
+    <string name="stopService">Parar serviço</string>
+    <string name="useNewAria2AppInstead">Aria2App foi atualizado</string>
     <string name="useNewAria2AppInstead_message">Aria2App will not provide the same functionalities of this app, but all-in-one. You are encouraged to migrate to Aria2App only if you were using the service on this device only. This app will be kept updated and working as usual.</string>
     <string name="badEnvIssue">Missing executable</string>
     <string name="badEnvIssue_message">You have installed the app correctly, but it looks like Android didn\'t extract the native libraries for this app.</string>
