@@ -109,7 +109,10 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
     }
 
     private void updateUiStatus(boolean on) {
-        if (screen != null) screen.lockPreferences(on);
+        if (screen != null) {
+            screen.lockPreferences(on);
+            screen.refreshNics();
+        }
 
         updateToggle.setStatus(on);
 
