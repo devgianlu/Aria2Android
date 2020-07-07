@@ -1,2 +1,5 @@
 ### Added
-- Added feature to import/export configuration and session
+- Added list of interfaces
+
+### Changed
+- Load CA certificates instead of disabling check
