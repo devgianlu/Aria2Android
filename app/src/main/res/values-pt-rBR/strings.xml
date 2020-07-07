@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Aria2Android</string>
+    <string name="logs">Registros</string>
+    <string name="permissionRequest">Pedido de permissão</string>
+    <string name="writeStorageMessage">Aria2Android precisa escrever no armazenamento externo para salvar seus arquivos baixados.</string>
+    <string name="about_app">Sobre o aplicativo</string>
+    <string name="unknown">Desconhecido</string>
+    <string name="noLogs">O registro está vazio.</string>
+    <string name="failedCreatingSessionFile">Falha ao criar um arquivo de sessão vazio!</string>
+    <string name="writePermissionDenied">Você negou a permissão de escrita! Não foi possível iniciar o aria2!</string>
+    <string name="stopService">Parar serviço</string>
+    <string name="useNewAria2AppInstead">Aria2App foi atualizado</string>
+    <string name="useNewAria2AppInstead_message">Aria2App não fornecerá as mesmas funcionalidades deste aplicativo, mas tudo em um. Você é incentivado a migrar para o Aria2App somente se você estiver usando o serviço apenas neste dispositivo. Este aplicativo será mantido atualizado e funcionando como de costume.</string>
+    <string name="badEnvIssue">Executável faltando</string>
+    <string name="badEnvIssue_message">Você instalou o aplicativo corretamente, mas parece que o Android não extraiu as bibliotecas nativas para este aplicativo.</string>
+</resources>
