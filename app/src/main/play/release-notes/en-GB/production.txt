@@ -1,5 +1,2 @@
-### Added
-- Added list of interfaces
-
 ### Changed
-- Load CA certificates instead of disabling check
+- `rpc-listen-all` is set to `false` by default when using the InAppDownloader
