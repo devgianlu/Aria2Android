@@ -8,5 +8,3 @@
 /captures
 Thumbs.db
 /app/**/release
-google-services.json
-!/app/src/foss/google-services.json

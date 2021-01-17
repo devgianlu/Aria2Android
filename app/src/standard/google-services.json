@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "527799533684",
+    "firebase_url": "https://aria2android.firebaseio.com",
+    "project_id": "aria2android",
+    "storage_bucket": "aria2android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527799533684:android:02ad0a05e2836239125121",
+        "android_client_info": {
+          "package_name": "com.gianlu.aria2android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "527799533684-hvbvpl4rlcrqb6i8rcm99a064l0h5ht6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-KpLBArLdHacef_bLwh33SFZXoM0l9wA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "527799533684-hvbvpl4rlcrqb6i8rcm99a064l0h5ht6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
