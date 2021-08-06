@@ -1,2 +1,5 @@
+### Fixed
+- Minor bug fixes
+
 ### Changed
-- `rpc-listen-all` is set to `false` by default when using the InAppDownloader
+- Updated third party libraries
