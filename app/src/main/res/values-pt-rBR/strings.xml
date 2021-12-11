@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Aria2Android</string>
     <string name="logs">Registros</string>
-    <string name="permissionRequest">Pedido de permissão</string>
+    <string name="permissionRequest">Solicitar permissão</string>
     <string name="writeStorageMessage">Aria2Android precisa escrever no armazenamento externo para salvar seus arquivos baixados.</string>
     <string name="about_app">Sobre o aplicativo</string>
     <string name="unknown">Desconhecido</string>
