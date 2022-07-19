@@ -1,2 +1,2 @@
-### Fixed
-- Fixed startup crash
+### Changed
+- Updated libraries
