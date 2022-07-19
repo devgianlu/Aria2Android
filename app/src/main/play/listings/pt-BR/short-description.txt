@@ -1,1 +1,0 @@
-Aria2Android permite que você execute seu próprio servidor aria2 no seu dispositivo!
