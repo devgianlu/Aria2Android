@@ -35,7 +35,8 @@
             android:name=".TvActivity"
             android:banner="@drawable/tv_banner"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.Leanback">
+            android:theme="@style/AppTheme.Leanback"
+            android:exported="true">
 
             <!-- Leanback (Android TV) launcher -->
             <intent-filter>
@@ -50,7 +51,8 @@
             android:configChanges="uiMode"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Main"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="stateHidden"
+            android:exported="true">
 
             <!-- Standard launcher -->
             <intent-filter>

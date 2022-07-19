@@ -7,13 +7,13 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 def isCi = System.getenv("CI") == "true"
 android {
-    compileSdkVersion 30
-    buildToolsVersion "31.0.0"
+    compileSdkVersion 32
+    buildToolsVersion "33.0.0"
 
     defaultConfig {
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode 71
         versionName "2.6.3"
     }
@@ -68,7 +68,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
+    lint {
         warning 'MissingTranslation', 'Instantiatable'
     }
 
@@ -89,8 +89,8 @@ play {
 }
 
 dependencies {
-    implementation 'androidx.leanback:leanback:1.2.0-alpha01'
-    implementation 'com.google.android.material:material:1.5.0-alpha01'
+    implementation 'androidx.leanback:leanback:1.2.0-alpha02'
+    implementation 'com.google.android.material:material:1.6.1'
 
     implementation project(':aria2lib')
     implementation(project(':CommonUtils')) {
