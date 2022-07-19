@@ -1,4 +1,4 @@
-有了 Aria2Android ，您就可以在您的设备上运行一个真正的aria2，一款可在您的设备上运行的开源下载管理器。
+With Aria2Android you can run a real aria2, an open source download manager, executable on your device.
 
 您可以轻松地保存会话，以便暂停下载并在稍后继续它们，并通过JSON-RPC接口控制服务器。
 
