@@ -1,8 +1,8 @@
-With Aria2Android you can run a real aria2, an open source download manager, executable on your device.
+透過 Aria2Android，你可以在你的裝置上執行一個真正的 Aria2 ——一個開放原始碼的、可執行的管理員，
 
-You can easily save session to pause downloads and continue them later and control your server through the JSON-RPC interface.
+您可以很容易地儲存工作階段以暫停下載並稍後繼續下載，並透過 JSON-RPC 介面控制你的伺服器。
 
-This project is open source at https://github.com/devgianlu/Aria2Android
+此專案於此開放原始碼：https://github.com/devgianlu/Aria2Android
 --------------------------------
 
-aria2 is developed by Tatsuhiro Tsujikawa (https://github.com/tatsuhiro-t).
+Aria2 由 Tatsuhiro Tsujikawa (https://github.com/tatsuhiro-t) 開發。
