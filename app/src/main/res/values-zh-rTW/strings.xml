@@ -10,4 +10,8 @@
     <string name="failedCreatingSessionFile">創建空會話檔案失敗!</string>
     <string name="writePermissionDenied">您未授予寫入權限! 無法啟用aria2!</string>
     <string name="stopService">停止服務</string>
+    <string name="useNewAria2AppInstead">Aria2App 已更新</string>
+    <string name="useNewAria2AppInstead_message">Aria2App 不會提供與此應用程式相同的功能，而是多合一的。如果您只在這個裝置上使用服務，我們建議您移轉到 Aria2App。這個應用程式將保持更新並照常運作。</string>
+    <string name="badEnvIssue">遺失可執行檔</string>
+    <string name="badEnvIssue_message">您已經正確安裝了這個應用程式，但看起來 Android 沒有為這個應用程式擷取原生程式庫。</string>
 </resources>
