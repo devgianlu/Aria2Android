@@ -1,1 +1,1 @@
-Aria2Android permite que você execute seu próprio servidor aria2 no seu dispositivo!
+Aria2Android allows you to run your own aria2 server on your device!
