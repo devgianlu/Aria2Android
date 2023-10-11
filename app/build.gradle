@@ -1,3 +1,5 @@
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+
 plugins {
     id 'com.github.triplet.play' version '3.8.4'
 }
@@ -7,13 +9,13 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 def isCi = System.getenv("CI") == "true"
 android {
-    compileSdkVersion 33
-    buildToolsVersion "33.0.0"
-
     defaultConfig {
+        compileSdk 34
+
         applicationId "com.gianlu.aria2android"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
+
         versionCode 74
         versionName "2.6.6"
     }
@@ -38,7 +40,7 @@ android {
         }
     }
 
-    flavorDimensions 'main'
+    flavorDimensions = ['main']
     productFlavors {
         standard {
             dimension 'main'
@@ -85,12 +87,12 @@ play {
     enabled.set(isCi)
     serviceAccountCredentials.set(file("../.github/secrets.json"))
     track.set("production")
-    releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.DRAFT)
+    releaseStatus.set(ReleaseStatus.DRAFT)
 }
 
 dependencies {
-    implementation 'androidx.leanback:leanback:1.2.0-alpha02'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.leanback:leanback:1.2.0-alpha03'
+    implementation 'com.google.android.material:material:1.10.0'
 
     implementation project(':aria2lib')
     implementation(project(':CommonUtils')) {
