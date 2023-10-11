@@ -1,2 +1,6 @@
+### Fixed
+- Fixed permission issues on Android 13
+- Startup crash on Android 14
+
 ### Changed
 - Updated libraries
