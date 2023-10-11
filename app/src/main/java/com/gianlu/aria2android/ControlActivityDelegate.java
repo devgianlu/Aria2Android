@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -124,7 +125,7 @@ public class ControlActivityDelegate implements Aria2Ui.Listener {
         Prefs.putLong(PK.CURRENT_SESSION_START, System.currentTimeMillis());
         AnalyticsApplication.sendAnalytics(Utils.ACTION_TURN_ON);
 
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             AskPermission.ask(context, Manifest.permission.WRITE_EXTERNAL_STORAGE, new AskPermission.Listener() {
                 @Override
                 public void permissionGranted(@NonNull String permission) {
