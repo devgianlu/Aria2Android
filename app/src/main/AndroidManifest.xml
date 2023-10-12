@@ -16,6 +16,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Start service on boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Start foreground service for dataSync -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Foreground service on Android P+ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".ThisApplication"
