@@ -1,0 +1,1 @@
+Aria2Android allows you to run your own aria2 server on your device!
