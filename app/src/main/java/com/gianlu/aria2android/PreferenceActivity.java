@@ -36,6 +36,12 @@ public class PreferenceActivity extends BasePreferenceActivity {
         return "https://github.com/devgianlu/Aria2Android";
     }
 
+    @Nullable
+    @Override
+    protected String getGithubProjectName() {
+        return "Aria2Android";
+    }
+
     @Override
     protected boolean disableOtherDonationsOnGooglePlay() {
         return false;
