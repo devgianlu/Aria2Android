@@ -6,7 +6,6 @@
 [![Crowdin](https://badges.crowdin.net/aria2android/localized.svg)](https://crowdin.com/project/aria2android)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d912003e65614572af2da5c2c4b71ef8)](https://www.codacy.com/manual/devgianlu/Aria2Android?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=devgianlu/Aria2Android&amp;utm_campaign=Badge_Grade)
 [![time tracker](https://wakatime.com/badge/github/devgianlu/Aria2Android.svg)](https://wakatime.com/badge/github/devgianlu/Aria2Android)
-[![Donate Bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)](https://gianlu.xyz/donate/)
 
 An Android app that lets you run [aria2](https://github.com/aria2/aria2) on your device.
 
