@@ -1,2 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">Aria2Android</string>
+    <string name="logs">ログ</string>
+    <string name="permissionRequest">権限の要求</string>
+    <string name="writeStorageMessage">Aria2Androidは、ダウンロードしたファイルを保存するために外部ストレージを書き込む必要があります。</string>
+    <string name="about_app">このアプリについて</string>
+    <string name="unknown">不明</string>
+    <string name="noLogs">ログは空です。</string>
+    <string name="failedCreatingSessionFile">空のセッションファイルの作成に失敗しました！</string>
+    <string name="writePermissionDenied">書き込み権限を拒否。aria2を開始出来ません。</string>
+    <string name="stopService">サービスの停止</string>
+    <string name="useNewAria2AppInstead">Aria2App が更新されました</string>
+    <string name="useNewAria2AppInstead_message">Aria2Appは、このアプリの同じ機能を提供するのではなく、オールインワンの機能を提供します。 このデバイスでサービスを使用している場合にのみ、Aria2Appに移行することをお勧めします。 このアプリは通常通り更新され動作します。</string>
+    <string name="badEnvIssue">実行可能ファイルがありません</string>
+    <string name="badEnvIssue_message">アプリは正しくインストールされていますが、Android はこのアプリのネイティブライブラリを抽出していないようです。</string>
+</resources>
