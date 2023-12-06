@@ -9,6 +9,8 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 def isCi = System.getenv("CI") == "true"
 android {
+    namespace 'com.gianlu.aria2android'
+
     defaultConfig {
         compileSdk 34
 
