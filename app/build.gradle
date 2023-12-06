@@ -82,6 +82,12 @@ android {
             enabled.set(false)
         }
     }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 play {
