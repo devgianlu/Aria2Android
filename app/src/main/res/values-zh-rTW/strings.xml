@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Aria2Android</string>
-    <string name="logs">紀錄檔</string>
-    <string name="permissionRequest">權限請求</string>
-    <string name="writeStorageMessage">Aria2Android 需要使用外部儲存空間來儲存您下載的檔案。</string>
-    <string name="about_app">關於 App</string>
+    <string name="logs">記錄</string>
+    <string name="permissionRequest">權限要求</string>
+    <string name="writeStorageMessage">Aria2Android 需要使用外部儲存空間以儲存您下載的檔案。</string>
+    <string name="about_app">關於應用程式</string>
     <string name="unknown">未知</string>
-    <string name="noLogs">紀錄檔為空。</string>
-    <string name="failedCreatingSessionFile">創建空會話檔案失敗!</string>
-    <string name="writePermissionDenied">您未授予寫入權限! 無法啟用aria2!</string>
+    <string name="noLogs">記錄是空的。</string>
+    <string name="failedCreatingSessionFile">無法建立空白工作階段檔案！</string>
+    <string name="writePermissionDenied">您拒絕了寫入權限！無法啟動 Aria2！</string>
     <string name="stopService">停止服務</string>
     <string name="useNewAria2AppInstead">Aria2App 已更新</string>
     <string name="useNewAria2AppInstead_message">Aria2App 不會提供與此應用程式相同的功能，而是多合一的。如果您只在這個裝置上使用服務，我們建議您移轉到 Aria2App。這個應用程式將保持更新並照常運作。</string>

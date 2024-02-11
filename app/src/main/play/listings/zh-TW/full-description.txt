@@ -2,7 +2,7 @@
 
 您可以很容易地儲存工作階段以暫停下載並稍後繼續下載，並透過 JSON-RPC 介面控制你的伺服器。
 
-此專案於此開放原始碼：https://github.com/devgianlu/Aria2Android
+此專案在這裡開放原始碼：https://github.com/devgianlu/Aria2Android
 --------------------------------
 
 Aria2 由 Tatsuhiro Tsujikawa (https://github.com/tatsuhiro-t) 開發。
