@@ -11,6 +11,7 @@
 
     <!-- You know... -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Import bin -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Start service on boot -->
@@ -30,6 +31,7 @@
         android:label="@string/app_name"
         android:resizeableActivity="true"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
@@ -64,11 +66,16 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".AriaNgActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <!-- Preferences activity -->
         <activity
             android:name=".PreferenceActivity"
             android:configChanges="uiMode" />
-
+        <activity
+            android:name=".ConfigEditorActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:configChanges="uiMode" />
         <!-- Boot completed receiver -->
         <receiver
             android:name=".BootCompletedReceiver"

@@ -11,9 +11,7 @@ import androidx.annotation.NonNull;
 
 import com.gianlu.aria2lib.BadEnvironmentException;
 import com.gianlu.aria2lib.ui.Aria2ConfigurationScreen;
-import com.gianlu.aria2lib.ui.ConfigEditorActivity;
 import com.gianlu.aria2lib.ui.ImportExportUtils;
-import com.gianlu.commonutils.dialogs.ActivityWithDialog;
 import com.gianlu.commonutils.preferences.Prefs;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -21,7 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
 
-public class MainActivity extends ActivityWithDialog implements ControlActivityDelegate.UpdateToggle {
+public class MainActivity extends BastActivity implements ControlActivityDelegate.UpdateToggle {
     private static final String TAG = MainActivity.class.getSimpleName();
     private ControlActivityDelegate delegate;
     private FloatingActionButton toggleServer;
@@ -112,6 +110,9 @@ public class MainActivity extends ActivityWithDialog implements ControlActivityD
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.mainMenu_ariaNg:
+                startActivity(new Intent(this, AriaNgActivity.class));
+                return true;
             case R.id.mainMenu_preferences:
                 startActivity(new Intent(this, PreferenceActivity.class));
                 return true;

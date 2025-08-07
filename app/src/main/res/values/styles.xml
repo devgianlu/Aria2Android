@@ -1,6 +1,14 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="BaseAppTheme" />
+    <style name="AppTheme" parent="BaseAppTheme">
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
     <style name="AppTheme.Main" parent="AppTheme.NoActionBar">
         <item name="android:statusBarColor">?android:colorBackground</item>
