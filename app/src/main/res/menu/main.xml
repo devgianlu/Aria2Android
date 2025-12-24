@@ -9,6 +9,11 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/mainMenu_ariaNg"
+        android:icon="@drawable/ic_ariang"
+        android:title="@string/ariang" />
+
+    <item
         android:id="@+id/mainMenu_importExport"
         android:icon="@drawable/baseline_import_export_24"
         android:title="@string/importExport"
